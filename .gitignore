@@ -1,0 +1,34 @@
+# Build
+bin/
+build/
+captures/
+classes/
+gen/
+gradle-user-home/
+profile-out*/
+schemas/
+.build/
+.externalNativeBuild/
+.gradle/
+.kotlin/
+.navigation/
+*.aab
+*.aar
+*.apk
+*.framework
+*.generated.swift
+*.hmap
+*.keystore
+*.keys
+*.log
+*.zip
+
+# IDE
+*.iml
+.fleet/
+.idea/
+.vscode/
+local.properties
+
+# OS
+.DS_Store
