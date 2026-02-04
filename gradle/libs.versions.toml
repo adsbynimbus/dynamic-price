@@ -1,0 +1,7 @@
+[versions]
+android = "9.0.1"
+
+[plugins]
+android-library = { id = "com.android.library", version.ref = "android" }
+
+[libraries]
