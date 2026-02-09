@@ -258,7 +258,6 @@ private fun renderDynamicPriceRewardedAd(
     rewardItem: RewardItem,
     callback: NimbusRewardCallback,
 ) {
-    BlockingAdRenderer.setsCloseButtonDelayRender(60 * 1000)
     activity.loadBlockingAd(nimbusAd)
         ?.let { controller ->
             controller.listeners.add(object : AdController.Listener {
