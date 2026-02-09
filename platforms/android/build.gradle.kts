@@ -42,6 +42,12 @@ android {
     sourceSets.configureEach {
         java.srcDirs("src/$name/kotlin")
     }
+
+    testOptions {
+        unitTests.all {
+            it.useJUnitPlatform()
+        }
+    }
 }
 
 kotlin {
@@ -55,6 +61,7 @@ kotlin {
 dependencies {
     implementation(libs.ads.google)
     implementation(libs.ads.nimbus)
+    testImplementation(libs.bundles.test.unit)
 
     constraints {
         implementation(libs.androidx.core) {

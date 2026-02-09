@@ -7,6 +7,7 @@ ads-google = "24.1.0"
 ads-nimbus = "2.35.2"
 
 androidx-core = "1.17.0"
+mockk = "1.14.9"
 okio = "3.16.4"
 
 [plugins]
@@ -20,4 +21,12 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 ads-google = { module = "com.google.android.gms:play-services-ads", version.ref = "ads-google" }
 ads-nimbus = { module = "com.adsbynimbus.android:nimbus", version.ref = "ads-nimbus" }
 androidx-core = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
+
+[bundles]
+test-unit = [
+    "kotlin-test",
+    "mockk",
+]
