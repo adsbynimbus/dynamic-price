@@ -1,7 +1,6 @@
 package com.adsbynimbus.dynamicprice
 
-import com.adsbynimbus.Nimbus
-import com.adsbynimbus.NimbusAd
+import com.adsbynimbus.*
 import com.adsbynimbus.request.NimbusResponse
 
 /** Provides a mapping from a Nimbus response to Dynamic Price target */
