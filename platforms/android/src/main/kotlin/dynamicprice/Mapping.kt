@@ -1,21 +1,33 @@
-@file:JvmName("DynamicPrice")
-package com.adsbynimbus.lineitem
+package com.adsbynimbus.dynamicprice
 
 import com.adsbynimbus.Nimbus
 import com.adsbynimbus.NimbusAd
 import com.adsbynimbus.request.NimbusResponse
 
-const val BID_KEY = "na_bid"
-const val DURATION_KEY = "na_duration"
-const val ID_KEY = "na_id"
-const val SIZE_KEY = "na_size"
-const val NETWORK_KEY = "na_network"
-const val TYPE_KEY = "na_type"
-const val VIDEO_BID_KEY = "na_bid_video"
-
 /** Provides a mapping from a Nimbus response to Dynamic Price target */
 fun interface Mapping {
     fun getTarget(ad: NimbusAd): String
+
+    companion object {
+        const val BID_KEY = "na_bid"
+        const val ID_KEY = "na_id"
+        const val SIZE_KEY = "na_size"
+        const val NETWORK_KEY = "na_network"
+        const val TYPE_KEY = "na_type"
+        const val VIDEO_BID_KEY = "na_bid_video"
+
+        /** Returns a targeting map that must be applied for Dynamic Price to function properly */
+        fun NimbusResponse.targetingMap(mapping: Mapping): Map<String, String> {
+            val bidKey = if (bid.type == "video") VIDEO_BID_KEY else BID_KEY
+            return mapOf(
+                ID_KEY to bid.auction_id,
+                SIZE_KEY to "${bid.width}x${bid.height}",
+                TYPE_KEY to if (bid.type == "video") "video" else "static",
+                NETWORK_KEY to bid.network,
+                bidKey to if (Nimbus.testMode) "0" else mapping.getTarget(this),
+            )
+        }
+    }
 }
 
 /**
@@ -88,12 +100,5 @@ val NimbusResponse.defaultMapping
     get() = if (isInterstitial()) DEFAULT_FULLSCREEN else DEFAULT_BANNER
 
 /** Returns a targeting map that must be applied for Dynamic Price to function properly */
-fun NimbusResponse.targetingMap(mapping: Mapping = defaultMapping): Map<String, String> = mapOf(
-    ID_KEY to bid.auction_id,
-    SIZE_KEY to  "${bid.width}x${bid.height}",
-    TYPE_KEY to if (bid.type == "video") "video" else "static",
-    NETWORK_KEY to bid.network,
-) + if (bid.type == "video") mapOf(
-    VIDEO_BID_KEY to (mapping.getTarget(this).takeUnless { Nimbus.testMode } ?: "0"),
-    DURATION_KEY to bid.duration.toString(),
-) else mapOf(BID_KEY to (mapping.getTarget(this).takeUnless { Nimbus.testMode } ?: "0"))
+fun NimbusResponse.targetingMap(mapping: Mapping = defaultMapping): Map<String, String> =
+    with(Mapping) { targetingMap(mapping = mapping) }
