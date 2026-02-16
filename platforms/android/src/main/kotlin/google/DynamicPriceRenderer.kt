@@ -200,16 +200,12 @@ fun <T : InterstitialAd> T.handleEventForNimbus(name: String, info: String): Boo
 fun RewardedInterstitialAd.showAd(
     activity: Activity,
     nimbusAd: NimbusResponse,
-    nimbusAdManager: NimbusAdManager,
     callback: NimbusRewardCallback,
 ) {
-    val auctionData = GoogleAuctionData(nimbusAd)
-
-    fullScreenContentCallback = FullScreenContentCallback(auctionData, nimbusAdManager, responseInfo, callback)
-    onPaidEventListener = OnPaidEventListener { value -> auctionData.onPaidEvent(value) }
+    fullScreenContentCallback = FullScreenContentCallback(callback)
 
     if (shouldNimbusRenderAd(adMetadata)) {
-        renderDynamicPriceRewardedAd(activity, auctionData, responseInfo, rewardItem, nimbusAdManager, callback)
+        renderDynamicPriceRewardedAd(activity, nimbusAd, rewardItem, callback)
     } else {
         show(activity) {
             callback.onUserEarnedReward(it)
@@ -223,16 +219,12 @@ fun RewardedInterstitialAd.showAd(
 fun RewardedAd.showAd(
     activity: Activity,
     nimbusAd: NimbusResponse,
-    nimbusAdManager: NimbusAdManager,
     callback: NimbusRewardCallback,
 ) {
-    val auctionData = GoogleAuctionData(nimbusAd)
-
-    fullScreenContentCallback = FullScreenContentCallback(auctionData, nimbusAdManager, responseInfo, callback)
-    onPaidEventListener = OnPaidEventListener { value -> auctionData.onPaidEvent(value) }
+    fullScreenContentCallback = FullScreenContentCallback(callback)
 
     if (shouldNimbusRenderAd(adMetadata)) {
-        renderDynamicPriceRewardedAd(activity, auctionData, responseInfo, rewardItem, nimbusAdManager, callback)
+        renderDynamicPriceRewardedAd(activity, nimbusAd, rewardItem, callback)
     } else {
         show(activity) {
             callback.onUserEarnedReward(it)
@@ -241,9 +233,6 @@ fun RewardedAd.showAd(
 }
 
 private fun FullScreenContentCallback(
-    auctionData: GoogleAuctionData,
-    nimbusAdManager: NimbusAdManager,
-    responseInfo: ResponseInfo,
     callback: NimbusRewardCallback,
 ) = object : FullScreenContentCallback() {
     override fun onAdDismissedFullScreenContent() {
@@ -255,7 +244,6 @@ private fun FullScreenContentCallback(
     }
 
     override fun onAdImpression() {
-        nimbusAdManager.notifyImpression(auctionData, responseInfo)
         callback.onAdImpression()
     }
 
@@ -266,25 +254,18 @@ private fun FullScreenContentCallback(
 
 private fun renderDynamicPriceRewardedAd(
     activity: Activity,
-    auctionData: GoogleAuctionData,
-    responseInfo: ResponseInfo,
+    nimbusAd: NimbusAd,
     rewardItem: RewardItem,
-    nimbusAdManager: NimbusAdManager,
     callback: NimbusRewardCallback,
 ) {
-    auctionData.nimbusWin = true
     BlockingAdRenderer.setsCloseButtonDelayRender(60 * 1000)
-    activity.loadBlockingAd(auctionData.ad)
+    activity.loadBlockingAd(nimbusAd)
         ?.let { controller ->
             controller.listeners.add(object : AdController.Listener {
                 override fun onAdEvent(adEvent: AdEvent) {
                     when (adEvent) {
                         AdEvent.LOADED -> callback.onAdPresented()
-                        AdEvent.IMPRESSION -> {
-                            nimbusAdManager.notifyImpression(auctionData, responseInfo)
-                            callback.onAdImpression()
-                        }
-
+                        AdEvent.IMPRESSION -> callback.onAdImpression()
                         AdEvent.CLICKED -> callback.onAdClicked()
                         AdEvent.COMPLETED -> callback.onUserEarnedReward(rewardItem)
                         AdEvent.DESTROYED -> callback.onAdClosed()

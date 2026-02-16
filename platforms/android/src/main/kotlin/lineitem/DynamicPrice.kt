@@ -1,5 +1,4 @@
 @file:JvmName("DynamicPrice")
-
 package com.adsbynimbus.lineitem
 
 import com.adsbynimbus.Nimbus
