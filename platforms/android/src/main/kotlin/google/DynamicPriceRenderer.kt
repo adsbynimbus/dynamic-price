@@ -1,6 +1,7 @@
 @file:JvmName("DynamicPriceRenderer")
 package com.adsbynimbus.google
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Bundle
 import android.util.Log
@@ -264,6 +265,7 @@ private fun FullScreenContentCallback(
     }
 }
 
+@SuppressLint("RestrictedApi")
 private fun renderDynamicPriceRewardedAd(
     activity: Activity,
     auctionData: GoogleAuctionData,
