@@ -16,5 +16,5 @@ fun AbstractAdRequestBuilder<*>.applyDynamicPrice(
     mapping: Mapping,
 ) = apply {
     DynamicPriceAd.cache.put(ad.auctionId, ad)
-    ad.targetingMap(mapping).forEach { addCustomTargeting(it.key, it.value) }
+    with(Mapping) { ad.targetingMap(mapping) }.forEach { addCustomTargeting(it.key, it.value) }
 }
