@@ -5,12 +5,8 @@
 //  Copyright © 2024 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-#if SWIFT_PACKAGE
-@testable import NimbusRequestMocks
-#endif
-
 import XCTest
-@testable import NimbusGAMKit
+@testable import DynamicPrice
 import GoogleMobileAds
 
 class NimbusDynamicPriceInterstitialAdTests: XCTestCase {    

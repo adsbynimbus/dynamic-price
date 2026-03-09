@@ -6,7 +6,7 @@
 //  Copyright © 2021 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-@testable import NimbusGAMKit
+@testable import DynamicPrice
 import XCTest
 
 final class NimbusGAMLinearPriceMappingTests: XCTestCase {
