@@ -18,17 +18,32 @@ schemas/
 *.framework
 *.generated.swift
 *.hmap
+*.hprof
+*.ipa
 *.keystore
 *.keys
 *.log
+*.xcframework
 *.zip
+
+# CocoaPods
+Podfile.lock
+Pods/
 
 # IDE
 *.iml
+*.xcworkspace
 .fleet/
 .idea/
 .vscode/
+xcuserdata/
 local.properties
+local.xcconfig
 
 # OS
 .DS_Store
+
+# Swift Package Manager
+.swiftpm/
+Packages/
+Package.resolved

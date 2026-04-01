@@ -4,6 +4,7 @@
 # Declare Kotlin files as text
 *.kt text
 *.kts text
+*.swift text
 
 # Linux/macOS start script should use lf
 /gradlew text eol=lf
