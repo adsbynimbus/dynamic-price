@@ -5,8 +5,8 @@ let package = Package(
     name: "dynamic-price",
     platforms: [.iOS(.v15)],
     dependencies: [
-        .package(url: "https://github.com/adsbynimbus/nimbus-ios-sdk", from: "2.32.2"),
-        .package(url: "https://github.com/googleads/swift-package-manager-google-mobile-ads", from: "12.0.0"),
+        .package(url: "https://github.com/adsbynimbus/nimbus-ios-sdk", from: "2.32.5"),
+        .package(url: "https://github.com/googleads/swift-package-manager-google-mobile-ads", "12.0.0"..<"14.0.0"),
     ],
     targets: [
         .target(
