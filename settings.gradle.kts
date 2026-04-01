@@ -48,4 +48,4 @@ dependencyResolutionManagement {
 rootProject.name = "dynamic-price"
 
 include("android")
-project(":android").projectDir = layout.rootDirectory.file("platforms/android").asFile
+project(":android").projectDir = layout.rootDirectory.file("dynamic-price/android").asFile
