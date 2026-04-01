@@ -6,11 +6,16 @@ kotlin = "2.3.20"
 ads-google = "24.1.0"
 ads-nimbus = "2.35.3"
 
+androidx-fragment = "1.8.9"
 androidx-core = "1.18.0"
+androidx-lifecycle = "2.10.0"
+androidx-navigation = "2.9.7"
+androidx-startup = "1.2.0"
 mockk = "1.14.9"
 okio = "3.17.0"
 
 [plugins]
+android-app = { id = "com.android.application", version.ref = "android" }
 android-library = { id = "com.android.library", version.ref = "android" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 dokka-javadoc = { id = "org.jetbrains.dokka-javadoc", version.ref = "dokka" }
@@ -21,11 +26,22 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 ads-google = { module = "com.google.android.gms:play-services-ads", version.ref = "ads-google" }
 ads-nimbus = { module = "com.adsbynimbus.android:nimbus", version.ref = "ads-nimbus" }
 androidx-core = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
+androidx-fragment = { module = "androidx.fragment:fragment", version.ref = "androidx-fragment" }
+androidx-lifecycle = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
+androidx-navigation-fragment = { module = "androidx.navigation:navigation-fragment", version.ref = "androidx-navigation" }
+androidx-navigation-runtime = { module = "androidx.navigation:navigation-runtime", version.ref = "androidx-navigation" }
+androidx-navigation-ui = { module = "androidx.navigation:navigation-ui", version.ref = "androidx-navigation" }
+androidx-startup = { module = "androidx.startup:startup-runtime", version.ref = "androidx-startup" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 
 [bundles]
+androidx-navigation = [
+    "androidx-navigation-fragment",
+    "androidx-navigation-runtime",
+    "androidx-navigation-ui",
+]
 test-unit = [
     "kotlin-test",
     "mockk",

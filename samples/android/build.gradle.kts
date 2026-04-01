@@ -6,10 +6,12 @@ plugins {
 
 android {
     compileSdk = 36
+    namespace = "com.adsbynimbus.dynamicprice.sample"
 
     defaultConfig {
-        applicationId = "com.adsbynimbus.dynamicprice.sample"
+        applicationId = namespace
         minSdk = 23
+        //noinspection OldTargetApi
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -46,5 +48,7 @@ kotlin.target.compilations.configureEach {
 }
 
 dependencies {
-
+    implementation(projects.dynamicprice)
+    implementation(libs.androidx.lifecycle)
+    implementation(libs.androidx.startup)
 }

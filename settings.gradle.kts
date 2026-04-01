@@ -45,7 +45,9 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "dynamic-price"
+rootProject.name = "nimbus-dynamic-price"
 
 include("android")
-project(":android").projectDir = layout.rootDirectory.file("dynamic-price/android").asFile
+project(":android").projectDir = layout.rootDirectory.file("samples/android").asFile
+include("dynamicprice")
+project(":dynamicprice").projectDir = layout.rootDirectory.file("dynamic-price/android").asFile
