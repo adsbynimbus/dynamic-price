@@ -15,10 +15,10 @@ let package = Package(
                 .product(name: "GoogleMobileAds", package: "swift-package-manager-google-mobile-ads"),
                 .product(name: "NimbusKit", package: "nimbus-ios-sdk"),
             ],
-            path: "dynamic-price/ios/Sources/DynamicPrice"),
+            path: "dynamic-price/ios/src/main"),
         .testTarget(
             name: "DynamicPriceTests",
             dependencies: ["DynamicPrice"],
-            path: "dynamic-price/ios/Tests/DynamicPriceTests"),
+            path: "dynamic-price/ios/src/test"),
     ],
 )
