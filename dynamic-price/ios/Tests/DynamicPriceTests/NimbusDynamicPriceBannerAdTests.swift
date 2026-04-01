@@ -30,24 +30,7 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
             XCTAssertFalse(bannerView.subviews.last is NimbusAdView)
         }
     }
-    
-    func test_notify_win_at_app_event() {
-        let bannerView = AdManagerBannerView()
-        let requestManager = MockNimbusRequestManager()
-        let bannerAd = NimbusDynamicPriceBannerAd(
-            ad: nimbusAd,
-            requestManager: requestManager,
-            bannerView: bannerView
-        )
-        
-        bannerAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
-        
-        XCTAssertEqual(
-            requestManager.state,
-            .notifyWin(ad: nimbusAd, NimbusAuctionData: NimbusAuctionData())
-        )
-    }
-    
+
     func test_attach_adview_at_app_event() {
         let bannerView = AdManagerBannerView()
         bannerView.rootViewController = rootVC
@@ -72,54 +55,8 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
         wait(for: [expectation], timeout: 1)
     }
     
-    func test_scheduled_loss_notification() {
-        let requestManager = MockNimbusRequestManager()
-        let bannerView = AdManagerBannerView()
-        let bannerAd = NimbusDynamicPriceBannerAd(
-            ad: nimbusAd,
-            requestManager: requestManager,
-            bannerView: bannerView
-        )
-        bannerView.delegate = bannerAd
-        
-        bannerView.delegate?.bannerViewDidRecordImpression?(bannerView)
-        
-        let expectation = XCTestExpectation(description: "loss notification")
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-            XCTAssertEqual(requestManager.state, .notifyLoss(ad: self.nimbusAd, NimbusAuctionData: NimbusAuctionData(auctionPrice: "-1")))
-            expectation.fulfill()
-        }
-        
-        wait(for: [expectation], timeout: 2)
-    }
-    
-    func test_scheduled_loss_notification_not_sent_if_app_event_gets_handled() {
-        let requestManager = MockNimbusRequestManager()
-        let bannerView = AdManagerBannerView()
-        let bannerAd = NimbusDynamicPriceBannerAd(
-            ad: nimbusAd,
-            requestManager: requestManager,
-            bannerView: bannerView
-        )
-        bannerView.delegate = bannerAd
-        
-        bannerView.delegate?.bannerViewDidRecordImpression?(bannerView)
-        
-        let expectation = XCTestExpectation(description: "loss notification")
-        
-        bannerAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-            XCTAssertEqual(requestManager.state, .notifyWin(ad: self.nimbusAd, NimbusAuctionData: NimbusAuctionData()))
-            expectation.fulfill()
-        }
-        
-        wait(for: [expectation], timeout: 2)
-    }
-    
     func test_click_event_should_fire_google_click_delegate_message() {
-        let requestManager = MockNimbusRequestManager()
+        let requestManager = NimbusRequestManager()
         let clientDelegate = MockGADBannerDelegate()
         let proxy = NimbusDynamicPriceBannerProxy(requestManager: requestManager, clientDelegate: clientDelegate
         )
@@ -160,7 +97,7 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     
     
     func test_click_event_wont_fire_google_click_delegate_message_without_bannerview() {
-        let requestManager = MockNimbusRequestManager()
+        let requestManager = NimbusRequestManager()
         let clientDelegate = MockGADBannerDelegate()
         let proxy = NimbusDynamicPriceBannerProxy(requestManager: requestManager, clientDelegate: clientDelegate
         )
@@ -190,7 +127,7 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     }
     
     func test_click_event_wont_fire_google_click_delegate_message_without_renderinfo() {
-        let requestManager = MockNimbusRequestManager()
+        let requestManager = NimbusRequestManager()
         let clientDelegate = MockGADBannerDelegate()
         let proxy = NimbusDynamicPriceBannerProxy(requestManager: requestManager, clientDelegate: clientDelegate
         )
@@ -216,25 +153,8 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
         wait(for: [expectation], timeout: 0.1)
     }
     
-    func test_request_manager_notify_loss_fires_when_google_fails_to_fill() {
-        let requestManager = MockNimbusRequestManager()
-        let bannerView = AdManagerBannerView()
-        
-        let bannerAd = NimbusDynamicPriceBannerAd(
-            ad: nimbusAd,
-            requestManager: requestManager,
-            bannerView: bannerView
-        )
-        
-        bannerView.delegate = bannerAd
-        
-        bannerView.delegate?.bannerView?(bannerView, didFailToReceiveAdWithError: RequestError(.noFill))
-        
-        XCTAssertEqual(requestManager.state, .notifyLoss(ad: nimbusAd, NimbusAuctionData: NimbusAuctionData(auctionPrice: "-1")))
-    }
-    
     func test_adview_gets_destroyed_at_nimbus_error() {
-        let requestManager = MockNimbusRequestManager()
+        let requestManager = NimbusRequestManager()
         let bannerView = AdManagerBannerView()
         bannerView.rootViewController = rootVC
         

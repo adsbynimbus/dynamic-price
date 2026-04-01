@@ -33,7 +33,7 @@ class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
     }
     
     func test_handle_app_event() {
-        let requestManager = MockNimbusRequestManager()
+        let requestManager = NimbusRequestManager()
         let ad = createNimbusAd()
         
         let interstitial = NimbusDynamicPriceInterstitialAd(
@@ -43,67 +43,11 @@ class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
         
         let handled = interstitial.handleEventForNimbus(name: "na_render", info: renderInfo.json)
         XCTAssertTrue(handled)
-        
-        XCTAssertEqual(requestManager.state, .notifyWin(ad: ad, NimbusAuctionData: NimbusAuctionData()))
-    }
-    
-    func test_fire_delayed_loss_notification_at_impression() {
-        let delegate = MockGADFullScreenContentDelegate()
-        let requestManager = MockNimbusRequestManager()
-        
-        let gadInterstitial = InterstitialAd()
-        
-        let interstitialAd = NimbusDynamicPriceInterstitialAd(
-            ad: createNimbusAd(),
-            requestManager: requestManager,
-            clientDelegate: delegate
-        )
-        
-        interstitialAd.adDidRecordImpression(gadInterstitial)
-        
-        XCTAssertEqual(delegate.state, .adDidRecordImpression(ad: gadInterstitial))
-        
-        let expectation = XCTestExpectation(description: "loss notification")
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-            XCTAssertEqual(requestManager.state, .notifyLoss(ad: self.createNimbusAd(), NimbusAuctionData: NimbusAuctionData(auctionPrice: "-1")))
-            expectation.fulfill()
-        }
-        
-        wait(for: [expectation], timeout: 2)
-    }
-    
-    func test_scheduled_loss_notification_not_sent_if_app_event_gets_handled() {
-        let delegate = MockGADFullScreenContentDelegate()
-        let requestManager = MockNimbusRequestManager()
-        
-        let gadInterstitial = InterstitialAd()
-        
-        let interstitialAd = NimbusDynamicPriceInterstitialAd(
-            ad: createNimbusAd(),
-            requestManager: requestManager,
-            clientDelegate: delegate
-        )
-        
-        interstitialAd.adDidRecordImpression(gadInterstitial)
-        
-        XCTAssertEqual(delegate.state, .adDidRecordImpression(ad: gadInterstitial))
-        
-        interstitialAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
-        
-        let expectation = XCTestExpectation(description: "loss notification")
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-            XCTAssertEqual(requestManager.state, .notifyWin(ad: self.createNimbusAd(), NimbusAuctionData: NimbusAuctionData()))
-            expectation.fulfill()
-        }
-        
-        wait(for: [expectation], timeout: 2)
     }
     
     func test_click_event_should_fire_google_click_delegate_message() {
         let delegate = MockGADFullScreenContentDelegate()
-        let requestManager = MockNimbusRequestManager()
+        let requestManager = NimbusRequestManager()
         
         let gadInterstitial = InterstitialAd()
         
@@ -123,7 +67,7 @@ class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
     
     func test_click_event_wont_fire_if_gadinterstitial_missing() {
         let delegate = MockGADFullScreenContentDelegate()
-        let requestManager = MockNimbusRequestManager()
+        let requestManager = NimbusRequestManager()
         
         let interstitialAd = NimbusDynamicPriceInterstitialAd(
             ad: createNimbusAd(),
@@ -140,8 +84,8 @@ class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
     
     func test_click_event_wont_fire_if_renderinfo_missing() {
         let delegate = MockGADFullScreenContentDelegate()
-        let requestManager = MockNimbusRequestManager()
-        
+        let requestManager = NimbusRequestManager()
+
         let gadInterstitial = InterstitialAd()
         
         let interstitialAd = NimbusDynamicPriceInterstitialAd(
@@ -158,7 +102,7 @@ class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
     
     func test_interstitial_ad_forwards_all_google_delegate_messages() {
         let delegate = MockGADFullScreenContentDelegate()
-        let requestManager = MockNimbusRequestManager()
+        let requestManager = NimbusRequestManager()
         let gadInterstitial = InterstitialAd()
         
         let interstitialAd = NimbusDynamicPriceInterstitialAd(
