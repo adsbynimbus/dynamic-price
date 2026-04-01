@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import DynamicPrice
+@testable import NimbusDynamicPrice
 import GoogleMobileAds
 
 final class NimbusDynamicPriceBannerProxyTests: XCTestCase {

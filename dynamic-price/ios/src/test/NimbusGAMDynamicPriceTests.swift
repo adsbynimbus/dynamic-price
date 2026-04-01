@@ -6,7 +6,7 @@
 //  Copyright © 2020 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-@testable import DynamicPrice
+@testable import NimbusDynamicPrice
 import GoogleMobileAds
 import NimbusKit
 import XCTest
