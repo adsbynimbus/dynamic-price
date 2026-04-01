@@ -1,14 +1,14 @@
 [versions]
 android = "9.0.1"
-dokka = "2.2.0-Beta"
-kotlin = "2.3.10"
+dokka = "2.2.0"
+kotlin = "2.3.20"
 
 ads-google = "24.1.0"
-ads-nimbus = "2.35.2"
+ads-nimbus = "2.35.3"
 
-androidx-core = "1.17.0"
+androidx-core = "1.18.0"
 mockk = "1.14.9"
-okio = "3.16.4"
+okio = "3.17.0"
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "android" }
