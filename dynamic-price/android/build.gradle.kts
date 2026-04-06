@@ -59,8 +59,8 @@ kotlin {
 }
 
 dependencies {
-    implementation(libs.ads.google)
-    implementation(libs.ads.nimbus)
+    api(libs.ads.google)
+    api(libs.ads.nimbus)
     testImplementation(libs.bundles.test.unit)
 
     constraints {

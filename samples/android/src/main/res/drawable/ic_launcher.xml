@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="?android:attr/colorPrimary"/>
+    <foreground>
+        <inset android:drawable="@drawable/nimbus_logo"
+            android:insetLeft="25%"
+            android:insetRight="25%"
+            android:insetTop="45%"
+            android:insetBottom="45%"/>
+    </foreground>
+    <monochrome>
+        <inset android:drawable="@drawable/nimbus_logo"
+            android:insetLeft="25%"
+            android:insetRight="25%"
+            android:insetTop="45%"
+            android:insetBottom="45%"/>
+    </monochrome>
+</adaptive-icon>
