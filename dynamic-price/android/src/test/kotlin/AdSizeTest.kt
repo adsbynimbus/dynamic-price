@@ -1,4 +1,4 @@
-package com.adsbynimbus.google
+package com.adsbynimbus.dynamicprice
 
 import kotlin.test.*
 

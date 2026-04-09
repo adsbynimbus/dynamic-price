@@ -19,7 +19,7 @@ val dokkaHtmlJar by tasks.registering(Jar::class) {
 }
 
 android {
-    namespace = "com.adsbynimbus.google"
+    namespace = "com.adsbynimbus.dynamicprice"
     compileSdk = 36
 
     defaultConfig {
