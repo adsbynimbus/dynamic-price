@@ -8,6 +8,7 @@
 import XCTest
 @testable import DynamicPrice
 import GoogleMobileAds
+import NimbusKit
 
 final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     
@@ -17,7 +18,10 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
         let bannerView = AdManagerBannerView()
         bannerView.rootViewController = rootVC
         
-        var bannerAd: NimbusDynamicPriceBannerAd? = NimbusDynamicPriceBannerAd(ad: nimbusAd, requestManager: NimbusRequestManager(), bannerView: bannerView)
+        var bannerAd: NimbusDynamicPriceBannerAd? = NimbusDynamicPriceBannerAd(
+            ad: nimbusAd,
+            bannerView: bannerView
+        )
         
         bannerAd!.handleEventForNimbus(
             name: "na_render",
@@ -36,7 +40,6 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
         bannerView.rootViewController = rootVC
         let bannerAd = NimbusDynamicPriceBannerAd(
             ad: nimbusAd,
-            requestManager: NimbusRequestManager(),
             bannerView: bannerView
         )
         
@@ -56,17 +59,14 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     }
     
     func test_click_event_should_fire_google_click_delegate_message() {
-        let requestManager = NimbusRequestManager()
         let clientDelegate = MockGADBannerDelegate()
-        let proxy = NimbusDynamicPriceBannerProxy(requestManager: requestManager, clientDelegate: clientDelegate
-        )
+        let proxy = NimbusDynamicPriceBannerProxy(clientDelegate: clientDelegate)
         let bannerView = AdManagerBannerView()
         bannerView.delegate = proxy
         bannerView.rootViewController = rootVC
         
         let bannerAd = NimbusDynamicPriceBannerAd(
             ad: nimbusAd,
-            requestManager: requestManager,
             bannerView: bannerView
         )
         proxy.nimbusDelegate = bannerAd
@@ -97,16 +97,13 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     
     
     func test_click_event_wont_fire_google_click_delegate_message_without_bannerview() {
-        let requestManager = NimbusRequestManager()
         let clientDelegate = MockGADBannerDelegate()
-        let proxy = NimbusDynamicPriceBannerProxy(requestManager: requestManager, clientDelegate: clientDelegate
-        )
+        let proxy = NimbusDynamicPriceBannerProxy(clientDelegate: clientDelegate)
         var bannerView: AdManagerBannerView! = AdManagerBannerView()
         bannerView.delegate = proxy
         
         let bannerAd = NimbusDynamicPriceBannerAd(
             ad: nimbusAd,
-            requestManager: requestManager,
             bannerView: bannerView
         )
         proxy.nimbusDelegate = bannerAd
@@ -127,16 +124,13 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     }
     
     func test_click_event_wont_fire_google_click_delegate_message_without_renderinfo() {
-        let requestManager = NimbusRequestManager()
         let clientDelegate = MockGADBannerDelegate()
-        let proxy = NimbusDynamicPriceBannerProxy(requestManager: requestManager, clientDelegate: clientDelegate
-        )
+        let proxy = NimbusDynamicPriceBannerProxy(clientDelegate: clientDelegate)
         let bannerView = AdManagerBannerView()
         bannerView.delegate = proxy
         
         let bannerAd = NimbusDynamicPriceBannerAd(
             ad: nimbusAd,
-            requestManager: requestManager,
             bannerView: bannerView
         )
         proxy.nimbusDelegate = bannerAd
@@ -154,13 +148,11 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     }
     
     func test_adview_gets_destroyed_at_nimbus_error() {
-        let requestManager = NimbusRequestManager()
         let bannerView = AdManagerBannerView()
         bannerView.rootViewController = rootVC
         
         let bannerAd = NimbusDynamicPriceBannerAd(
             ad: nimbusAd,
-            requestManager: requestManager,
             bannerView: bannerView
         )
         
@@ -185,7 +177,6 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
         
         let bannerAd = NimbusDynamicPriceBannerAd(
             ad: nimbusAd,
-            requestManager: NimbusRequestManager(),
             bannerView: bannerView
         )
         
@@ -200,7 +191,6 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
         
         let bannerAd = NimbusDynamicPriceBannerAd(
             ad: nimbusAd,
-            requestManager: NimbusRequestManager(),
             bannerView: bannerView
         )
         

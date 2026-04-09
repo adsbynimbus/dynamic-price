@@ -25,27 +25,17 @@ extension InterstitialAd {
     /// Make sure to call applyDynamicPrice() before any other method below.
     /// - Parameters:
     ///     - ad: NimbusAd to render if Nimbus wins
-    ///     - requestManager: A request manager instance
     ///     - delegate: pass GADFullScreenContentDelegate if you want to receive delegate messages about this interstitial. Do NOT set `fullScreenContentDelegate` property yourself as it would override our proxy, resulting in Nimbus Dynamic Price not working correctly.
     public func applyDynamicPrice(
         ad: NimbusAd,
-        requestManager: NimbusRequestManager = NimbusRequestManager(),
         delegate: FullScreenContentDelegate? = nil
     ) {
         nimbusInterstitialAd = NimbusDynamicPriceInterstitialAd(
             ad: ad,
-            requestManager: requestManager,
             clientDelegate: delegate,
             gadInterstitialAd: self
         )
         fullScreenContentDelegate = nimbusInterstitialAd
-    }
-    
-    /// Call this method inside the `paidEventHandler` property.
-    /// - Parameters:
-    ///     - adValue: instance of GADAdValue
-    public func updatePrice(_ adValue: AdValue) {
-        nimbusInterstitialAd?.updatePrice(adValue)
     }
     
     /// Call this method when you receive a GADAppEventDelegate message of
