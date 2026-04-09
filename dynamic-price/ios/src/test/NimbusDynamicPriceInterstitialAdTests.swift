@@ -39,10 +39,10 @@ class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
         let delegate = MockGADFullScreenContentDelegate()
         
         let gadInterstitial = InterstitialAd()
+        gadInterstitial.fullScreenContentDelegate = delegate
         
         let interstitialAd = NimbusDynamicPriceInterstitialAd(
             ad: createNimbusAd(),
-            clientDelegate: delegate,
             gadInterstitialAd: gadInterstitial
         )
         
@@ -56,10 +56,7 @@ class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
     func test_click_event_wont_fire_if_gadinterstitial_missing() {
         let delegate = MockGADFullScreenContentDelegate()
         
-        let interstitialAd = NimbusDynamicPriceInterstitialAd(
-            ad: createNimbusAd(),
-            clientDelegate: delegate
-        )
+        let interstitialAd = NimbusDynamicPriceInterstitialAd(ad: createNimbusAd())
         
         interstitialAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
         
@@ -75,42 +72,12 @@ class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
         
         let interstitialAd = NimbusDynamicPriceInterstitialAd(
             ad: createNimbusAd(),
-            clientDelegate: delegate,
             gadInterstitialAd: gadInterstitial
         )
         
         interstitialAd.didReceiveNimbusEvent(controller: MockAdController(), event: .clicked)
         
         XCTAssertNil(delegate.state)
-    }
-    
-    func test_interstitial_ad_forwards_all_google_delegate_messages() {
-        let delegate = MockGADFullScreenContentDelegate()
-        let gadInterstitial = InterstitialAd()
-        
-        let interstitialAd = NimbusDynamicPriceInterstitialAd(
-            ad: createNimbusAd(),
-            clientDelegate: delegate,
-            gadInterstitialAd: gadInterstitial
-        )
-        
-        interstitialAd.ad(gadInterstitial, didFailToPresentFullScreenContentWithError: NSError(domain: "a", code: 1))
-        XCTAssertEqual(delegate.state, .didFailToPresent(ad: gadInterstitial, error: NSError(domain: "a", code: 1)))
-        
-        interstitialAd.adDidRecordImpression(gadInterstitial)
-        XCTAssertEqual(delegate.state, .adDidRecordImpression(ad: gadInterstitial))
-        
-        interstitialAd.adDidRecordClick(gadInterstitial)
-        XCTAssertEqual(delegate.state, .adDidRecordClick(ad: gadInterstitial))
-        
-        interstitialAd.adWillPresentFullScreenContent(gadInterstitial)
-        XCTAssertEqual(delegate.state, .adWillPresentFullScreenContent(ad: gadInterstitial))
-        
-        interstitialAd.adWillDismissFullScreenContent(gadInterstitial)
-        XCTAssertEqual(delegate.state, .adWillDismissFullScreenContent(ad: gadInterstitial))
-        
-        interstitialAd.adDidDismissFullScreenContent(gadInterstitial)
-        XCTAssertEqual(delegate.state, .adDidDismissFullScreenContent(ad: gadInterstitial))
     }
     
     private func createNimbusAd(

@@ -13,8 +13,6 @@ final class NimbusDynamicPriceInterstitialAd: NSObject {
     weak var rootViewController: UIViewController?
     var didPresentGoogleController = false
     
-    /// This is the publisher's original delegate. If set, we forward events to it.
-    private weak var clientDelegate: FullScreenContentDelegate?
     private weak var gadInterstitialAd: InterstitialAd?
     
     private var gadViewController: UIViewController? { rootViewController?.presentedViewController }
@@ -29,12 +27,10 @@ final class NimbusDynamicPriceInterstitialAd: NSObject {
     
     init(
         ad: NimbusAd,
-        clientDelegate: FullScreenContentDelegate? = nil,
         rootViewController: UIViewController? = nil,
         gadInterstitialAd: InterstitialAd? = nil
     ) {
         self.ad = ad
-        self.clientDelegate = clientDelegate
         self.rootViewController = rootViewController
         self.gadInterstitialAd = gadInterstitialAd
         
@@ -106,7 +102,7 @@ final class NimbusDynamicPriceInterstitialAd: NSObject {
             return
         }
 
-        adDidRecordClick(gadInterstitialAd)
+        gadInterstitialAd.fullScreenContentDelegate?.adDidRecordClick?(gadInterstitialAd)
         
         URLSession.trackClick(url: renderInfo.googleClickEventUrl, logger: logger)
     }
@@ -125,41 +121,9 @@ extension NimbusDynamicPriceInterstitialAd: AdControllerDelegate {
     
     func didReceiveNimbusError(controller: AdController, error: NimbusCoreKit.NimbusError) {
         if let gadInterstitialAd {
-            clientDelegate?.ad?(gadInterstitialAd, didFailToPresentFullScreenContentWithError: error)
+            gadInterstitialAd.fullScreenContentDelegate?.ad?(gadInterstitialAd, didFailToPresentFullScreenContentWithError: error)
             dismiss()
         }
-    }
-}
-
-// MARK: - GADFullScreenContentDelegate
-
-extension NimbusDynamicPriceInterstitialAd: FullScreenContentDelegate {
-    func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
-        clientDelegate?.ad?(ad, didFailToPresentFullScreenContentWithError: error)
-    }
-    
-    func adDidRecordImpression(_ ad: FullScreenPresentingAd) {
-        clientDelegate?.adDidRecordImpression?(ad)
-    }
-    
-    func adDidRecordClick(_ ad: FullScreenPresentingAd) {
-        clientDelegate?.adDidRecordClick?(ad)
-    }
-    
-    func adWillPresentFullScreenContent(_ ad: FullScreenPresentingAd) {
-        clientDelegate?.adWillPresentFullScreenContent?(ad)
-        
-        if !didPresentGoogleController {
-            logger.log("Detected GADInterstitialAd.present(fromRootViewController:) was called instead of GADInterstitialAd.presentDynamicPrice(fromRootViewController:)", level: .error)
-        }
-    }
-    
-    func adWillDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
-        clientDelegate?.adWillDismissFullScreenContent?(ad)
-    }
-    
-    func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
-        clientDelegate?.adDidDismissFullScreenContent?(ad)
     }
 }
 
