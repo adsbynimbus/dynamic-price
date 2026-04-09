@@ -1,5 +1,5 @@
 import GoogleMobileAds
-@preconcurrency import NimbusDynamicPrice
+@preconcurrency import DynamicPrice
 import SwiftUI
 
 extension AdManagerBannerView: @retroactive AppEventDelegate {
@@ -96,7 +96,7 @@ struct AdManagerInlineAd: UIViewRepresentable {
             let sizeDesc = String(describing: parent.adSize)
             self.name = sizeDesc.replacingOccurrences(of: "AdSize", with: "")
         }
-        
+
         func bannerViewDidReceiveAd(_ bannerView: BannerView) {
             print("DynamicPrice: \(name) loaded")
         }

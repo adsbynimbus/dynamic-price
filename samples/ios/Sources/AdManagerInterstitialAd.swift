@@ -1,5 +1,5 @@
 import GoogleMobileAds
-@preconcurrency import NimbusDynamicPrice
+@preconcurrency import DynamicPrice
 import SwiftUI
 
 @MainActor
@@ -36,7 +36,7 @@ final class InterstitialAdViewModel: NSObject, FullScreenContentDelegate {
     let adType: AdTypes = .Interstitial
     var isLoading = false
     var didShow = false
-    
+
     private var interstitialAd: InterstitialAd?
 
     @MainActor
@@ -49,7 +49,7 @@ final class InterstitialAdViewModel: NSObject, FullScreenContentDelegate {
             delegate: self,
             nimbusRequest: .forInterstitialAd(position: adType.id),
         )
-        isLoading = false 
+        isLoading = false
     }
 
     func showAd() {

@@ -1,5 +1,5 @@
 import GoogleMobileAds
-@preconcurrency import NimbusDynamicPrice
+@preconcurrency import DynamicPrice
 import SwiftUI
 
 func loadDynamicPriceRewardedVideo(
