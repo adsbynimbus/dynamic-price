@@ -14,11 +14,7 @@ final class NimbusDynamicPriceBannerAd: NSObject {
     weak var adView: NimbusAdView?
     
     private let ad: NimbusAd
-    private let requestManager: NimbusRequestManager
-    
     private var renderInfo: NimbusDynamicPriceRenderInfo?
-    private var isNimbusWin: Bool { renderInfo != nil }
-    private var price = "-1"
     private let logger = Nimbus.shared.logger
     
     deinit {
@@ -27,18 +23,12 @@ final class NimbusDynamicPriceBannerAd: NSObject {
     
     init(
         ad: NimbusAd,
-        requestManager: NimbusRequestManager,
         bannerView: AdManagerBannerView
     ) {
         self.ad = ad
-        self.requestManager = requestManager
         self.bannerView = bannerView
         
         super.init()
-    }
-    
-    func updatePrice(_ adValue: AdValue) {
-        price = adValue.nimbusPrice
     }
     
     @discardableResult
@@ -48,7 +38,6 @@ final class NimbusDynamicPriceBannerAd: NSObject {
         }
         
         renderInfo = info
-        notifyWin()
         DispatchQueue.main.async { [weak self] in self?.attachAdView() }
         
         return true
@@ -73,27 +62,6 @@ final class NimbusDynamicPriceBannerAd: NSObject {
         }
         
         self.adView = adView
-    }
-    
-    // MARK: - Notify Win/Loss
-    
-    func scheduleLossNotification() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            if !self.isNimbusWin {
-                self.notifyLoss()
-            }
-        }
-    }
-    
-    func notifyWin() {
-        requestManager.notifyWin(ad: ad, auctionData: NimbusAuctionData())
-    }
-    
-    func notifyLoss() {
-        requestManager.notifyLoss(ad: ad, auctionData: NimbusAuctionData(
-            auctionPrice: price,
-            winningSource: bannerView?.responseInfo?.loadedAdNetworkResponseInfo?.adNetworkClassName
-        ))
     }
     
     // MARK: - NimbusEvent Handling
@@ -133,11 +101,11 @@ final class NimbusDynamicPriceBannerAd: NSObject {
 
 extension NimbusDynamicPriceBannerAd: BannerViewDelegate {
     func bannerView(_ bannerView: BannerView, didFailToReceiveAdWithError error: Error) {
-        requestManager.notifyError(ad: ad, error: error)
+
     }
     
     func bannerViewDidRecordImpression(_ bannerView: BannerView) {
-        scheduleLossNotification()
+    
     }
 }
 

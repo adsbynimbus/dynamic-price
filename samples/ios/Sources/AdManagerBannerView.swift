@@ -18,7 +18,6 @@ extension AdManagerBannerView: @retroactive AppEventDelegate {
                 bid from Nimbus for rendering.
              */
             applyDynamicPrice(
-                requestManager: nimbusRequestManager,
                 delegate: delegate,
                 ad: nimbusResponse,
             )

@@ -73,7 +73,6 @@ fun RewardedAdScreen(modifier: Modifier = Modifier) {
                 rewardedAd.showAd(
                     activity = activity,
                     nimbusAd = nimbusResponse,
-                    nimbusAdManager = DynamicPriceHelper.requestManager,
                     callback = object : NimbusRewardCallback {
                         override fun onAdImpression() {
                             Log.i("DynamicPrice", "Rewarded impression")

@@ -18,7 +18,6 @@ func loadDynamicPriceInterstitialAd(
     if let nimbusResponse {
         interstitialAd.applyDynamicPrice(
             ad: nimbusResponse,
-            requestManager: nimbusRequestManager,
             delegate: delegate,
         )
     }

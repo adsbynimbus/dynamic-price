@@ -20,10 +20,7 @@ final class NimbusDynamicPriceInterstitialAd: NSObject {
     private var gadViewController: UIViewController? { rootViewController?.presentedViewController }
     
     private var didPresent = false
-    private let requestManager: NimbusRequestManager
     private let ad: NimbusAd
-    private var isNimbusWin: Bool { renderInfo != nil }
-    private var price = "-1"
     
     private var renderInfo: NimbusDynamicPriceRenderInfo?
     private let logger = Nimbus.shared.logger
@@ -32,22 +29,16 @@ final class NimbusDynamicPriceInterstitialAd: NSObject {
     
     init(
         ad: NimbusAd,
-        requestManager: NimbusRequestManager,
         clientDelegate: FullScreenContentDelegate? = nil,
         rootViewController: UIViewController? = nil,
         gadInterstitialAd: InterstitialAd? = nil
     ) {
         self.ad = ad
-        self.requestManager = requestManager
         self.clientDelegate = clientDelegate
         self.rootViewController = rootViewController
         self.gadInterstitialAd = gadInterstitialAd
         
         super.init()
-    }
-    
-    func updatePrice(_ adValue: AdValue) {
-        price = adValue.nimbusPrice
     }
     
     @discardableResult
@@ -57,32 +48,10 @@ final class NimbusDynamicPriceInterstitialAd: NSObject {
         }
         
         renderInfo = info
-        notifyWin()
         
         DispatchQueue.main.async { [weak self] in self?.present() }
         
         return true
-    }
-    
-    // MARK: - Notify win/loss
-    
-    private func scheduleLossNotification() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            if !self.isNimbusWin {
-                self.notifyLoss()
-            }
-        }
-    }
-    
-    private func notifyWin() {
-        requestManager.notifyWin(ad: ad, auctionData: NimbusAuctionData())
-    }
-    
-    private func notifyLoss() {
-        requestManager.notifyLoss(ad: ad, auctionData: NimbusAuctionData(
-            auctionPrice: price,
-            winningSource: gadInterstitialAd?.responseInfo.loadedAdNetworkResponseInfo?.adNetworkClassName
-        ))
     }
     
     // MARK: - Presentation
@@ -90,7 +59,7 @@ final class NimbusDynamicPriceInterstitialAd: NSObject {
     /// Make sure this method is called from the main thread
     func present() {
         guard let rootViewController = gadViewController,
-              didPresentGoogleController, isNimbusWin, !didPresent
+              didPresentGoogleController, !didPresent
         else {
             return
         }
@@ -117,7 +86,6 @@ final class NimbusDynamicPriceInterstitialAd: NSObject {
      
     private func dismiss() {
         DispatchQueue.main.async {
-            self.price = "-1"
             self.renderInfo = nil
             self.didPresent = false
             self.didPresentGoogleController = false
@@ -172,7 +140,6 @@ extension NimbusDynamicPriceInterstitialAd: FullScreenContentDelegate {
     
     func adDidRecordImpression(_ ad: FullScreenPresentingAd) {
         clientDelegate?.adDidRecordImpression?(ad)
-        scheduleLossNotification()
     }
     
     func adDidRecordClick(_ ad: FullScreenPresentingAd) {

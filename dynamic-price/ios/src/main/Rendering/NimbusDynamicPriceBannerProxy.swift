@@ -9,16 +9,13 @@ import NimbusKit
 import GoogleMobileAds
 
 final class NimbusDynamicPriceBannerProxy: NSObject {
-    let requestManager: NimbusRequestManager
     weak var clientDelegate: BannerViewDelegate?
     weak var nimbusDelegate: BannerViewDelegate?
     
     init(
-        requestManager: NimbusRequestManager,
         clientDelegate: BannerViewDelegate? = nil,
         nimbusDelegate: BannerViewDelegate? = nil
     ) {
-        self.requestManager = requestManager
         self.clientDelegate = clientDelegate
         self.nimbusDelegate = nimbusDelegate
     }

@@ -53,12 +53,10 @@ extension AdManagerBannerView {
     ///     - requestManager: A request manager instance
     ///     - delegate: pass GADBannerViewDelegate if you want to receive delegate messages about this banner. Do NOT set `bannerView.delegate` property yourself as it would override our proxy, resulting in Nimbus Dynamic Price not working correctly.
     public func applyDynamicPrice(
-        requestManager: NimbusRequestManager = NimbusRequestManager(),
         delegate: BannerViewDelegate? = nil,
         ad: NimbusAd? = nil
     ) {
         nimbusBannerProxy = NimbusDynamicPriceBannerProxy(
-            requestManager: requestManager,
             clientDelegate: delegate
         )
         self.delegate = nimbusBannerProxy
@@ -86,13 +84,6 @@ extension AdManagerBannerView {
 
         initBannerAd(ad: ad)
         load(gamRequest)
-    }
-    
-    /// Call this method inside the `paidEventHandler` property.
-    /// - Parameters:
-    ///     - adValue: instance of GADAdValue
-    public func updatePrice(_ adValue: AdValue) {
-        nimbusBannerAd?.updatePrice(adValue)
     }
     
     /// Call this method when you receive a GADAppEventDelegate message of
@@ -137,7 +128,6 @@ extension AdManagerBannerView {
         
         nimbusBannerAd = NimbusDynamicPriceBannerAd(
             ad: ad,
-            requestManager: proxy.requestManager,
             bannerView: self
         )
         proxy.nimbusDelegate = nimbusBannerAd
