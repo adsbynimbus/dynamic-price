@@ -8,9 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import com.adsbynimbus.NimbusError
 import com.adsbynimbus.dynamicprice.sample.AdTypes.RewardedVideo
-import com.adsbynimbus.google.NimbusRewardCallback
-import com.adsbynimbus.google.applyDynamicPrice
-import com.adsbynimbus.google.showAd
+import com.adsbynimbus.dynamicprice.*
 import com.adsbynimbus.request.NimbusRequest
 import com.adsbynimbus.request.NimbusRequest.Companion.forRewardedVideo
 import com.adsbynimbus.request.NimbusResponse

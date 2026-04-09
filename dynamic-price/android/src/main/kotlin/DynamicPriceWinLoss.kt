@@ -1,4 +1,4 @@
-package com.adsbynimbus.google
+package com.adsbynimbus.dynamicprice
 
 import com.adsbynimbus.internal.nimbusScope
 import com.adsbynimbus.request.AuctionData

@@ -1,4 +1,4 @@
-package com.adsbynimbus.google
+package com.adsbynimbus.dynamicprice
 
 import android.content.Context
 import com.adsbynimbus.openrtb.request.Format

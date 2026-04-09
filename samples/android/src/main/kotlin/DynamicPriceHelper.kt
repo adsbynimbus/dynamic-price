@@ -1,7 +1,7 @@
 package com.adsbynimbus.dynamicprice.sample
 
 import com.adsbynimbus.NimbusAdManager
-import com.adsbynimbus.lineitem.*
+import com.adsbynimbus.dynamicprice.*
 
 object DynamicPriceHelper {
     /**
