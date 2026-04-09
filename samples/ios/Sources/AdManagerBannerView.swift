@@ -17,10 +17,7 @@ extension AdManagerBannerView: @retroactive AppEventDelegate {
                 Clears any previously rendered Dynamic Price Ads and optionally prepares the
                 bid from Nimbus for rendering.
              */
-            applyDynamicPrice(
-                delegate: delegate,
-                ad: nimbusResponse,
-            )
+            applyDynamicPrice(ad: nimbusResponse)
             load(adRequest)
         }
     }

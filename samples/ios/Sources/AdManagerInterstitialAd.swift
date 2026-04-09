@@ -16,10 +16,7 @@ func loadDynamicPriceInterstitialAd(
     let interstitialAd = try await AdManagerInterstitialAd.load(with: adUnitId, request: adRequest)
     interstitialAd.appEventDelegate = interstitialAd
     if let nimbusResponse {
-        interstitialAd.applyDynamicPrice(
-            ad: nimbusResponse,
-            delegate: delegate,
-        )
+        interstitialAd.applyDynamicPrice(ad: nimbusResponse)
     }
     return interstitialAd
 }

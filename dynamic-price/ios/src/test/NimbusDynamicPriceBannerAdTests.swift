@@ -60,16 +60,14 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     
     func test_click_event_should_fire_google_click_delegate_message() {
         let clientDelegate = MockGADBannerDelegate()
-        let proxy = NimbusDynamicPriceBannerProxy(clientDelegate: clientDelegate)
         let bannerView = AdManagerBannerView()
-        bannerView.delegate = proxy
         bannerView.rootViewController = rootVC
+        bannerView.delegate = clientDelegate
         
         let bannerAd = NimbusDynamicPriceBannerAd(
             ad: nimbusAd,
             bannerView: bannerView
         )
-        proxy.nimbusDelegate = bannerAd
         
         bannerAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
         
@@ -98,15 +96,12 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     
     func test_click_event_wont_fire_google_click_delegate_message_without_bannerview() {
         let clientDelegate = MockGADBannerDelegate()
-        let proxy = NimbusDynamicPriceBannerProxy(clientDelegate: clientDelegate)
         var bannerView: AdManagerBannerView! = AdManagerBannerView()
-        bannerView.delegate = proxy
         
         let bannerAd = NimbusDynamicPriceBannerAd(
             ad: nimbusAd,
             bannerView: bannerView
         )
-        proxy.nimbusDelegate = bannerAd
         
         bannerAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
         
@@ -125,15 +120,12 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     
     func test_click_event_wont_fire_google_click_delegate_message_without_renderinfo() {
         let clientDelegate = MockGADBannerDelegate()
-        let proxy = NimbusDynamicPriceBannerProxy(clientDelegate: clientDelegate)
         let bannerView = AdManagerBannerView()
-        bannerView.delegate = proxy
         
         let bannerAd = NimbusDynamicPriceBannerAd(
             ad: nimbusAd,
             bannerView: bannerView
         )
-        proxy.nimbusDelegate = bannerAd
         
         let expectation = XCTestExpectation(description: "fire google click message")
         expectation.isInverted = true

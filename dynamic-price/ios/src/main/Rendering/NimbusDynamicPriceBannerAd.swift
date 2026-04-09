@@ -97,18 +97,6 @@ final class NimbusDynamicPriceBannerAd: NSObject {
     }
 }
 
-// MARK: - GADBannerViewDelegate
-
-extension NimbusDynamicPriceBannerAd: BannerViewDelegate {
-    func bannerView(_ bannerView: BannerView, didFailToReceiveAdWithError error: Error) {
-
-    }
-    
-    func bannerViewDidRecordImpression(_ bannerView: BannerView) {
-    
-    }
-}
-
 // MARK: - NimbusAdViewControllerDelegate
 
 extension NimbusDynamicPriceBannerAd: AdControllerDelegate {

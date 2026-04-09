@@ -10,7 +10,6 @@ import NimbusKit
 
 extension AdManagerBannerView {
     private static var nimbusBannerAdKey: Void?
-    private static var nimbusBannerProxyKey: Void?
     
     private var nimbusBannerAd: NimbusDynamicPriceBannerAd? {
         get {
@@ -28,39 +27,12 @@ extension AdManagerBannerView {
             )
         }
     }
-    
-    private var nimbusBannerProxy: NimbusDynamicPriceBannerProxy? {
-        get {
-            objc_getAssociatedObject(
-                self,
-                &Self.nimbusBannerProxyKey
-            ) as? NimbusDynamicPriceBannerProxy
-        }
-        set {
-            objc_setAssociatedObject(
-                self,
-                &Self.nimbusBannerProxyKey,
-                newValue,
-                .OBJC_ASSOCIATION_RETAIN_NONATOMIC
-            )
-        }
-    }
-    
+
     /// This method initializes nimbus dynamic price for this GAMBannerView instance.
     /// Make sure to call applyDynamicPrice() before any other method below.
     /// - Parameters:
     ///     - ad: NimbusAd to render if Nimbus wins
-    ///     - requestManager: A request manager instance
-    ///     - delegate: pass GADBannerViewDelegate if you want to receive delegate messages about this banner. Do NOT set `bannerView.delegate` property yourself as it would override our proxy, resulting in Nimbus Dynamic Price not working correctly.
-    public func applyDynamicPrice(
-        delegate: BannerViewDelegate? = nil,
-        ad: NimbusAd? = nil
-    ) {
-        nimbusBannerProxy = NimbusDynamicPriceBannerProxy(
-            clientDelegate: delegate
-        )
-        self.delegate = nimbusBannerProxy
-                
+    public func applyDynamicPrice(ad: NimbusAd? = nil) {
         initBannerAd(ad: ad)
     }
     
@@ -76,8 +48,6 @@ extension AdManagerBannerView {
         ad: NimbusAd? = nil,
         mapping: NimbusGAMLinearPriceMapping = .banner()
     ) {
-        guard let _ = validateProxy() else { return }
-        
         if !gamRequest.hasDynamicPrice {
             ad?.applyDynamicPrice(into: gamRequest, mapping: mapping)
         }
@@ -100,7 +70,6 @@ extension AdManagerBannerView {
     }
     
     private func validate() -> Bool {
-        guard let _ = validateProxy() else { return false }
         guard let _ = nimbusBannerAd else {
             Nimbus.shared.logger.log("NimbusDynamicPriceBannerAd was not initialized", level: .error)
             return false
@@ -109,17 +78,7 @@ extension AdManagerBannerView {
         return true
     }
     
-    private func validateProxy() -> NimbusDynamicPriceBannerProxy? {
-        guard let nimbusBannerProxy, delegate is NimbusDynamicPriceBannerProxy else {
-            Nimbus.shared.logger.log("Custom GAMBannerView.delegate was set while using Nimbus Dynamic Price implementation. Please pass your delegate in GAMBannerView.applyDynamicPrice instead.", level: .error)
-            return nil
-        }
-        
-        return nimbusBannerProxy
-    }
-    
     private func initBannerAd(ad: NimbusAd?) {
-        guard let proxy = validateProxy() else { return }
         guard let ad else {
             // To make sure there's no stale nimbus-rendered ad
             nimbusBannerAd = nil
@@ -130,6 +89,5 @@ extension AdManagerBannerView {
             ad: ad,
             bannerView: self
         )
-        proxy.nimbusDelegate = nimbusBannerAd
     }
 }
