@@ -127,15 +127,3 @@ extension DynamicPriceInterstitialAd: AdControllerDelegate {
         }
     }
 }
-
-// MARK: - NimbusAdViewControllerDelegate
-
-extension DynamicPriceInterstitialAd: NimbusAdViewControllerDelegate {
-    func viewWillAppear(animated: Bool) {}
-    func viewDidAppear(animated: Bool) {}
-    func viewWillDisappear(animated: Bool) {}
-    func viewDidDisappear(animated: Bool) {}
-    func didCloseAd(adView: NimbusAdView) {
-        adController?.destroy()
-    }
-}
