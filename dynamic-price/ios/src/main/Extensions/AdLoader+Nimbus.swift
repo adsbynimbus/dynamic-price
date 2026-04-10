@@ -33,11 +33,11 @@ public extension AdLoader {
     /// - Parameters:
     ///     - gamRequest: Instance of GAMRequest
     ///     - ad: NimbusAd to render if Nimbus wins
-    ///     - mapping: Default is `LinearPriceMapping.banner()`
+    ///     - mapping: Mapping to line items in Ad Manager
     func loadDynamicPrice(
         gamRequest: AdManagerRequest,
         ad: NimbusAd? = nil,
-        mapping: LinearPriceMapping = .banner()
+        mapping: LinearPriceMapping,
     ) {
         if !gamRequest.hasDynamicPrice {
             ad?.applyDynamicPrice(into: gamRequest, mapping: mapping)
