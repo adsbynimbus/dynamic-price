@@ -1,8 +1,9 @@
 //
-//  GADAdLoader+Nimbus.swift
-//  Nimbus
+//  AdLoader+Nimbus.swift
+//  DynamicPrice
+//
 //  Created on 2/27/24
-//  Copyright © 2024 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import GoogleMobileAds
@@ -32,11 +33,11 @@ public extension AdLoader {
     /// - Parameters:
     ///     - gamRequest: Instance of GAMRequest
     ///     - ad: NimbusAd to render if Nimbus wins
-    ///     - mapping: Default is `NimbusGAMLinearPriceMapping.banner()`
+    ///     - mapping: Default is `LinearPriceMapping.banner()`
     func loadDynamicPrice(
         gamRequest: AdManagerRequest,
         ad: NimbusAd? = nil,
-        mapping: NimbusGAMLinearPriceMapping = .banner()
+        mapping: LinearPriceMapping = .banner()
     ) {
         if !gamRequest.hasDynamicPrice {
             ad?.applyDynamicPrice(into: gamRequest, mapping: mapping)

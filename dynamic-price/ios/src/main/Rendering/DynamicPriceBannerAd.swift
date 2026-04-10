@@ -1,20 +1,21 @@
 //
-//  NimbusDynamicPriceBannerAd.swift
-//  Nimbus
+//  DynamicPriceBannerAd.swift
+//  DynamicPrice
+//
 //  Created on 2/26/24
-//  Copyright © 2024 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import UIKit
 import GoogleMobileAds
 import NimbusKit
 
-final class NimbusDynamicPriceBannerAd: NSObject {
+final class DynamicPriceBannerAd: NSObject {
     private weak var bannerView: AdManagerBannerView?
     weak var adView: NimbusAdView?
     
     private let ad: NimbusAd
-    private var renderInfo: NimbusDynamicPriceRenderInfo?
+    private var renderInfo: DynamicPriceRenderInfo?
     private let logger = Nimbus.shared.logger
     
     deinit {
@@ -33,7 +34,7 @@ final class NimbusDynamicPriceBannerAd: NSObject {
     
     @discardableResult
     func handleEventForNimbus(name: String, info: String?) -> Bool {
-        guard name == "na_render", let info = NimbusDynamicPriceRenderInfo(info: info) else {
+        guard name == "na_render", let info = DynamicPriceRenderInfo(info: info) else {
             return false
         }
         
@@ -97,9 +98,9 @@ final class NimbusDynamicPriceBannerAd: NSObject {
     }
 }
 
-// MARK: - NimbusAdViewControllerDelegate
+// MARK: - AdControllerDelegate
 
-extension NimbusDynamicPriceBannerAd: AdControllerDelegate {
+extension DynamicPriceBannerAd: AdControllerDelegate {
     func didReceiveNimbusEvent(controller: AdController, event: NimbusEvent) {
         if event == .clicked {
             handleClickEvent()

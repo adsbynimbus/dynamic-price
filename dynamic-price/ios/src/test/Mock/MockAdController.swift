@@ -1,8 +1,9 @@
 //
 //  MockAdController.swift
-//  NimbusGAMKitTests
+//  DynamicPriceTests
+//
 //  Created on 3/1/24
-//  Copyright © 2024 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import NimbusKit

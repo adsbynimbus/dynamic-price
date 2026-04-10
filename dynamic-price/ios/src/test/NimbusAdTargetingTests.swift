@@ -1,9 +1,9 @@
 //
 //  NimbusAdTargetingTests.swift
-//  NimbusGAMKitTests
+//  DynamicPriceTests
 //
 //  Created on 8/12/22.
-//  Copyright © 2022 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 @testable import DynamicPrice
@@ -30,7 +30,7 @@ class NimbusAdTargetingTests: XCTestCase {
         let ad = createNimbusAd(type: .video, dimensPresent: false)
         let request = AdManagerRequest()
         
-        let mapping = NimbusGAMLinearPriceMapping.banner()
+        let mapping = LinearPriceMapping.banner()
         ad.applyDynamicPrice(into: request, mapping: mapping)
 
         XCTAssertEqual(request.customTargeting?["na_id"] as! String, ad.auctionId)
@@ -47,7 +47,7 @@ class NimbusAdTargetingTests: XCTestCase {
         request.customTargeting = [:]
         request.customTargeting?["test_key"] = "test_value"
 
-        let mapping = NimbusGAMLinearPriceMapping.banner()
+        let mapping = LinearPriceMapping.banner()
         ad.applyDynamicPrice(into: request, mapping: mapping)
 
         XCTAssertEqual(request.customTargeting?["na_id"] as! String, ad.auctionId)
@@ -65,7 +65,7 @@ class NimbusAdTargetingTests: XCTestCase {
         let request = AdManagerRequest()
         request.customTargeting = [:]
         
-        let mapping = NimbusGAMLinearPriceMapping.banner()
+        let mapping = LinearPriceMapping.banner()
         ad.applyDynamicPrice(into: request, mapping: mapping)
         
         XCTAssertEqual(request.customTargeting?["na_bid"] as! String, "0")
@@ -80,7 +80,7 @@ class NimbusAdTargetingTests: XCTestCase {
         let request = AdManagerRequest()
         request.customTargeting = [:]
         
-        let mapping = NimbusGAMLinearPriceMapping.banner()
+        let mapping = LinearPriceMapping.banner()
         ad.applyDynamicPrice(into: request, mapping: mapping)
         
         XCTAssertEqual(request.customTargeting?["na_bid_video"] as! String, "0")

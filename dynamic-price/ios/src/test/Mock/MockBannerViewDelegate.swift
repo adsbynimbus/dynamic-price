@@ -1,14 +1,15 @@
 //
-//  MockGADBannerDelegate.swift
-//  NimbusGAMKitTests
+//  MockBannerViewDelegate.swift
+//  DynamicPriceTests
+//
 //  Created on 2/28/24
-//  Copyright © 2024 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import Foundation
 import GoogleMobileAds
 
-final class MockGADBannerDelegate: NSObject, BannerViewDelegate {
+final class MockBannerViewDelegate: NSObject, BannerViewDelegate {
     var onDidFailToReceiveAd: ((BannerView, Error) -> Void)?
     func bannerView(_ bannerView: BannerView, didFailToReceiveAdWithError error: Error) {
         onDidFailToReceiveAd?(bannerView, error)

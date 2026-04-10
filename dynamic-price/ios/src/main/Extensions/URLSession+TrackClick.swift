@@ -1,8 +1,9 @@
 //
 //  URLSession+TrackClick.swift
-//  Nimbus
+//  DynamicPrice
+//
 //  Created on 5/6/25
-//  Copyright © 2025 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import Foundation

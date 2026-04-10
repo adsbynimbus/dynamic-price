@@ -1,16 +1,16 @@
 //
-//  NimbusDynamicPriceRewardedWrapper.swift
-//  Nimbus
+//  RewardedAdPresenter.swift
+//  DynamicPrice
 //
 //  Created on 7/23/23.
-//  Copyright © 2023 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import Foundation
 import NimbusKit
 import GoogleMobileAds
 
-public protocol NimbusRewardedAdPresenterDelegate: AnyObject {
+public protocol RewardedAdPresenterDelegate: AnyObject {
     func didTriggerImpression()
     func didTriggerClick()
     
@@ -21,14 +21,14 @@ public protocol NimbusRewardedAdPresenterDelegate: AnyObject {
     func didReceiveError(error: NimbusError)
 }
 
-public final class NimbusRewardedAdPresenter {
+public final class RewardedAdPresenter {
     
     private enum AdType {
         case rewarded(ad: RewardedAd)
         case rewardedInterstitial(ad: RewardedInterstitialAd)
     }
     
-    public weak var delegate: NimbusRewardedAdPresenterDelegate?
+    public weak var delegate: RewardedAdPresenterDelegate?
     
     private let ad: NimbusAd
     private var adType: AdType?
@@ -117,7 +117,7 @@ public final class NimbusRewardedAdPresenter {
 // MARK: AdControllerDelegate
 
 /// :nodoc:
-extension NimbusRewardedAdPresenter: AdControllerDelegate {
+extension RewardedAdPresenter: AdControllerDelegate {
     public func didReceiveNimbusEvent(controller: NimbusCoreKit.AdController, event: NimbusCoreKit.NimbusEvent) {
         switch event {
         case .impression:
@@ -151,7 +151,7 @@ extension NimbusRewardedAdPresenter: AdControllerDelegate {
 // MARK: NimbusAdViewControllerDelegate
 
 /// :nodoc:
-extension NimbusRewardedAdPresenter: NimbusAdViewControllerDelegate {
+extension RewardedAdPresenter: NimbusAdViewControllerDelegate {
     public func viewWillAppear(animated: Bool) {}
     
     public func viewDidAppear(animated: Bool) {

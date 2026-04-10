@@ -12,11 +12,11 @@ extension DynamicPriceApp {
      * $0.50 increments: $8.00 - $20.00  (ex. na_bid = {800, 850, 900, 950 ... 2000})
      * $1.00 increments: $20.00 - $35.00 (ex. na_bid = {2000, 2100, 2200, 2300 ... 3500})
      */
-    nonisolated static let mapping = NimbusGAMLinearPriceMapping(granularities: [
-        NimbusGAMLinearPriceGranularity(min: 0, max: 300, step: 1),
-        NimbusGAMLinearPriceGranularity(min: 300, max: 800, step: 5),
-        NimbusGAMLinearPriceGranularity(min: 800, max: 2000, step: 50),
-        NimbusGAMLinearPriceGranularity(min: 2000, max: 3500, step: 100),
+    nonisolated static let mapping = LinearPriceMapping(granularities: [
+        LinearPriceGranularity(min: 0, max: 300, step: 1),
+        LinearPriceGranularity(min: 300, max: 800, step: 5),
+        LinearPriceGranularity(min: 800, max: 2000, step: 50),
+        LinearPriceGranularity(min: 2000, max: 3500, step: 100),
     ])
 }
 

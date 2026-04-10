@@ -1,15 +1,16 @@
 //
-//  NimbusDynamicPriceInterstitialAd.swift
-//  NimbusGAMKit
+//  DynamicPriceInterstitialAd.swift
+//  DynamicPrice
+//
 //  Created on 2/16/24
-//  Copyright © 2024 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import UIKit
 import GoogleMobileAds
 import NimbusKit
 
-final class NimbusDynamicPriceInterstitialAd: NSObject {
+final class DynamicPriceInterstitialAd: NSObject {
     weak var rootViewController: UIViewController?
     var didPresentGoogleController = false
     
@@ -20,7 +21,7 @@ final class NimbusDynamicPriceInterstitialAd: NSObject {
     private var didPresent = false
     private let ad: NimbusAd
     
-    private var renderInfo: NimbusDynamicPriceRenderInfo?
+    private var renderInfo: DynamicPriceRenderInfo?
     private let logger = Nimbus.shared.logger
     
     private var adController: AdController?
@@ -39,7 +40,7 @@ final class NimbusDynamicPriceInterstitialAd: NSObject {
     
     @discardableResult
     func handleEventForNimbus(name: String, info: String?) -> Bool {
-        guard name == "na_render", let info = NimbusDynamicPriceRenderInfo(info: info) else {
+        guard name == "na_render", let info = DynamicPriceRenderInfo(info: info) else {
             return false
         }
         
@@ -110,7 +111,7 @@ final class NimbusDynamicPriceInterstitialAd: NSObject {
 
 // MARK: - AdControllerDelegate
 
-extension NimbusDynamicPriceInterstitialAd: AdControllerDelegate {
+extension DynamicPriceInterstitialAd: AdControllerDelegate {
     func didReceiveNimbusEvent(controller: AdController, event: NimbusEvent) {        
         if event == .clicked {
             handleClickEvent()
@@ -129,7 +130,7 @@ extension NimbusDynamicPriceInterstitialAd: AdControllerDelegate {
 
 // MARK: - NimbusAdViewControllerDelegate
 
-extension NimbusDynamicPriceInterstitialAd: NimbusAdViewControllerDelegate {
+extension DynamicPriceInterstitialAd: NimbusAdViewControllerDelegate {
     func viewWillAppear(animated: Bool) {}
     func viewDidAppear(animated: Bool) {}
     func viewWillDisappear(animated: Bool) {}

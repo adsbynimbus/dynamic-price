@@ -40,7 +40,7 @@ extension RewardedAd {
 }
 
 @Observable
-final class RewardedAdViewModel: NSObject, FullScreenContentDelegate, NimbusRewardedAdPresenterDelegate {
+final class RewardedAdViewModel: NSObject, FullScreenContentDelegate, RewardedAdPresenterDelegate {
     @MainActor
     static var rootViewController: UIViewController? {
         UIApplication.shared.connectedScenes
@@ -53,7 +53,7 @@ final class RewardedAdViewModel: NSObject, FullScreenContentDelegate, NimbusRewa
     var isLoading = false
     var didShow = false
 
-    private var nimbusPresenter: NimbusRewardedAdPresenter?
+    private var nimbusPresenter: RewardedAdPresenter?
     private var rewardedAd: RewardedAd?
 
     @MainActor
@@ -69,7 +69,7 @@ final class RewardedAdViewModel: NSObject, FullScreenContentDelegate, NimbusRewa
             )
             rewardedAd = googleAd
             if let nimbusBid {
-                nimbusPresenter = NimbusRewardedAdPresenter(
+                nimbusPresenter = RewardedAdPresenter(
                     request: nimbusRequest,
                     ad: nimbusBid,
                     rewardedAd: googleAd,
@@ -111,7 +111,7 @@ struct RewardedAdScreen: View {
     }
 }
 
-// MARK: - NimbusRewardedAdPresenter
+// MARK: - RewardedAdPresenter
 
 extension RewardedAdViewModel {
     nonisolated public func didEarnReward(reward: AdReward) {

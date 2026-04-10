@@ -1,14 +1,15 @@
 //
-//  MockGADFullScreenContentDelegate.swift
-//  NimbusGAMKitTests
+//  MockFullScreenContentDelegate.swift
+//  DynamicPriceTests
+//
 //  Created on 2/29/24
-//  Copyright © 2024 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import Foundation
 import GoogleMobileAds
 
-final class MockGADFullScreenContentDelegate: NSObject, FullScreenContentDelegate {
+final class MockFullScreenContentDelegate: NSObject, FullScreenContentDelegate {
     enum State: Equatable {
         case didFailToPresent(ad: FullScreenPresentingAd, error: Error)
         case adDidRecordImpression(ad: FullScreenPresentingAd)
@@ -18,8 +19,8 @@ final class MockGADFullScreenContentDelegate: NSObject, FullScreenContentDelegat
         case adDidDismissFullScreenContent(ad: FullScreenPresentingAd)
         
         static func == (
-            lhs: MockGADFullScreenContentDelegate.State,
-            rhs: MockGADFullScreenContentDelegate.State
+            lhs: MockFullScreenContentDelegate.State,
+            rhs: MockFullScreenContentDelegate.State
         ) -> Bool {
             switch (lhs, rhs) {
             case (.didFailToPresent(let lhsAd, let lhsError), .didFailToPresent(let rhsAd, let rhsError)):

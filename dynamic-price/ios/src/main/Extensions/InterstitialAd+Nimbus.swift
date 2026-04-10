@@ -1,8 +1,9 @@
 //
-//  GADInterstitialAd+Nimbus.swift
-//  NimbusGAMKit
+//  InterstitialAd+Nimbus.swift
+//  DynamicPrice
+//
 //  Created on 2/16/24
-//  Copyright © 2024 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import GoogleMobileAds
@@ -12,9 +13,9 @@ import NimbusRenderKit
 extension InterstitialAd {
     private static var nimbusAdKey: Void?
 
-    private var nimbusInterstitialAd: NimbusDynamicPriceInterstitialAd? {
+    private var nimbusInterstitialAd: DynamicPriceInterstitialAd? {
         get {
-            objc_getAssociatedObject(self, &Self.nimbusAdKey) as? NimbusDynamicPriceInterstitialAd
+            objc_getAssociatedObject(self, &Self.nimbusAdKey) as? DynamicPriceInterstitialAd
         }
         set {
             objc_setAssociatedObject(self, &Self.nimbusAdKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
@@ -26,7 +27,7 @@ extension InterstitialAd {
     /// - Parameters:
     ///     - ad: NimbusAd to render if Nimbus wins
     public func applyDynamicPrice(ad: NimbusAd) {
-        nimbusInterstitialAd = NimbusDynamicPriceInterstitialAd(
+        nimbusInterstitialAd = DynamicPriceInterstitialAd(
             ad: ad,
             gadInterstitialAd: self
         )
