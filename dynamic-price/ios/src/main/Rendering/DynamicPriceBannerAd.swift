@@ -69,7 +69,7 @@ final class DynamicPriceBannerAd: NSObject {
     
     func handleClickEvent() {
         guard let bannerView else {
-            logger.log("GAMBannerView was unexpectedly released before click event could be processed", level: .error)
+            logger.log("BannerView was unexpectedly released before click event could be processed", level: .error)
             return
         }
         guard let renderInfo else {

@@ -49,7 +49,7 @@ final class DynamicPriceBannerAdTests: XCTestCase {
         
         bannerAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
         
-        let expectation = XCTestExpectation(description: "attach adView to GAMBannerView")
+        let expectation = XCTestExpectation(description: "attach adView to BannerView")
         
         DispatchQueue.main.async {
             XCTAssertTrue(bannerView.subviews.last is NimbusAdView)

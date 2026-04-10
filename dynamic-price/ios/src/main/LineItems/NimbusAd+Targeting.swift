@@ -11,9 +11,9 @@ import NimbusKit
 
 public extension NimbusAd {
 
-    /// Add keywords for custom targeting from Nimbus ad to GAMRequest
+    /// Add keywords for custom targeting from Nimbus ad to AdRequest
     /// - Parameters:
-    ///   - request: GAMRequest to add keywords to
+    ///   - request: AdManagerRequest to add keywords to
     ///   - mapping: A mapping composed of multiple LinearPriceGranularities in ascending order. Default: LinearPriceMapping.banner()
     func applyDynamicPrice(into request: AdManagerRequest, mapping: LinearPriceMapping) {
         applyDynamicPrice(into: request, keywords: mapping.getKeywords(ad: self))
@@ -49,6 +49,6 @@ extension NimbusAd {
 }
 
 /// :nodoc:
-extension AdManagerRequest {
+extension Request {
     var hasDynamicPrice: Bool { customTargeting?["na_id"] != nil }
 }
