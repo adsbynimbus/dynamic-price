@@ -31,19 +31,19 @@ public extension AdLoader {
     
     /// This method applies dynamic price targeting and calls `GADAdLoader.load()`.
     /// - Parameters:
-    ///     - gamRequest: Instance of GAMRequest
+    ///     - request: Instance of AdManagerRequest
     ///     - ad: NimbusAd to render if Nimbus wins
     ///     - mapping: Mapping to line items in Ad Manager
     func loadDynamicPrice(
-        gamRequest: AdManagerRequest,
+        request: AdManagerRequest,
         ad: NimbusAd? = nil,
         mapping: LinearPriceMapping,
     ) {
-        if !gamRequest.hasDynamicPrice {
-            ad?.applyDynamicPrice(into: gamRequest, mapping: mapping)
+        if !request.hasDynamicPrice {
+            ad?.applyDynamicPrice(into: request, mapping: mapping)
         }
         
         nimbusAd = ad
-        load(gamRequest)
+        load(request)
     }
 }

@@ -29,7 +29,7 @@ extension AdManagerBannerView {
         }
     }
 
-    /// This method initializes nimbus dynamic price for this GAMBannerView instance.
+    /// This method initializes nimbus dynamic price for this BannerView instance.
     /// Make sure to call applyDynamicPrice() before any other method below.
     /// - Parameters:
     ///     - ad: NimbusAd to render if Nimbus wins
@@ -37,27 +37,27 @@ extension AdManagerBannerView {
         initBannerAd(ad: ad)
     }
     
-    /// This method should be used instead of GAMBannerView.load() and only if the ad is loaded
-    /// using GAMBannerView, not GADAdLoader. loadDynamicPrice() sets up dynamic price targeting and
-    /// calls GAMBannerView.load() at the end.
+    /// This method should be used instead of AdManagerBannerView.load() and only if the ad is loaded
+    /// using AdManagerBannerView, not AdLoader. loadDynamicPrice() sets up dynamic price targeting and
+    /// calls AdManagerBannerView.load() at the end.
     /// - Parameters:
     ///     - ad: NimbusAd to render if Nimbus wins
-    ///     - gamRequest: Instance of GAMRequest
+    ///     - request: Instance of AdManagerRequest
     ///     - mapping: Mapping to line items in Ad Manager
     public func loadDynamicPrice(
-        gamRequest: AdManagerRequest,
+        request: AdManagerRequest,
         ad: NimbusAd? = nil,
         mapping: LinearPriceMapping,
     ) {
-        if !gamRequest.hasDynamicPrice {
-            ad?.applyDynamicPrice(into: gamRequest, mapping: mapping)
+        if !request.hasDynamicPrice {
+            ad?.applyDynamicPrice(into: request, mapping: mapping)
         }
 
         initBannerAd(ad: ad)
-        load(gamRequest)
+        load(request)
     }
     
-    /// Call this method when you receive a GADAppEventDelegate message of
+    /// Call this method when you receive a AppEventDelegate message of
     /// `adView(banner:didReceiveAppEvent:withInfo:)` to see whether Nimbus
     /// can handle the given app event.
     /// - Parameters:

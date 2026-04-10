@@ -49,12 +49,12 @@ public struct LinearPriceGranularity: DynamicPriceMapping, Comparable, Equatable
     }
     
     /**
-     Returns the keywords to be inserted in the GAM ad
+     Returns the keywords to be inserted in the AdManagerRequest
      
      - Parameters:
      - ad: An ad from Nimbus
      
-     - Returns: The keywords to set on the GAM view
+     - Returns: The keywords to set on the AdManagerRequest
      */
     public func getKeywords(ad: NimbusAd) -> String? {
         String((ad.bidInCents - (ad.bidInCents % step)).nimbusClamped(to: min...max))
