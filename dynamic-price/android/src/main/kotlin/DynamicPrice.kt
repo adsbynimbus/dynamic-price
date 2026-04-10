@@ -56,40 +56,8 @@ class LinearPriceMapping(vararg val granularities: LinearPriceGranularity) :
         o1.min - o2.min
 }
 
-/**
- * Default Mapping for Banner ad units
- *
- * $0.01 increments: $0.01 - $3.00   (ex. na_bid = {1, 2, 3, 4 ... 300})
- * $0.05 increments: $3.00 - $8.00   (ex. na_bid = {300, 305, 310, 315 ... 800})
- * $0.50 increments: $8.00 - $20.00  (ex. na_bid = {800, 850, 900, 950 ... 2000})
- * $1.00 increments: $20.00 - $35.00 (ex. na_bid = {2000, 2100, 2200, 2300 ... 3500})
- */
-@JvmField
-val DEFAULT_BANNER: Mapping = LinearPriceMapping(
-    LinearPriceGranularity(0, 300, 1),
-    LinearPriceGranularity(300, 800, 5),
-    LinearPriceGranularity(800, 2000, 50),
-    LinearPriceGranularity(2000, 3500, 100)
-)
-
-/**
- * Default Mapping for Fullscreen (Interstitial) ad units
- *
- * $0.05 increments: $0.05 - $35.00  (ex. na_bid = {5, 10, 15, 20 ... 3500})
- * $1.00 increments: $35.00 - $60.00 (ex. na_bid = {3500, 3600, 3700, 3800 ... 6000})
- */
-@JvmField
-val DEFAULT_FULLSCREEN: Mapping = LinearPriceMapping(
-    LinearPriceGranularity(0, 3500, 5),
-    LinearPriceGranularity(3500, 6000, 100)
-)
-
-/** Returns the default Dynamic Price Mappings for a NimbusResponse */
-val NimbusResponse.defaultMapping
-    get() = if (isInterstitial()) DEFAULT_FULLSCREEN else DEFAULT_BANNER
-
 /** Returns a targeting map that must be applied for Dynamic Price to function properly */
-fun NimbusResponse.targetingMap(mapping: Mapping = defaultMapping): Map<String, String> = mapOf(
+fun NimbusResponse.targetingMap(mapping: Mapping): Map<String, String> = mapOf(
     ID_KEY to bid.auction_id,
     SIZE_KEY to  "${bid.width}x${bid.height}",
     TYPE_KEY to if (bid.type == "video") "video" else "static",

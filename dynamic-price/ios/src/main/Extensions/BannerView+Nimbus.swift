@@ -43,11 +43,11 @@ extension AdManagerBannerView {
     /// - Parameters:
     ///     - ad: NimbusAd to render if Nimbus wins
     ///     - gamRequest: Instance of GAMRequest
-    ///     - mapping: Default is `LinearPriceMapping.banner()`
+    ///     - mapping: Mapping to line items in Ad Manager
     public func loadDynamicPrice(
         gamRequest: AdManagerRequest,
         ad: NimbusAd? = nil,
-        mapping: LinearPriceMapping = .banner()
+        mapping: LinearPriceMapping,
     ) {
         if !gamRequest.hasDynamicPrice {
             ad?.applyDynamicPrice(into: gamRequest, mapping: mapping)

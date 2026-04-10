@@ -13,10 +13,20 @@ import XCTest
 
 class NimbusAdTargetingTests: XCTestCase {
     
+    let mapping = LinearPriceMapping(
+        granularities: [
+            LinearPriceGranularity(min: 0, max: 300, step: 1),
+            LinearPriceGranularity(min: 300, max: 800, step: 5),
+            LinearPriceGranularity(min: 800, max: 2000, step: 50),
+            LinearPriceGranularity(min: 2000, max: 3500, step: 100)
+        ]
+    )
+
+    
     func test_keywordsPresent_static() {
         let ad = createNimbusAd(type: .static)
         let request = AdManagerRequest()
-        ad.applyDynamicPrice(into: request)
+        ad.applyDynamicPrice(into: request, mapping: mapping)
 
         XCTAssertEqual(request.customTargeting?["na_id"] as! String, ad.auctionId)
         XCTAssertEqual(request.customTargeting?["na_network"] as! String, ad.network)
@@ -30,7 +40,6 @@ class NimbusAdTargetingTests: XCTestCase {
         let ad = createNimbusAd(type: .video, dimensPresent: false)
         let request = AdManagerRequest()
         
-        let mapping = LinearPriceMapping.banner()
         ad.applyDynamicPrice(into: request, mapping: mapping)
 
         XCTAssertEqual(request.customTargeting?["na_id"] as! String, ad.auctionId)
@@ -46,8 +55,7 @@ class NimbusAdTargetingTests: XCTestCase {
         let request = AdManagerRequest()
         request.customTargeting = [:]
         request.customTargeting?["test_key"] = "test_value"
-
-        let mapping = LinearPriceMapping.banner()
+        
         ad.applyDynamicPrice(into: request, mapping: mapping)
 
         XCTAssertEqual(request.customTargeting?["na_id"] as! String, ad.auctionId)
@@ -65,7 +73,6 @@ class NimbusAdTargetingTests: XCTestCase {
         let request = AdManagerRequest()
         request.customTargeting = [:]
         
-        let mapping = LinearPriceMapping.banner()
         ad.applyDynamicPrice(into: request, mapping: mapping)
         
         XCTAssertEqual(request.customTargeting?["na_bid"] as! String, "0")
@@ -80,7 +87,6 @@ class NimbusAdTargetingTests: XCTestCase {
         let request = AdManagerRequest()
         request.customTargeting = [:]
         
-        let mapping = LinearPriceMapping.banner()
         ad.applyDynamicPrice(into: request, mapping: mapping)
         
         XCTAssertEqual(request.customTargeting?["na_bid_video"] as! String, "0")

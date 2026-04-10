@@ -15,7 +15,7 @@ public extension NimbusAd {
     /// - Parameters:
     ///   - request: GAMRequest to add keywords to
     ///   - mapping: A mapping composed of multiple LinearPriceGranularities in ascending order. Default: LinearPriceMapping.banner()
-    func applyDynamicPrice(into request: AdManagerRequest, mapping: LinearPriceMapping = .banner()) {
+    func applyDynamicPrice(into request: AdManagerRequest, mapping: LinearPriceMapping) {
         applyDynamicPrice(into: request, keywords: mapping.getKeywords(ad: self))
     }
 }
