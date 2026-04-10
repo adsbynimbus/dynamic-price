@@ -6,8 +6,7 @@
 //  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-@_exported import NimbusRequestKit
-import Foundation
+import NimbusKit
 
 /// Provides a mapping from a Nimbus response to keywords
 public protocol DynamicPriceMapping {

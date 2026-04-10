@@ -6,7 +6,7 @@
 //  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-@_exported import NimbusRequestKit
+import NimbusKit
 
 /**
  * A mapping using a linear step function to generate the keywords

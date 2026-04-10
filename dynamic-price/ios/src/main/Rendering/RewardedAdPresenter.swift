@@ -7,8 +7,8 @@
 //
 
 import Foundation
-import NimbusKit
 import GoogleMobileAds
+import NimbusKit
 
 public protocol RewardedAdPresenterDelegate: AnyObject {
     func didTriggerImpression()
@@ -118,7 +118,7 @@ public final class RewardedAdPresenter {
 
 /// :nodoc:
 extension RewardedAdPresenter: AdControllerDelegate {
-    public func didReceiveNimbusEvent(controller: NimbusCoreKit.AdController, event: NimbusCoreKit.NimbusEvent) {
+    public func didReceiveNimbusEvent(controller: AdController, event: NimbusEvent) {
         switch event {
         case .impression:
             delegate?.didTriggerImpression()
@@ -142,7 +142,7 @@ extension RewardedAdPresenter: AdControllerDelegate {
         }
     }
     
-    public func didReceiveNimbusError(controller: NimbusCoreKit.AdController, error: NimbusCoreKit.NimbusError) {
+    public func didReceiveNimbusError(controller: AdController, error: NimbusError) {
         delegate?.didReceiveError(error: error)
     }
 }

@@ -7,7 +7,7 @@
 //
 
 import GoogleMobileAds
-import NimbusCoreKit
+import NimbusKit
 
 public extension AdLoader {
     private static var nimbusAdKey: Void?

@@ -7,8 +7,8 @@
 //
 
 @testable import DynamicPrice
-import NimbusKit
 import GoogleMobileAds
+import NimbusKit
 import XCTest
 
 class NimbusAdTargetingTests: XCTestCase {

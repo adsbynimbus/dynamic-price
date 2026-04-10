@@ -7,8 +7,7 @@
 //
 
 import GoogleMobileAds
-import NimbusCoreKit
-import NimbusRenderKit
+import NimbusKit
 
 extension InterstitialAd {
     private static var nimbusAdKey: Void?
