@@ -1,19 +1,33 @@
 //
-//  NimbusGAMLinearPriceMapping.swift
-//  NimbusGAMKit
+//  LinearPriceMapping.swift
+//  DynamicPrice
 //
 //  Created on 12/10/20.
-//  Copyright © 2020 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 @_exported import NimbusRequestKit
 import Foundation
 
+/// Provides a mapping from a Nimbus response to keywords
+public protocol DynamicPriceMapping {
+
+    /**
+     The keyword to be inserted
+     
+     - Parameters:
+     - ad: An ad from Nimbus
+     
+     - Returns: The keywords to set
+     */
+    func getKeywords(ad: NimbusAd) -> String?
+}
+
 /// A mapping composed of multiple LinearPriceGranularities in ascending order
-public struct NimbusGAMLinearPriceMapping: NimbusDynamicPriceMapping {
+public struct LinearPriceMapping: DynamicPriceMapping {
     
     /// The granularities used in this mapping
-    let granularities: [NimbusGAMLinearPriceGranularity]
+    let granularities: [LinearPriceGranularity]
     
     /**
      Constructs a new `LinearPriceMapping`
@@ -21,7 +35,7 @@ public struct NimbusGAMLinearPriceMapping: NimbusDynamicPriceMapping {
      - Parameters:
      -  granularities: the granularities to use
      */
-    public init(granularities: [NimbusGAMLinearPriceGranularity]) {
+    public init(granularities: [LinearPriceGranularity]) {
         self.granularities = granularities.sorted()
     }
     
@@ -50,13 +64,13 @@ public struct NimbusGAMLinearPriceMapping: NimbusDynamicPriceMapping {
      * $0.50 increments: $8.00 - $20.00  (ex. na_bid = {800, 850, 900, 950 ... 2000})
      * $1.00 increments: $20.00 - $35.00 (ex. na_bid = {2000, 2100, 2200, 2300 ... 3500})
      */
-    public static func banner() -> NimbusGAMLinearPriceMapping {
-        NimbusGAMLinearPriceMapping(
+    public static func banner() -> LinearPriceMapping {
+        LinearPriceMapping(
             granularities: [
-                NimbusGAMLinearPriceGranularity(min: 0, max: 300, step: 1),
-                NimbusGAMLinearPriceGranularity(min: 300, max: 800, step: 5),
-                NimbusGAMLinearPriceGranularity(min: 800, max: 2000, step: 50),
-                NimbusGAMLinearPriceGranularity(min: 2000, max: 3500, step: 100)
+                LinearPriceGranularity(min: 0, max: 300, step: 1),
+                LinearPriceGranularity(min: 300, max: 800, step: 5),
+                LinearPriceGranularity(min: 800, max: 2000, step: 50),
+                LinearPriceGranularity(min: 2000, max: 3500, step: 100)
             ]
         )
     }
@@ -67,11 +81,11 @@ public struct NimbusGAMLinearPriceMapping: NimbusDynamicPriceMapping {
      * $0.05 increments: $0.05 - $35.00  (ex. na_bid = {5, 10, 15, 20 ... 3500})
      * $1.00 increments: $35.00 - $60.00 (ex. na_bid = {3500, 3600, 3700, 3800 ... 6000})
      */
-    public static func fullscreen() -> NimbusGAMLinearPriceMapping {
-        NimbusGAMLinearPriceMapping(
+    public static func fullscreen() -> LinearPriceMapping {
+        LinearPriceMapping(
             granularities: [
-                NimbusGAMLinearPriceGranularity(min: 0, max: 3500, step: 5),
-                NimbusGAMLinearPriceGranularity(min: 3500, max: 6000, step: 100)
+                LinearPriceGranularity(min: 0, max: 3500, step: 5),
+                LinearPriceGranularity(min: 3500, max: 6000, step: 100)
             ]
         )
     }

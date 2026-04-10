@@ -1,9 +1,9 @@
 //
-//  NimbusGAMLinearPriceGranularity.swift
-//  NimbusGAMKit
+//  LinearPriceGranularity.swift
+//  DynamicPrice
 //
 //  Created on 10/21/20.
-//  Copyright © 2020 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 @_exported import NimbusRequestKit
@@ -12,7 +12,7 @@
  * A mapping using a linear step function to generate the keywords
  * By default, this class will map to a keyword of "nimbus{width}_{height}:{bucket}" i.e nimbus320_50:500 for a bid at 5 dollars.
  */
-public struct NimbusGAMLinearPriceGranularity: NimbusDynamicPriceMapping, Comparable, Equatable {
+public struct LinearPriceGranularity: DynamicPriceMapping, Comparable, Equatable {
     
     /// The minimum bid in cents
     public let min: Int
@@ -24,7 +24,7 @@ public struct NimbusGAMLinearPriceGranularity: NimbusDynamicPriceMapping, Compar
     public let step: Int
     
     /**
-     Constructs a new `NimbusGAMLinearPriceGranularity`
+     Constructs a new `LinearPriceGranularity`
      
      - Parameters:
      - min: The minimum bid in cents
@@ -38,7 +38,7 @@ public struct NimbusGAMLinearPriceGranularity: NimbusDynamicPriceMapping, Compar
     }
     
     /**
-     Constructs a new `NimbusGAMLinearPriceGranularity`
+     Constructs a new `LinearPriceGranularity`
      
      - Parameters:
      - min: The minimum bid in cents
@@ -61,7 +61,7 @@ public struct NimbusGAMLinearPriceGranularity: NimbusDynamicPriceMapping, Compar
     }
     
     /// :nodoc:
-    public static func < (lhs: NimbusGAMLinearPriceGranularity, rhs: NimbusGAMLinearPriceGranularity) -> Bool {
+    public static func < (lhs: LinearPriceGranularity, rhs: LinearPriceGranularity) -> Bool {
         lhs.min < rhs.min
     }
     

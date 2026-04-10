@@ -1,8 +1,9 @@
 //
-//  GAMBannerView+Nimbus.swift
-//  Nimbus
+//  BannerView+Nimbus.swift
+//  DynamicPrice
+//
 //  Created on 2/26/24
-//  Copyright © 2024 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import GoogleMobileAds
@@ -11,12 +12,12 @@ import NimbusKit
 extension AdManagerBannerView {
     private static var nimbusBannerAdKey: Void?
     
-    private var nimbusBannerAd: NimbusDynamicPriceBannerAd? {
+    private var nimbusBannerAd: DynamicPriceBannerAd? {
         get {
             objc_getAssociatedObject(
                 self, 
                 &Self.nimbusBannerAdKey
-            ) as? NimbusDynamicPriceBannerAd
+            ) as? DynamicPriceBannerAd
         }
         set {
             objc_setAssociatedObject(
@@ -42,11 +43,11 @@ extension AdManagerBannerView {
     /// - Parameters:
     ///     - ad: NimbusAd to render if Nimbus wins
     ///     - gamRequest: Instance of GAMRequest
-    ///     - mapping: Default is `NimbusGAMLinearPriceMapping.banner()`
+    ///     - mapping: Default is `LinearPriceMapping.banner()`
     public func loadDynamicPrice(
         gamRequest: AdManagerRequest,
         ad: NimbusAd? = nil,
-        mapping: NimbusGAMLinearPriceMapping = .banner()
+        mapping: LinearPriceMapping = .banner()
     ) {
         if !gamRequest.hasDynamicPrice {
             ad?.applyDynamicPrice(into: gamRequest, mapping: mapping)
@@ -85,7 +86,7 @@ extension AdManagerBannerView {
             return
         }
         
-        nimbusBannerAd = NimbusDynamicPriceBannerAd(
+        nimbusBannerAd = DynamicPriceBannerAd(
             ad: ad,
             bannerView: self
         )

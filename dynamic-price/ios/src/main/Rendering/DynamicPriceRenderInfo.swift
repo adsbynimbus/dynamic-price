@@ -1,16 +1,16 @@
 //
-//  NimbusDynamicPriceRenderInfo.swift
-//  NimbusGAMKit
+//  DynamicPriceRenderInfo.swift
+//  DynamicPrice
 //
 //  Created on 23/04/23.
-//  Copyright © 2023 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import Foundation
 import NimbusCoreKit
 
 /// :nodoc:
-struct NimbusDynamicPriceRenderInfo: Codable {
+struct DynamicPriceRenderInfo: Codable {
     let auctionId: String
     let googleClickEventUrl: URL
     
@@ -34,7 +34,7 @@ struct NimbusDynamicPriceRenderInfo: Codable {
         }
         
         do {
-            self = try JSONDecoder().decode(NimbusDynamicPriceRenderInfo.self, from: data)
+            self = try JSONDecoder().decode(DynamicPriceRenderInfo.self, from: data)
         } catch {
             Nimbus.shared.logger.log("\(error)", level: .error)
             return nil
