@@ -1,5 +1,6 @@
+import DynamicPrice
 import GoogleMobileAds
-@preconcurrency import DynamicPrice
+import NimbusKit
 import SwiftUI
 
 @MainActor

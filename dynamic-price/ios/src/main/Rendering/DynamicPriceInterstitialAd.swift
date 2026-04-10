@@ -120,7 +120,7 @@ extension DynamicPriceInterstitialAd: AdControllerDelegate {
         }
     }
     
-    func didReceiveNimbusError(controller: AdController, error: NimbusCoreKit.NimbusError) {
+    func didReceiveNimbusError(controller: AdController, error: NimbusError) {
         if let gadInterstitialAd {
             gadInterstitialAd.fullScreenContentDelegate?.ad?(gadInterstitialAd, didFailToPresentFullScreenContentWithError: error)
             dismiss()

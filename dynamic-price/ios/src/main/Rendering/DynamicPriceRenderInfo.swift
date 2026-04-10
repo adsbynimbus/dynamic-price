@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import NimbusCoreKit
+import NimbusKit
 
 /// :nodoc:
 struct DynamicPriceRenderInfo: Codable {

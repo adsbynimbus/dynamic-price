@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import NimbusCoreKit
+import NimbusKit
 
 extension URLSession {
     static func trackClick(url: URL, logger: Logger) {

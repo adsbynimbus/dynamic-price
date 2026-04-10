@@ -6,8 +6,7 @@
 //  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-@_exported import NimbusRequestKit
-import Foundation
+import NimbusKit
 
 /// Provides a mapping from a Nimbus response to keywords
 public protocol DynamicPriceMapping {
@@ -24,7 +23,7 @@ public protocol DynamicPriceMapping {
 }
 
 /// A mapping composed of multiple LinearPriceGranularities in ascending order
-public struct LinearPriceMapping: DynamicPriceMapping {
+public struct LinearPriceMapping: DynamicPriceMapping, Sendable {
     
     /// The granularities used in this mapping
     let granularities: [LinearPriceGranularity]

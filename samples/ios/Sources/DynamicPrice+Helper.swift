@@ -1,4 +1,5 @@
-@preconcurrency import DynamicPrice
+@preconcurrency import NimbusKit
+import DynamicPrice
 import SwiftUI
 
 extension DynamicPriceApp {
@@ -35,6 +36,7 @@ extension NimbusRequestManager {
         }
     }
 
+    @MainActor
     func makeRequest(_ request: NimbusRequest) async throws -> NimbusAd {
         let listener = RequestListener()
         delegate = listener
