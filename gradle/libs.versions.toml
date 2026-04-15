@@ -1,31 +1,57 @@
 [versions]
 android = "9.0.1"
-dokka = "2.2.0-Beta"
-kotlin = "2.3.10"
+dokka = "2.2.0"
+kotlin = "2.3.20"
 
 ads-google = "24.1.0"
-ads-nimbus = "2.35.2"
+ads-nimbus = "2.35.3"
 
-androidx-core = "1.17.0"
+androidx-activity = "1.13.0"
+androidx-compose = "2026.03.01"
+androidx-core = "1.18.0"
+androidx-lifecycle = "2.10.0"
+androidx-navigation = "2.9.7"
+androidx-startup = "1.2.0"
 mockk = "1.14.9"
-okio = "3.16.4"
+okio = "3.17.0"
 
 [plugins]
+android-app = { id = "com.android.application", version.ref = "android" }
 android-library = { id = "com.android.library", version.ref = "android" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 dokka-javadoc = { id = "org.jetbrains.dokka-javadoc", version.ref = "dokka" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
 [libraries]
 ads-google = { module = "com.google.android.gms:play-services-ads", version.ref = "ads-google" }
 ads-nimbus = { module = "com.adsbynimbus.android:nimbus", version.ref = "ads-nimbus" }
+androidx-compose = { module = "androidx.compose:compose-bom", version.ref = "androidx-compose" }
+androidx-compose-activity = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
+androidx-compose-icons-core = { module = "androidx.compose.material:material-icons-core" }
+androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
+androidx-compose-navigation = { module = "androidx.navigation:navigation-compose", version.ref = "androidx-navigation" }
+androidx-compose-ui = { module = "androidx.compose.ui:ui" }
+androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
+androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-core = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
+androidx-lifecycle = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
+androidx-startup = { module = "androidx.startup:startup-runtime", version.ref = "androidx-startup" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 
 [bundles]
+androidx-compose = [
+    "androidx-compose-activity",
+    "androidx-compose-icons-core",
+    "androidx-compose-material3",
+    "androidx-compose-navigation",
+    "androidx-compose-ui",
+    "androidx-compose-ui-tooling",
+    "androidx-compose-ui-tooling-preview",
+]
 test-unit = [
     "kotlin-test",
     "mockk",
