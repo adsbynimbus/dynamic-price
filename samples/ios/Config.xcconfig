@@ -1,0 +1,6 @@
+API_KEY=
+PUBLISHER_KEY=
+ADMANAGER_APP_ID=
+ADMANAGER_ADUNIT_ID=
+
+#include? "local.xcconfig" // Overrides can be defined in this file
