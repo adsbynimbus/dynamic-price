@@ -23,7 +23,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import androidx.startup.Initializer
 import com.adsbynimbus.Nimbus
+import com.adsbynimbus.internal.Platform
 import com.adsbynimbus.render.Renderer
+import java.lang.ref.WeakReference
 import kotlin.time.measureTime
 
 class AppInitializer : Initializer<Unit> {
@@ -43,13 +45,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        Platform.currentActivity = WeakReference(this)
         setContent {
             NimbusTheme {
                 App(this)
             }
         }
-        // Remove broken test_demand renderer
-        Renderer.INLINE.remove("test_demand")
     }
 }
 
