@@ -47,7 +47,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "dynamic-price"
 
-include("android")
-project(":android").projectDir = layout.rootDirectory.file("samples/android").asFile
-include("dynamicprice")
-project(":dynamicprice").projectDir = layout.rootDirectory.file("dynamic-price/android").asFile
+include("android-samples")
+project(":android-samples").projectDir = layout.rootDirectory.file("samples/android").asFile
+include("android-library")
+project(":android-library").projectDir = layout.rootDirectory.file("dynamic-price/android").asFile
