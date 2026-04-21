@@ -8,23 +8,31 @@
 
 @testable import DynamicPrice
 import GoogleMobileAds
-import XCTest
+import NimbusKit
+import Testing
 
-class NimbusAdTargetingTests: XCTestCase {
+@Suite(.serialized) struct NimbusAdTargetingTests {
 
+    let mapping = NimbusGAMLinearPriceMapping(
+        granularities: [NimbusGAMLinearPriceGranularity(min: 0, max: 300, step: 1)]
+    )
+
+    @Test("keywords present static")
     func test_keywordsPresent_static() {
         let ad = createNimbusAd(type: .static)
         let request = AdManagerRequest()
         ad.applyDynamicPrice(into: request)
 
-        XCTAssertEqual(request.customTargeting?["na_id"] as! String, ad.auctionId)
-        XCTAssertEqual(request.customTargeting?["na_network"] as! String, ad.network)
-        XCTAssertEqual(request.customTargeting?["na_size"] as! String, "\(ad.adDimensions!.width)x\(ad.adDimensions!.height)")
-        XCTAssertEqual(request.customTargeting?["na_type"] as! String, NimbusAuctionType.static.rawValue)
-        XCTAssertNil(request.customTargeting?["na_bid_video"])
-        XCTAssertNil(request.customTargeting?["na_duration"])
+        #expect(request.customTargeting?["na_id"] as? String == ad.auctionId)
+        #expect(request.customTargeting?["na_bid"] as? String == mapping.getKeywords(ad: ad))
+        #expect(request.customTargeting?["na_network"] as? String == ad.network)
+        #expect(request.customTargeting?["na_size"] as? String == "\(ad.adDimensions!.width)x\(ad.adDimensions!.height)")
+        #expect(request.customTargeting?["na_type"] as? String == NimbusAuctionType.static.rawValue)
+        #expect(request.customTargeting?["na_bid_video"] == nil)
+        #expect(request.customTargeting?["na_duration"] == nil)
     }
 
+    @Test("keywords present video")
     func test_keywordsPresent_video() {
         let ad = createNimbusAd(type: .video, dimensPresent: false)
         let request = AdManagerRequest()
@@ -32,14 +40,15 @@ class NimbusAdTargetingTests: XCTestCase {
         let mapping = NimbusGAMLinearPriceMapping.banner()
         ad.applyDynamicPrice(into: request, mapping: mapping)
 
-        XCTAssertEqual(request.customTargeting?["na_id"] as! String, ad.auctionId)
-        XCTAssertEqual(request.customTargeting?["na_network"] as! String, ad.network)
-        XCTAssertEqual(request.customTargeting?["na_size"] as! String, "0x0")
-        XCTAssertEqual(request.customTargeting?["na_bid_video"] as? String, mapping.getKeywords(ad: ad))
-        XCTAssertEqual(request.customTargeting?["na_duration"] as! String, String(ad.duration ?? -1))
-        XCTAssertEqual(request.customTargeting?["na_type"] as! String, NimbusAuctionType.video.rawValue)
+        #expect(request.customTargeting?["na_id"] as? String == ad.auctionId)
+        #expect(request.customTargeting?["na_network"] as? String == ad.network)
+        #expect(request.customTargeting?["na_size"] as? String == "0x0")
+        #expect(request.customTargeting?["na_bid_video"] as? String == mapping.getKeywords(ad: ad))
+        #expect(request.customTargeting?["na_duration"] as? String == String(ad.duration!))
+        #expect(request.customTargeting?["na_type"] as? String == NimbusAuctionType.video.rawValue)
     }
 
+    @Test("keywords present existing keywords")
     func test_keywordsPresent_existingKeywords() {
         let ad = createNimbusAd(type: .static)
         let request = AdManagerRequest()
@@ -49,15 +58,16 @@ class NimbusAdTargetingTests: XCTestCase {
         let mapping = NimbusGAMLinearPriceMapping.banner()
         ad.applyDynamicPrice(into: request, mapping: mapping)
 
-        XCTAssertEqual(request.customTargeting?["na_id"] as! String, ad.auctionId)
-        XCTAssertEqual(request.customTargeting?["na_network"] as! String, ad.network)
-        XCTAssertEqual(request.customTargeting?["na_size"] as! String, "\(ad.adDimensions!.width)x\(ad.adDimensions!.height)")
-        XCTAssertEqual(request.customTargeting?["na_bid"] as! String, mapping.getKeywords(ad: ad)!)
-        XCTAssertNil(request.customTargeting?["na_duration"])
-        XCTAssertEqual(request.customTargeting?["na_type"] as! String, NimbusAuctionType.static.rawValue)
-        XCTAssertEqual(request.customTargeting?["test_key"] as! String, "test_value")
+        #expect(request.customTargeting?["na_id"] as? String == ad.auctionId)
+        #expect(request.customTargeting?["na_network"] as? String == ad.network)
+        #expect(request.customTargeting?["na_size"] as? String == "\(ad.adDimensions!.width)x\(ad.adDimensions!.height)")
+        #expect(request.customTargeting?["na_bid"] as? String == "200")
+        #expect(request.customTargeting?["na_duration"] == nil)
+        #expect(request.customTargeting?["na_type"] as? String == NimbusAuctionType.static.rawValue)
+        #expect(request.customTargeting?["test_key"] as? String == "test_value")
     }
 
+    @Test("static ad keywords override in test mode")
     func test_static_ad_keywords_override_in_test_mode() {
         Nimbus.shared.testMode = true
         let ad = createNimbusAd(type: .static)
@@ -66,13 +76,14 @@ class NimbusAdTargetingTests: XCTestCase {
 
         let mapping = NimbusGAMLinearPriceMapping.banner()
         ad.applyDynamicPrice(into: request, mapping: mapping)
-
-        XCTAssertEqual(request.customTargeting?["na_bid"] as! String, "0")
-        XCTAssertNil(request.customTargeting?["na_bid_video"])
-
+        
+        #expect(request.customTargeting?["na_bid"] as? String == "0")
+        #expect(request.customTargeting?["na_bid_video"] == nil)
+        
         Nimbus.shared.testMode = false
     }
-
+    
+    @Test("video ad keywords override in test mode")
     func test_video_ad_keywords_override_in_test_mode() {
         Nimbus.shared.testMode = true
         let ad = createNimbusAd(type: .video)
@@ -81,9 +92,9 @@ class NimbusAdTargetingTests: XCTestCase {
 
         let mapping = NimbusGAMLinearPriceMapping.banner()
         ad.applyDynamicPrice(into: request, mapping: mapping)
-
-        XCTAssertEqual(request.customTargeting?["na_bid_video"] as! String, "0")
-        XCTAssertNil(request.customTargeting?["na_bid"])
+        
+        #expect(request.customTargeting?["na_bid_video"] as? String == "0")
+        #expect(request.customTargeting?["na_bid"] == nil)
 
         Nimbus.shared.testMode = false
     }
