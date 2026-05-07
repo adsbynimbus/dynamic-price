@@ -39,10 +39,6 @@ android {
         withSourcesJar()
     }
 
-    sourceSets.configureEach {
-        java.srcDirs("src/$name/kotlin")
-    }
-
     testOptions {
         unitTests.all {
             it.useJUnitPlatform()
