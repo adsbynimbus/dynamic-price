@@ -1,0 +1,53 @@
+version: 2
+
+registries:
+  github-maven:
+    type: maven-repository
+    url: https://maven.pkg.github.com
+    username: ${{ secrets.USER }}
+    password: ${{ secrets.GHP }}
+
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "gradle"
+    directory: "/"
+    registries: "*"
+    schedule:
+      interval: "daily"
+    groups:
+      ads:
+        patterns:
+          - "com.adsbynimbus*"
+          - "com.amazon*"
+          - "*play-services-ads"
+          - "*ads-mobile-sdk"
+          - "com.iabtcf*"
+
+  - package-ecosystem: "gradle"
+    directory: "/"
+    registries: "*"
+    schedule:
+      interval: "weekly"
+      build:
+        patterns:
+          - "com.android.library"
+          - "org.jetbrains.kotlin*"
+          - "org.jetbrains.dokka"
+          - "com.google.devtools.ksp"
+      app:
+        patterns:
+          - "org.jetbrains.compose*"
+          - "androidx.*"
+          - "*compose"
+      test:
+        patterns:
+          - "org.jetbrains.*"
+          - "io.kotest*"
+          - "io.mockk*"
+      libs:
+        patterns:
+          - "*"
