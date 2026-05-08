@@ -39,10 +39,6 @@ android {
         withSourcesJar()
     }
 
-    sourceSets.configureEach {
-        java.srcDirs("src/$name/kotlin")
-    }
-
     testOptions {
         unitTests.all {
             it.useJUnitPlatform()
@@ -59,7 +55,11 @@ kotlin {
 }
 
 dependencies {
-    api(libs.ads.google)
+    api(libs.ads.google) {
+        version {
+            require("24.5.0") // To be used for publishing
+        }
+    }
     api(libs.ads.nimbus)
     testImplementation(libs.bundles.test.unit)
 
@@ -68,12 +68,6 @@ dependencies {
             version {
                 require("[1.13.0,)")
                 because("BundleCompat.getSerializable added in 1.13.0")
-            }
-        }
-        implementation(libs.okio) {
-            version {
-                require("[3.4.0,)")
-                because("Addresses CVE-2023-3635 reported on Okio 3.2.0")
             }
         }
     }

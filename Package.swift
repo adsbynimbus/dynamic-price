@@ -10,7 +10,7 @@ let package = Package(
             targets: ["NimbusDynamicPrice"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/adsbynimbus/nimbus-ios-sdk", from: "2.32.5"),
+        .package(url: "https://github.com/adsbynimbus/nimbus-ios-sdk", from: "2.34.0"),
         .package(url: "https://github.com/googleads/swift-package-manager-google-mobile-ads", "12.0.0"..<"14.0.0"),
     ],
     targets: [
