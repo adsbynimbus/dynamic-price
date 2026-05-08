@@ -55,7 +55,11 @@ kotlin {
 }
 
 dependencies {
-    api(libs.ads.google)
+    api(libs.ads.google) {
+        version {
+            require("24.5.0") // To be used for publishing
+        }
+    }
     api(libs.ads.nimbus)
     testImplementation(libs.bundles.test.unit)
 
