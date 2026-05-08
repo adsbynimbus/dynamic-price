@@ -1,0 +1,79 @@
+name: Build
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '55 23 * * 6'
+
+permissions:
+  contents: write
+  packages: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+defaults:
+  run:
+    shell: bash
+env:
+  NSUnbufferedIO: YES
+
+jobs:
+  gradle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '25'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          dependency-graph: generate-and-submit
+      - name: Build
+        run: ./gradlew assemble
+      - name: Test
+        run: ./gradlew check
+      - name: Upload reports
+        uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: android-reports
+          path: '**/build/reports/'
+
+  xcodebuild:
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+      - name: Setup Xcode
+        id: xcodebuild
+        uses: ./.github/actions/xcodebuild
+      - name: Build
+        run: xcodebuild -scheme DynamicPrice ${{ steps.xcodebuild.outputs.options }}
+        working-directory: samples/ios
+      - name: Test
+        run: xcodebuild test -scheme dynamic-price ${{ steps.xcodebuild.outputs.options }}
+      - name: Cache DerivedData
+        uses: actions/cache/save@v5
+        if: ${{ github.ref == 'refs/heads/main' && steps.xcodebuild.outcome.build-cache-hit != 'true' }}
+        with:
+          path: |
+            ~/Library/Developer/Xcode/DerivedData
+            !~/Library/Developer/Xcode/DerivedData/**/Logs/**
+            !**/*.xcbuilddata
+          key: ${{ steps.xcodebuild.outputs.build-cache-key }}
+      - name: Upload reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ios-reports
+          path: '~/Library/Developer/Xcode/DerivedData/**/Logs/'

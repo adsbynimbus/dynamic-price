@@ -5,6 +5,11 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+val githubActions = providers.environmentVariable("GITHUB_ACTIONS")
+androidComponents.beforeVariants {
+    it.enable = it.name.contains("release", ignoreCase = true) || !githubActions.isPresent
+}
+
 android {
     compileSdk = 36
     namespace = "com.adsbynimbus.dynamicprice.sample"

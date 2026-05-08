@@ -18,6 +18,11 @@ val dokkaHtmlJar by tasks.registering(Jar::class) {
     from(tasks.dokkaGeneratePublicationHtml.flatMap { it.outputDirectory })
 }
 
+val githubActions = providers.environmentVariable("GITHUB_ACTIONS")
+androidComponents.beforeVariants {
+    it.enable = it.name.contains("release", ignoreCase = true) || !githubActions.isPresent
+}
+
 android {
     namespace = "com.adsbynimbus.google"
     compileSdk = 36
