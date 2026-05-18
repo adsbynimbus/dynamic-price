@@ -7,6 +7,12 @@ registries:
     username: ${{ secrets.USER }}
     password: ${{ secrets.GHP }}
 
+multi-ecosystem-groups:
+  ads:
+    target-branch: "ads/update"
+    schedule:
+      interval: "daily"
+
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -16,22 +22,20 @@ updates:
   - package-ecosystem: "gradle"
     directory: "/"
     registries: "*"
-    schedule:
-      interval: "daily"
-    groups:
-      ads:
-        patterns:
-          - "com.adsbynimbus*"
-          - "com.amazon*"
-          - "*play-services-ads"
-          - "*ads-mobile-sdk"
-          - "com.iabtcf*"
+    multi-ecosystem-group: "ads"
+    patterns:
+      - "com.adsbynimbus*"
+      - "com.amazon*"
+      - "*play-services-ads"
+      - "*ads-mobile-sdk"
+      - "com.iabtcf*"
 
   - package-ecosystem: "gradle"
     directory: "/"
     registries: "*"
     schedule:
       interval: "weekly"
+    groups:
       build:
         patterns:
           - "com.android.library"
@@ -51,3 +55,8 @@ updates:
       libs:
         patterns:
           - "*"
+
+  - package-ecosystem: "swift"
+    directory: "/"
+    multi-ecosystem-group: "ads"
+    patterns: ["*"]
