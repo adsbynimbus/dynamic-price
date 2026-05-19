@@ -6,20 +6,20 @@
 //  Copyright © 2020 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-@testable import NimbusDynamicPrice
+@testable import DynamicPrice
 import GoogleMobileAds
 import NimbusKit
 import XCTest
 
 final class NimbusGAMDynamicPriceTests: XCTestCase {
-    
+
     private let bannerView = AdManagerBannerView(adSize: AdSizeBanner)
-    
+
     override func setUp() {
         super.setUp()
         bannerView.adUnitID = "adUnitId"
     }
-    
+
     func test_init() {
         let linearPriceGran = NimbusGAMLinearPriceGranularity(min: 10, max: 200)
         XCTAssertEqual(linearPriceGran.min, 10)
@@ -133,7 +133,7 @@ final class NimbusGAMDynamicPriceTests: XCTestCase {
         )
         XCTAssertNil(request.customTargeting)
     }
-    
+
     private func createNimbusAd(
         type: NimbusAuctionType = .static,
         dimensPresent: Bool = true

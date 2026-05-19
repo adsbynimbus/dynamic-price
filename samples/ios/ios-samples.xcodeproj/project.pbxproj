@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		968D6A0E2F90565E00798709 /* NimbusDynamicPrice in Frameworks */ = {isa = PBXBuildFile; productRef = 968D6A0D2F90565E00798709 /* NimbusDynamicPrice */; };
+		96AE441F2FBC95F800A45B7F /* DynamicPrice in Frameworks */ = {isa = PBXBuildFile; productRef = 96AE441E2FBC95F800A45B7F /* DynamicPrice */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		963ECC312CEB6354001C3012 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = SOURCE_ROOT; };
 		963ECC342CEB64A9001C3012 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		96CD481F2D679BF70029C2B5 /* DynamicPrice.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = DynamicPrice.app; path = "/Users/jason/Work/dynamic-price/samples/ios/build/Debug-iphoneos/DynamicPrice.app"; sourceTree = "<absolute>"; };
+		969D9D9F2FBC8C3D0023D3E1 /* ios-samples.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ios-samples.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -28,7 +28,7 @@
 		961CA66B2CEA91D40084BE6A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
-				968D6A0E2F90565E00798709 /* NimbusDynamicPrice in Frameworks */,
+				96AE441F2FBC95F800A45B7F /* DynamicPrice in Frameworks */,
 			);
 		};
 /* End PBXFrameworksBuildPhase section */
@@ -40,15 +40,16 @@
 				961CA6AD2CEA95C30084BE6A /* Sources */,
 				963ECC312CEB6354001C3012 /* Config.xcconfig */,
 				963ECC342CEB64A9001C3012 /* Info.plist */,
+				969D9D9F2FBC8C3D0023D3E1 /* ios-samples.app */,
 			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		961CA66D2CEA91D40084BE6A /* DynamicPrice */ = {
+		961CA66D2CEA91D40084BE6A /* ios-samples */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 961CA6922CEA91D50084BE6A /* Build configuration list for PBXNativeTarget "DynamicPrice" */;
+			buildConfigurationList = 961CA6922CEA91D50084BE6A /* Build configuration list for PBXNativeTarget "ios-samples" */;
 			buildPhases = (
 				961CA66A2CEA91D40084BE6A /* Sources */,
 				961CA66B2CEA91D40084BE6A /* Frameworks */,
@@ -58,12 +59,12 @@
 			fileSystemSynchronizedGroups = (
 				961CA6AD2CEA95C30084BE6A /* Sources */,
 			);
-			name = DynamicPrice;
+			name = "ios-samples";
 			packageProductDependencies = (
-				968D6A0D2F90565E00798709 /* NimbusDynamicPrice */,
+				96AE441E2FBC95F800A45B7F /* DynamicPrice */,
 			);
 			productName = OMSDKValidator;
-			productReference = 96CD481F2D679BF70029C2B5 /* DynamicPrice.app */;
+			productReference = 969D9D9F2FBC8C3D0023D3E1 /* ios-samples.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -82,7 +83,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 961CA6692CEA91D40084BE6A /* Build configuration list for PBXProject "DynamicPrice" */;
+			buildConfigurationList = 961CA6692CEA91D40084BE6A /* Build configuration list for PBXProject "ios-samples" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -92,14 +93,14 @@
 			mainGroup = 961CA6652CEA91D40084BE6A;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				968D6A0C2F90565E00798709 /* XCLocalSwiftPackageReference "../../../dynamic-price" */,
+				96978DC42FBC8E17002BD985 /* XCLocalSwiftPackageReference "../../../dynamic-price" */,
 			);
 			preferredProjectObjectVersion = 90;
 			productRefGroup = 961CA6652CEA91D40084BE6A;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				961CA66D2CEA91D40084BE6A /* DynamicPrice */,
+				961CA66D2CEA91D40084BE6A /* ios-samples */,
 			);
 		};
 /* End PBXProject section */
@@ -113,7 +114,7 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		961CA6902CEA91D50084BE6A /* Debug configuration for PBXProject "DynamicPrice" */ = {
+		961CA6902CEA91D50084BE6A /* Debug configuration for PBXProject "ios-samples" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 963ECC312CEB6354001C3012 /* Config.xcconfig */;
 			buildSettings = {
@@ -180,7 +181,7 @@
 			};
 			name = Debug;
 		};
-		961CA6912CEA91D50084BE6A /* Release configuration for PBXProject "DynamicPrice" */ = {
+		961CA6912CEA91D50084BE6A /* Release configuration for PBXProject "ios-samples" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 963ECC312CEB6354001C3012 /* Config.xcconfig */;
 			buildSettings = {
@@ -240,7 +241,7 @@
 			};
 			name = Release;
 		};
-		961CA6932CEA91D50084BE6A /* Debug configuration for PBXNativeTarget "DynamicPrice" */ = {
+		961CA6932CEA91D50084BE6A /* Debug configuration for PBXNativeTarget "ios-samples" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -260,7 +261,7 @@
 			};
 			name = Debug;
 		};
-		961CA6942CEA91D50084BE6A /* Release configuration for PBXNativeTarget "DynamicPrice" */ = {
+		961CA6942CEA91D50084BE6A /* Release configuration for PBXNativeTarget "ios-samples" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -283,35 +284,36 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		961CA6692CEA91D40084BE6A /* Build configuration list for PBXProject "DynamicPrice" */ = {
+		961CA6692CEA91D40084BE6A /* Build configuration list for PBXProject "ios-samples" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				961CA6902CEA91D50084BE6A /* Debug configuration for PBXProject "DynamicPrice" */,
-				961CA6912CEA91D50084BE6A /* Release configuration for PBXProject "DynamicPrice" */,
+				961CA6902CEA91D50084BE6A /* Debug configuration for PBXProject "ios-samples" */,
+				961CA6912CEA91D50084BE6A /* Release configuration for PBXProject "ios-samples" */,
 			);
 			defaultConfigurationName = Release;
 		};
-		961CA6922CEA91D50084BE6A /* Build configuration list for PBXNativeTarget "DynamicPrice" */ = {
+		961CA6922CEA91D50084BE6A /* Build configuration list for PBXNativeTarget "ios-samples" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				961CA6932CEA91D50084BE6A /* Debug configuration for PBXNativeTarget "DynamicPrice" */,
-				961CA6942CEA91D50084BE6A /* Release configuration for PBXNativeTarget "DynamicPrice" */,
+				961CA6932CEA91D50084BE6A /* Debug configuration for PBXNativeTarget "ios-samples" */,
+				961CA6942CEA91D50084BE6A /* Release configuration for PBXNativeTarget "ios-samples" */,
 			);
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		968D6A0C2F90565E00798709 /* XCLocalSwiftPackageReference "../../../dynamic-price" */ = {
+		96978DC42FBC8E17002BD985 /* XCLocalSwiftPackageReference "../../../dynamic-price" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = "../../../dynamic-price";
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		968D6A0D2F90565E00798709 /* NimbusDynamicPrice */ = {
+		96AE441E2FBC95F800A45B7F /* DynamicPrice */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = NimbusDynamicPrice;
+			package = 96978DC42FBC8E17002BD985 /* XCLocalSwiftPackageReference "../../../dynamic-price" */;
+			productName = DynamicPrice;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

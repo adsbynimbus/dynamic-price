@@ -6,7 +6,7 @@
 //  Copyright © 2021 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-@testable import NimbusDynamicPrice
+@testable import DynamicPrice
 import XCTest
 
 final class NimbusGAMLinearPriceMappingTests: XCTestCase {
@@ -31,7 +31,7 @@ final class NimbusGAMLinearPriceMappingTests: XCTestCase {
             NimbusGAMLinearPriceGranularity(min: 2000, max: 3500, step: 100)
         )
     }
-    
+
     func testFullscreenDefault() {
         let mapping = NimbusGAMLinearPriceMapping.fullscreen()
         XCTAssertEqual(mapping.granularities.count, 2)

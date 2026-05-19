@@ -1,6 +1,9 @@
-package com.adsbynimbus.google
+package com.adsbynimbus.google.com.adsbynimbus.google
 
-import kotlin.test.*
+import com.adsbynimbus.google.mapToFormat
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 
 class AdSizeTest {
 

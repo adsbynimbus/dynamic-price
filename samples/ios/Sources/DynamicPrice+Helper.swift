@@ -1,4 +1,4 @@
-@preconcurrency import NimbusDynamicPrice
+@preconcurrency import DynamicPrice
 import SwiftUI
 
 extension DynamicPriceApp {

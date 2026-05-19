@@ -92,7 +92,7 @@ dokka {
         sourceLink {
             localDirectory = layout.projectDirectory.dir("src/$name/kotlin")
             remoteLineSuffix = "#L"
-            remoteUrl("https://github.com/adsbynimbus/dynamic-price/tree/main/android-sdk/src/$name/kotlin")
+            remoteUrl("https://github.com/adsbynimbus/dynamic-price/tree/main/library/android/src/$name/kotlin")
         }
     }
 }

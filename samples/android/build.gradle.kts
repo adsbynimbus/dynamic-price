@@ -58,7 +58,7 @@ kotlin {
 }
 
 dependencies {
-    implementation(projects.dynamicprice)
+    implementation(projects.androidLibrary)
     implementation(platform(libs.androidx.compose))
     implementation(libs.bundles.androidx.compose)
     implementation(libs.androidx.lifecycle)

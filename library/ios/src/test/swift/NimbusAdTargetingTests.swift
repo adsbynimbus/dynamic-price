@@ -6,13 +6,13 @@
 //  Copyright © 2022 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-@testable import NimbusDynamicPrice
+@testable import DynamicPrice
 import NimbusKit
 import GoogleMobileAds
 import XCTest
 
 class NimbusAdTargetingTests: XCTestCase {
-    
+
     func test_keywordsPresent_static() {
         let ad = createNimbusAd(type: .static)
         let request = AdManagerRequest()
@@ -29,7 +29,7 @@ class NimbusAdTargetingTests: XCTestCase {
     func test_keywordsPresent_video() {
         let ad = createNimbusAd(type: .video, dimensPresent: false)
         let request = AdManagerRequest()
-        
+
         let mapping = NimbusGAMLinearPriceMapping.banner()
         ad.applyDynamicPrice(into: request, mapping: mapping)
 
@@ -58,34 +58,34 @@ class NimbusAdTargetingTests: XCTestCase {
         XCTAssertEqual(request.customTargeting?["na_type"] as! String, NimbusAuctionType.static.rawValue)
         XCTAssertEqual(request.customTargeting?["test_key"] as! String, "test_value")
     }
-    
+
     func test_static_ad_keywords_override_in_test_mode() {
         Nimbus.shared.testMode = true
         let ad = createNimbusAd(type: .static)
         let request = AdManagerRequest()
         request.customTargeting = [:]
-        
+
         let mapping = NimbusGAMLinearPriceMapping.banner()
         ad.applyDynamicPrice(into: request, mapping: mapping)
-        
+
         XCTAssertEqual(request.customTargeting?["na_bid"] as! String, "0")
         XCTAssertNil(request.customTargeting?["na_bid_video"])
-        
+
         Nimbus.shared.testMode = false
     }
-    
+
     func test_video_ad_keywords_override_in_test_mode() {
         Nimbus.shared.testMode = true
         let ad = createNimbusAd(type: .video)
         let request = AdManagerRequest()
         request.customTargeting = [:]
-        
+
         let mapping = NimbusGAMLinearPriceMapping.banner()
         ad.applyDynamicPrice(into: request, mapping: mapping)
-        
+
         XCTAssertEqual(request.customTargeting?["na_bid_video"] as! String, "0")
         XCTAssertNil(request.customTargeting?["na_bid"])
-        
+
         Nimbus.shared.testMode = false
     }
 
