@@ -163,15 +163,3 @@ extension NimbusDynamicPriceInterstitialAd: FullScreenContentDelegate {
         clientDelegate?.adDidDismissFullScreenContent?(ad)
     }
 }
-
-// MARK: - NimbusAdViewControllerDelegate
-
-extension NimbusDynamicPriceInterstitialAd: NimbusAdViewControllerDelegate {
-    func viewWillAppear(animated: Bool) {}
-    func viewDidAppear(animated: Bool) {}
-    func viewWillDisappear(animated: Bool) {}
-    func viewDidDisappear(animated: Bool) {}
-    func didCloseAd(adView: NimbusAdView) {
-        adController?.destroy()
-    }
-}
