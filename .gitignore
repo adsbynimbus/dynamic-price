@@ -32,13 +32,13 @@ Pods/
 
 # IDE
 *.iml
-*.xcworkspace
 .fleet/
 .idea/
 .vscode/
 xcuserdata/
 local.properties
 local.xcconfig
+project.xcworkspace
 
 # OS
 .DS_Store
