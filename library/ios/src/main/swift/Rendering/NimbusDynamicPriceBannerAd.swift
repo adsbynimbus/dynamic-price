@@ -14,7 +14,7 @@ final class NimbusDynamicPriceBannerAd: NSObject {
     weak var adView: NimbusAdView?
     
     private let ad: NimbusAd
-    private let requestManager: NimbusRequestManager
+
     
     private var renderInfo: NimbusDynamicPriceRenderInfo?
     private var isNimbusWin: Bool { renderInfo != nil }
@@ -26,11 +26,9 @@ final class NimbusDynamicPriceBannerAd: NSObject {
     
     init(
         ad: NimbusAd,
-        requestManager: NimbusRequestManager,
         bannerView: AdManagerBannerView
     ) {
         self.ad = ad
-        self.requestManager = requestManager
         self.bannerView = bannerView
         
         super.init()
@@ -101,18 +99,6 @@ final class NimbusDynamicPriceBannerAd: NSObject {
         return nil
     }
 }
-
-// MARK: - GADBannerViewDelegate
-
-extension NimbusDynamicPriceBannerAd: BannerViewDelegate {
-    func bannerView(_ bannerView: BannerView, didFailToReceiveAdWithError error: Error) {
-    }
-    
-    func bannerViewDidRecordImpression(_ bannerView: BannerView) {
-    }
-}
-
-// MARK: - NimbusAdViewControllerDelegate
 
 extension NimbusDynamicPriceBannerAd: AdControllerDelegate {
     func didReceiveNimbusEvent(controller: AdController, event: NimbusEvent) {

@@ -17,7 +17,7 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
         let bannerView = AdManagerBannerView()
         bannerView.rootViewController = rootVC
 
-        var bannerAd: NimbusDynamicPriceBannerAd? = NimbusDynamicPriceBannerAd(ad: nimbusAd, requestManager: NimbusRequestManager(), bannerView: bannerView)
+        var bannerAd: NimbusDynamicPriceBannerAd? = NimbusDynamicPriceBannerAd(ad: nimbusAd, bannerView: bannerView)
 
         bannerAd!.handleEventForNimbus(
             name: "na_render",
@@ -36,7 +36,6 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
         bannerView.rootViewController = rootVC
         let bannerAd = NimbusDynamicPriceBannerAd(
             ad: nimbusAd,
-            requestManager: NimbusRequestManager(),
             bannerView: bannerView
         )
 
@@ -58,18 +57,14 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     func test_click_event_should_fire_google_click_delegate_message() {
         let requestManager = NimbusRequestManager()
         let clientDelegate = MockGADBannerDelegate()
-        let proxy = NimbusDynamicPriceBannerProxy(requestManager: requestManager, clientDelegate: clientDelegate
-        )
         let bannerView = AdManagerBannerView()
-        bannerView.delegate = proxy
+        bannerView.delegate = clientDelegate
         bannerView.rootViewController = rootVC
 
         let bannerAd = NimbusDynamicPriceBannerAd(
             ad: nimbusAd,
-            requestManager: requestManager,
             bannerView: bannerView
         )
-        proxy.nimbusDelegate = bannerAd
 
         bannerAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
@@ -99,17 +94,13 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     func test_click_event_wont_fire_google_click_delegate_message_without_bannerview() {
         let requestManager = NimbusRequestManager()
         let clientDelegate = MockGADBannerDelegate()
-        let proxy = NimbusDynamicPriceBannerProxy(requestManager: requestManager, clientDelegate: clientDelegate
-        )
         var bannerView: AdManagerBannerView! = AdManagerBannerView()
-        bannerView.delegate = proxy
+        bannerView.delegate = clientDelegate
 
         let bannerAd = NimbusDynamicPriceBannerAd(
             ad: nimbusAd,
-            requestManager: requestManager,
             bannerView: bannerView
         )
-        proxy.nimbusDelegate = bannerAd
 
         bannerAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
@@ -129,17 +120,13 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     func test_click_event_wont_fire_google_click_delegate_message_without_renderinfo() {
         let requestManager = NimbusRequestManager()
         let clientDelegate = MockGADBannerDelegate()
-        let proxy = NimbusDynamicPriceBannerProxy(requestManager: requestManager, clientDelegate: clientDelegate
-        )
         let bannerView = AdManagerBannerView()
-        bannerView.delegate = proxy
+        bannerView.delegate = clientDelegate
 
         let bannerAd = NimbusDynamicPriceBannerAd(
             ad: nimbusAd,
-            requestManager: requestManager,
             bannerView: bannerView
         )
-        proxy.nimbusDelegate = bannerAd
 
         let expectation = XCTestExpectation(description: "fire google click message")
         expectation.isInverted = true
@@ -160,7 +147,6 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
 
         let bannerAd = NimbusDynamicPriceBannerAd(
             ad: nimbusAd,
-            requestManager: requestManager,
             bannerView: bannerView
         )
 
@@ -185,7 +171,6 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
 
         let bannerAd = NimbusDynamicPriceBannerAd(
             ad: nimbusAd,
-            requestManager: NimbusRequestManager(),
             bannerView: bannerView
         )
 
@@ -200,7 +185,6 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
 
         let bannerAd = NimbusDynamicPriceBannerAd(
             ad: nimbusAd,
-            requestManager: NimbusRequestManager(),
             bannerView: bannerView
         )
 
