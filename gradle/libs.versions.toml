@@ -1,18 +1,18 @@
 [versions]
 android = "9.2.1"
 dokka = "2.2.0"
-kotlin = "2.3.21"
+kotlin = "2.4.0"
 
-ads-google = "25.2.0"
-ads-nimbus = "2.36.1"
+ads-google = "25.3.0"
+ads-nimbus = "2.37.0"
 
 androidx-activity = "1.13.0"
-androidx-compose = "2026.05.00"
-androidx-core = "1.18.0"
+androidx-compose = "2026.05.01"
+androidx-core = "1.19.0"
 androidx-lifecycle = "2.10.0"
 androidx-navigation = "2.9.8"
 androidx-startup = "1.2.0"
-mockk = "1.14.9"
+mockk = "1.14.11"
 okio = "3.17.0"
 
 [plugins]
