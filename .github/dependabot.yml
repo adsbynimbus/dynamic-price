@@ -9,7 +9,6 @@ registries:
 
 multi-ecosystem-groups:
   ads:
-    target-branch: "ads/update"
     schedule:
       interval: "daily"
 
