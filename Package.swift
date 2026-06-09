@@ -6,8 +6,8 @@ let package = Package(
     platforms: [.iOS(.v15)],
     products: [
         .library(
-            name: "NimbusDynamicPrice",
-            targets: ["NimbusDynamicPrice"]),
+            name: "DynamicPrice",
+            targets: ["DynamicPrice"]),
     ],
     dependencies: [
         .package(url: "https://github.com/adsbynimbus/nimbus-ios-sdk", from: "2.34.0"),
@@ -15,15 +15,15 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "NimbusDynamicPrice",
+            name: "DynamicPrice",
             dependencies: [
                 .product(name: "GoogleMobileAds", package: "swift-package-manager-google-mobile-ads"),
                 .product(name: "NimbusKit", package: "nimbus-ios-sdk"),
             ],
-            path: "dynamic-price/ios/src/main"),
+            path: "library/ios/src/main"),
         .testTarget(
-            name: "NimbusDynamicPriceTests",
-            dependencies: ["NimbusDynamicPrice"],
-            path: "dynamic-price/ios/src/test"),
+            name: "DynamicPriceTests",
+            dependencies: ["DynamicPrice"],
+            path: "library/ios/src/test"),
     ],
 )

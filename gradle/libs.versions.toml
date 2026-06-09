@@ -4,6 +4,7 @@ dokka = "2.2.0"
 kotlin = "2.4.0"
 
 ads-google = "25.3.0"
+ads-google-nextgen = "1.1.1"
 ads-nimbus = "2.37.0"
 
 androidx-activity = "1.13.0"
@@ -17,7 +18,7 @@ okio = "3.17.0"
 
 [plugins]
 android-app = { id = "com.android.application", version.ref = "android" }
-android-library = { id = "com.android.library", version.ref = "android" }
+android-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "android" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 dokka-javadoc = { id = "org.jetbrains.dokka-javadoc", version.ref = "dokka" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
@@ -26,6 +27,7 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 
 [libraries]
 ads-google = { module = "com.google.android.gms:play-services-ads", version.ref = "ads-google" }
+ads-google-nextgen = { module = "com.google.android.libraries.ads.mobile.sdk:ads-mobile-sdk", version.ref = "ads-google-nextgen" }
 ads-nimbus = { module = "com.adsbynimbus.android:nimbus", version.ref = "ads-nimbus" }
 androidx-compose = { module = "androidx.compose:compose-bom", version.ref = "androidx-compose" }
 androidx-compose-activity = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }

@@ -1,4 +1,4 @@
-import NimbusDynamicPrice
+import DynamicPrice
 import SwiftUI
 
 @main

@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "0F32ACE5-FDB5-437F-9603-C5CE692151A0",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "DynamicPriceTests",
+        "name" : "DynamicPriceTests"
+      }
+    }
+  ],
+  "version" : 1
+}

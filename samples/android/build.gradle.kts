@@ -11,8 +11,8 @@ androidComponents.beforeVariants {
 }
 
 android {
-    compileSdk = 36
-    namespace = "com.adsbynimbus.dynamicprice.sample"
+    compileSdk = 37
+    namespace = "$group.sample"
 
     defaultConfig {
         applicationId = namespace
@@ -22,7 +22,6 @@ android {
         versionName = "1.0"
         manifestPlaceholders["appName"] = "Dynamic Price Samples"
         with(providers) {
-            manifestPlaceholders["gamAppId"] = gradleProperty("sample.admanager.appid").get()
             buildConfigField("String", "API_KEY", "\"${gradleProperty("sample.nimbus.apikey").get()}\"")
             buildConfigField("String", "PUBLISHER_KEY", "\"${gradleProperty("sample.nimbus.publisherkey").get()}\"")
             buildConfigField("String", "ADMANAGER_ADUNIT_ID", "\"${gradleProperty("sample.admanager.adunitid").get()}\"")
@@ -38,6 +37,18 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+        }
+    }
+
+    val adManagerAppId = providers.gradleProperty("sample.admanager.appid")
+    flavorDimensions += "gma-sdk"
+    productFlavors {
+        register("legacy") {
+            manifestPlaceholders["appName"] = "Dynamic Price Legacy Samples"
+            manifestPlaceholders["gamAppId"] = adManagerAppId.get()
+        }
+        register("nextgen") {
+            buildConfigField("String", "ADMANAGER_APP_ID", "\"${adManagerAppId.get()}\"")
         }
     }
 
@@ -58,9 +69,13 @@ kotlin {
 }
 
 dependencies {
-    implementation(projects.dynamicprice)
+    "legacyImplementation"(projects.androidLegacy)
+    "legacyImplementation"(libs.ads.google)
+    "nextgenImplementation"(projects.androidLibrary)
+    "nextgenImplementation"(libs.ads.google.nextgen)
     implementation(platform(libs.androidx.compose))
     implementation(libs.bundles.androidx.compose)
     implementation(libs.androidx.lifecycle)
     implementation(libs.androidx.startup)
+    implementation(libs.ads.nimbus)
 }
