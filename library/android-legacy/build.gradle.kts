@@ -21,11 +21,6 @@ val dokkaHtmlJar by tasks.registering(Jar::class) {
     from(tasks.dokkaGeneratePublicationHtml.flatMap { it.outputDirectory })
 }
 
-val githubActions = providers.environmentVariable("GITHUB_ACTIONS")
-androidComponents.beforeVariants {
-    it.enable = it.name.contains("release", ignoreCase = true) || !githubActions.isPresent
-}
-
 kotlin {
     android {
         namespace = "com.adsbynimbus.google"
@@ -105,15 +100,13 @@ publishing {
         artifactId = "dynamicprice-legacy" + if (name != "kotlinMultiplatform") "-$name" else ""
     }
     repositories {
-        if (githubActions.isPresent) {
+        providers.environmentVariable("GITHUB_REPOSITORY").orNull?.let {
             maven("s3://adsbynimbus-public/android/sdks") {
                 name = "aws"
                 authentication {
                     create<AwsImAuthentication>("awsIm")
                 }
             }
-        }
-        providers.environmentVariable("GITHUB_REPOSITORY").orNull?.let {
             maven("https://maven.pkg.github.com/$it") {
                 name = "github"
                 credentials(PasswordCredentials::class)
