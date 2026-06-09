@@ -9,12 +9,14 @@ plugins {
 }
 
 val dokkaJavadocJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("javadoc")
+    archiveClassifier = "javadoc"
+    description = "Creates a javadoc jar for bundling with an Android Library"
     from(tasks.dokkaGeneratePublicationJavadoc.flatMap { it.outputDirectory })
 }
 
 val dokkaHtmlJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("html-doc")
+    archiveClassifier = "html-doc"
+    description = "Creates a jar containing html docs for bundling with an Android Library"
     from(tasks.dokkaGeneratePublicationHtml.flatMap { it.outputDirectory })
 }
 
@@ -79,7 +81,7 @@ dependencies {
 }
 
 dokka {
-    moduleName = "Dynamic Price"
+    moduleName = "Dynamic Price Legacy"
     dokkaGeneratorIsolation = ClassLoaderIsolation()
     dokkaSourceSets.configureEach {
         includes.from("Module.md")
@@ -92,7 +94,7 @@ dokka {
         sourceLink {
             localDirectory = layout.projectDirectory.dir("src/$name/kotlin")
             remoteLineSuffix = "#L"
-            remoteUrl("https://github.com/adsbynimbus/dynamic-price/tree/main/library/android/src/$name/kotlin")
+            remoteUrl("https://github.com/adsbynimbus/dynamic-price/tree/main/library/android-legacy/src/$name/kotlin")
         }
     }
 }

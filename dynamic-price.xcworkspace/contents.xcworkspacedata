@@ -1,16 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Workspace version = "1.1">
-    <Group location = "group:library/android/src" name = "android-library">
-        <FileRef location = "group:main" />
-        <FileRef location = "group:test" />
-    </Group>
-    <Group location = "group:samples/android/src" name = "android-samples">
-        <FileRef location = "group:main" />
-    </Group>
-    <Group location = "container:library/ios/src" name = "ios-library">
-        <FileRef location = "group:main" />
-        <FileRef location = "group:test" />
-    </Group>
-    <FileRef location = "group:samples/ios/ios-samples.xcodeproj" />
-    <FileRef location = "self:" name = "dynamic-price" />
+<Workspace
+   version = "1.1">
+   <Group
+      location = "group:library/android-legacy"
+      name = "android-legacy">
+      <FileRef
+         location = "group:main">
+      </FileRef>
+      <FileRef
+         location = "group:test">
+      </FileRef>
+   </Group>
+   <Group
+      location = "group:samples/android/src"
+      name = "android-samples">
+      <FileRef
+         location = "group:main">
+      </FileRef>
+   </Group>
+   <Group
+      location = "container:library/ios/src"
+      name = "ios-library">
+      <FileRef
+         location = "group:main">
+      </FileRef>
+      <FileRef
+         location = "group:test">
+      </FileRef>
+   </Group>
+   <FileRef
+      location = "group:samples/ios/ios-samples.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "self:"
+      name = "dynamic-price">
+   </FileRef>
 </Workspace>

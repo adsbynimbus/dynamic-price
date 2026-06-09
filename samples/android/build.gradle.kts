@@ -58,7 +58,7 @@ kotlin {
 }
 
 dependencies {
-    implementation(projects.androidLibrary)
+    implementation(projects.androidLegacy)
     implementation(platform(libs.androidx.compose))
     implementation(libs.bundles.androidx.compose)
     implementation(libs.androidx.lifecycle)
