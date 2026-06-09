@@ -11,7 +11,7 @@ import androidx.compose.ui.platform.*
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.*
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.adsbynimbus.dynamicprice.nextgen.*
+import com.adsbynimbus.dynamicprice.*
 import com.adsbynimbus.dynamicprice.sample.AdTypes.*
 import com.adsbynimbus.openrtb.request.Format.Companion.BANNER_320_50
 import com.adsbynimbus.openrtb.request.Format.Companion.MREC

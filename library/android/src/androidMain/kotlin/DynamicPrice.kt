@@ -1,10 +1,10 @@
-package com.adsbynimbus.dynamicprice.nextgen
+package com.adsbynimbus.dynamicprice
 
 import android.app.Activity
 import androidx.core.os.BundleCompat.getSerializable
 import androidx.core.view.*
 import com.adsbynimbus.NimbusAd
-import com.adsbynimbus.dynamicprice.nextgen.internal.*
+import com.adsbynimbus.dynamicprice.internal.*
 import com.adsbynimbus.internal.Platform
 import com.adsbynimbus.lineitem.*
 import com.adsbynimbus.render.*

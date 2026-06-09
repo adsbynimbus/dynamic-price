@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalSerializationApi::class)
 
-package com.adsbynimbus.dynamicprice.nextgen.internal
+package com.adsbynimbus.dynamicprice.internal
 
 import android.app.Activity
 import android.app.Activity.OVERRIDE_TRANSITION_CLOSE
@@ -12,7 +12,7 @@ import androidx.annotation.WorkerThread
 import androidx.collection.LruCache
 import androidx.core.view.allViews
 import com.adsbynimbus.*
-import com.adsbynimbus.dynamicprice.nextgen.*
+import com.adsbynimbus.dynamicprice.*
 import com.adsbynimbus.internal.*
 import com.adsbynimbus.render.*
 import com.adsbynimbus.request.NimbusResponse

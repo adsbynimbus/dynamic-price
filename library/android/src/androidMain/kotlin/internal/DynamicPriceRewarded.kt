@@ -1,9 +1,9 @@
-package com.adsbynimbus.dynamicprice.nextgen.internal
+package com.adsbynimbus.dynamicprice.internal
 
 import android.app.Activity
 import android.content.Context
 import com.adsbynimbus.NimbusError
-import com.adsbynimbus.dynamicprice.nextgen.*
+import com.adsbynimbus.dynamicprice.*
 import com.adsbynimbus.internal.*
 import com.adsbynimbus.render.*
 import com.adsbynimbus.render.Renderer.Companion.loadBlockingAd
