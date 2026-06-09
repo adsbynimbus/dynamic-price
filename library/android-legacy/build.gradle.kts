@@ -61,8 +61,8 @@ kotlin {
             implementation(libs.bundles.test.unit)
         }
         androidMain.dependencies {
-            api(libs.ads.google)
-            api(libs.ads.nimbus)
+            implementation(libs.ads.google)
+            implementation(libs.ads.nimbus)
         }
     }
 }

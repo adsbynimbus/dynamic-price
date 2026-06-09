@@ -9,24 +9,21 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import androidx.startup.Initializer
 import com.adsbynimbus.Nimbus
-import com.adsbynimbus.render.Renderer
 import kotlin.time.measureTime
 
-class AppInitializer : Initializer<Unit> {
+class NimbusInitializer : Initializer<Unit> {
     override fun create(context: Context) {
         val nimbusStartup = measureTime {
             Nimbus.initialize(context, BuildConfig.PUBLISHER_KEY, BuildConfig.API_KEY)
@@ -48,8 +45,6 @@ class MainActivity : ComponentActivity() {
                 App(this)
             }
         }
-        // Remove broken test_demand renderer
-        Renderer.INLINE.remove("test_demand")
     }
 }
 

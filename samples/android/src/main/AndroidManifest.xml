@@ -24,22 +24,14 @@
             </intent-filter>
         </activity>
 
-        <meta-data
-            android:name="com.google.android.gms.ads.AD_MANAGER_APP"
-            android:value="true"/>
-
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="${gamAppId}"/>
-
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
             android:exported="false"
             tools:node="merge">
-            <!-- This entry makes AppInitializer discoverable. -->
+            <!-- This entry makes NimbusInitializer discoverable. -->
             <meta-data
-                android:name="com.adsbynimbus.dynamicprice.sample.AppInitializer"
+                android:name="com.adsbynimbus.dynamicprice.sample.NimbusInitializer"
                 android:value="androidx.startup"/>
         </provider>
     </application>

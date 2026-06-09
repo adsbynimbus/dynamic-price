@@ -24,6 +24,12 @@
       <FileRef
          location = "group:main">
       </FileRef>
+      <FileRef
+         location = "group:nextgen">
+      </FileRef>
+      <FileRef
+         location = "group:legacy">
+      </FileRef>
    </Group>
    <Group
       location = "container:library/ios/src"
