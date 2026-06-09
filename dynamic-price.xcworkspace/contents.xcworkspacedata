@@ -5,10 +5,17 @@
       location = "group:library/android-legacy"
       name = "android-legacy">
       <FileRef
-         location = "group:main">
+         location = "group:src/androidMain">
       </FileRef>
       <FileRef
-         location = "group:test">
+         location = "group:src/androidHostTest">
+      </FileRef>
+   </Group>
+   <Group
+      location = "group:library/android"
+      name = "android-library">
+      <FileRef
+         location = "group:src/androidMain">
       </FileRef>
    </Group>
    <Group

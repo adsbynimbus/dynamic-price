@@ -10,27 +10,22 @@ plugins {
 }
 
 val dokkaJavadocJar by tasks.registering(Jar::class) {
-    archiveClassifier = "javadoc"
+    archiveClassifier.set("javadoc")
     description = "Creates a javadoc jar for bundling with an Android Library"
     from(tasks.dokkaGeneratePublicationJavadoc.flatMap { it.outputDirectory })
 }
 
 val dokkaHtmlJar by tasks.registering(Jar::class) {
-    archiveClassifier = "html-doc"
+    archiveClassifier.set("html-doc")
     description = "Creates a jar containing html docs for bundling with an Android Library"
     from(tasks.dokkaGeneratePublicationHtml.flatMap { it.outputDirectory })
 }
 
-val githubActions = providers.environmentVariable("GITHUB_ACTIONS")
-androidComponents.beforeVariants {
-    it.enable = it.name.contains("release", ignoreCase = true) || !githubActions.isPresent
-}
-
 kotlin {
     android {
-        namespace = "com.adsbynimbus.google"
-        compileSdk = 36
-        minSdk = 23
+        namespace = "$group"
+        compileSdk = 37
+        minSdk = 24
 
         compilations.configureEach {
             compileTaskProvider.configure {
@@ -47,28 +42,22 @@ kotlin {
             artifact(dokkaJavadocJar)
             artifact(dokkaHtmlJar)
         }
-
-        compilerOptions {
-            apiVersion = KotlinVersion.KOTLIN_2_0
-            languageVersion = KotlinVersion.KOTLIN_2_0
-        }
-
-        withHostTest { }
     }
+
+    compilerOptions {
+        apiVersion = KotlinVersion.KOTLIN_2_0
+        languageVersion = KotlinVersion.KOTLIN_2_0
+    }
+
+    explicitApi()
 
     sourceSets {
-        commonTest.dependencies {
-            implementation(libs.bundles.test.unit)
-        }
+        removeIf { it.name == "commonTest" } // Fixes Unused Kotlin Source Sets warning
         androidMain.dependencies {
-            api(libs.ads.google)
-            api(libs.ads.nimbus)
+            implementation(libs.ads.nimbus)
+            implementation(libs.ads.google.nextgen)
         }
     }
-}
-
-tasks.withType<Test>().configureEach {
-    useJUnitPlatform()
 }
 
 dependencies.constraints {
@@ -81,7 +70,7 @@ dependencies.constraints {
 }
 
 dokka {
-    moduleName = "Dynamic Price Legacy"
+    moduleName = "Dynamic Price"
     dokkaGeneratorIsolation = ClassLoaderIsolation()
     dokkaSourceSets.configureEach {
         includes.from("Module.md")
@@ -94,7 +83,7 @@ dokka {
         sourceLink {
             localDirectory = layout.projectDirectory.dir("src/$name/kotlin")
             remoteLineSuffix = "#L"
-            remoteUrl("https://github.com/adsbynimbus/dynamic-price/tree/main/library/android-legacy/src/$name/kotlin")
+            remoteUrl("https://github.com/adsbynimbus/dynamic-price/tree/main/library/android/src/$name/kotlin")
         }
     }
 }
@@ -102,7 +91,7 @@ dokka {
 publishing {
     // Rename root publication to nextgen and android publication to nextgen-android
     publications.withType<MavenPublication>().configureEach {
-        artifactId = "dynamicprice-legacy" + if (name != "kotlinMultiplatform") "-$name" else ""
+        artifactId = "dynamicprice" + if (name != "kotlinMultiplatform") "-$name" else ""
     }
     repositories {
         providers.environmentVariable("GITHUB_REPOSITORY").orNull?.let {

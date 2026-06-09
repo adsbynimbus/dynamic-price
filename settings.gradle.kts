@@ -49,5 +49,7 @@ rootProject.name = "dynamic-price"
 
 include("android-samples")
 project(":android-samples").projectDir = layout.rootDirectory.file("samples/android").asFile
+include("android-library")
+project(":android-library").projectDir = layout.rootDirectory.file("library/android").asFile
 include("android-legacy")
 project(":android-legacy").projectDir = layout.rootDirectory.file("library/android-legacy").asFile
