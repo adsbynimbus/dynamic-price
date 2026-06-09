@@ -105,6 +105,14 @@ publishing {
         artifactId = "dynamicprice-legacy" + if (name != "kotlinMultiplatform") "-$name" else ""
     }
     repositories {
+        if (githubActions.isPresent) {
+            maven("s3://adsbynimbus-public/android/sdks") {
+                name = "aws"
+                authentication {
+                    create<AwsImAuthentication>("awsIm")
+                }
+            }
+        }
         providers.environmentVariable("GITHUB_REPOSITORY").orNull?.let {
             maven("https://maven.pkg.github.com/$it") {
                 name = "github"

@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'android/**'
+      - 'android-legacy/**'
+
+permissions:
+  contents: read
+  id-token: write
+  packages: write
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    if: github.repository == 'adsbynimbus/dynamic-price'
+    env:
+      ORG_GRADLE_PROJECT_githubUsername: ${{ github.actor }}
+      ORG_GRADLE_PROJECT_githubPassword: ${{ github.token }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+      - name: Parse Publishing Info
+        id: publish_info
+        run: |
+          # Map to gradle project names
+          if [[ "(echo "$GITHUB_REF_NAME" | cut -d'/' -f1)" == *"android-legacy"* ]]; then
+            echo "library=android-legacy" >> $GITHUB_OUTPUT
+          else
+            echo "library=android-library" >> $GITHUB_OUTPUT
+          fi
+          echo version=$(echo "$GITHUB_REF_NAME" | cut -d'/' -f2) >> $GITHUB_OUTPUT
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_MOBILE_ROLE }}
+          aws-region: us-east-1
+      - name: Publish
+        env:
+          ORG_GRADLE_PROJECT_version: ${{ steps.publish_info.outputs.version }}
+        run: ./gradlew :${{ steps.publish_info.outputs.library }}:publish
