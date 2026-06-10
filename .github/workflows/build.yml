@@ -37,10 +37,8 @@ jobs:
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           dependency-graph: generate-and-submit
-      - name: Build
-        run: ./gradlew assemble
-      - name: Test
-        run: ./gradlew check
+      - name: Build + Test
+        run: ./gradlew build
       - name: Upload reports
         uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
@@ -57,10 +55,8 @@ jobs:
       - name: Setup Xcode
         id: xcodebuild
         uses: ./.github/actions/xcodebuild
-      - name: Build
-        run: xcodebuild build-for-testing -scheme dynamic-price ${{ steps.xcodebuild.outputs.options }}
-      - name: Test
-        run: xcodebuild test-without-building -scheme dynamic-price ${{ steps.xcodebuild.outputs.options }}
+      - name: Build + Test
+        run: xcodebuild build test -scheme dynamic-price ${{ steps.xcodebuild.outputs.options }}
       - name: Cache DerivedData
         uses: actions/cache/save@v5
         if: ${{ github.ref == 'refs/heads/main' && steps.xcodebuild.outcome.build-cache-hit != 'true' }}
