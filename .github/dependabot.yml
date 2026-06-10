@@ -54,6 +54,10 @@ updates:
       libs:
         patterns:
           - "*"
+    ignore:
+      - dependency-name: "org.jetbrains.compose.material3:material3"
+      - dependency-name: "com.google.protobuf:protobuf-javalite"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "swift"
     directory: "/"

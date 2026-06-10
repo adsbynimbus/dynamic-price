@@ -15,6 +15,8 @@ androidx-navigation = "2.9.8"
 androidx-startup = "1.2.0"
 mockk = "1.14.11"
 okio = "3.17.0"
+#noinspection NewerVersionAvailable
+protobuf = "3.25.9"
 
 [plugins]
 android-app = { id = "com.android.application", version.ref = "android" }
@@ -43,6 +45,7 @@ androidx-startup = { module = "androidx.startup:startup-runtime", version.ref = 
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
+protobuf = { module = "com.google.protobuf:protobuf-javalite", version.ref = "protobuf" }
 
 [bundles]
 androidx-compose = [
