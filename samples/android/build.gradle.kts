@@ -75,7 +75,14 @@ dependencies {
     "nextgenImplementation"(libs.ads.google.nextgen)
     implementation(platform(libs.androidx.compose))
     implementation(libs.bundles.androidx.compose)
+    implementation(libs.ads.nimbus)
     implementation(libs.androidx.lifecycle)
     implementation(libs.androidx.startup)
-    implementation(libs.ads.nimbus)
+
+    constraints {
+        implementation(libs.okio)
+        implementation(libs.protobuf) {
+            because("Fixes CVE-2024-7254")
+        }
+    }
 }
