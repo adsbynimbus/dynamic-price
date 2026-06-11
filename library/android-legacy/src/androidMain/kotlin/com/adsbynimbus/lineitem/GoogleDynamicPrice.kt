@@ -1,9 +1,7 @@
 @file:JvmName("GoogleDynamicPrice")
-package com.adsbynimbus.google
+package com.adsbynimbus.lineitem
 
-import com.adsbynimbus.lineitem.Mapping
-import com.adsbynimbus.lineitem.defaultMapping
-import com.adsbynimbus.lineitem.targetingMap
+import com.adsbynimbus.google.dynamicPriceAdCache
 import com.adsbynimbus.request.NimbusResponse
 import com.google.android.gms.ads.AbstractAdRequestBuilder
 import com.google.android.gms.ads.admanager.AdManagerAdRequest

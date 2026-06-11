@@ -1,9 +1,8 @@
 package com.adsbynimbus.dynamicprice.sample
 
 import android.graphics.Rect
-import android.view.View
+import android.view.*
 import android.view.View.OnLayoutChangeListener
-import android.view.ViewTreeObserver
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,8 +13,8 @@ import androidx.lifecycle.*
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.adsbynimbus.dynamicprice.sample.AdTypes.AdViewBanner
-import com.adsbynimbus.google.applyDynamicPrice
-import com.adsbynimbus.google.handleEventForNimbus
+import com.adsbynimbus.google.*
+import com.adsbynimbus.lineitem.*
 import com.adsbynimbus.openrtb.request.Format.Companion.BANNER_320_50
 import com.adsbynimbus.openrtb.request.Format.Companion.MREC
 import com.adsbynimbus.openrtb.request.Video
@@ -25,9 +24,8 @@ import com.google.android.gms.ads.*
 import com.google.android.gms.ads.admanager.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.resume
-import kotlin.time.Duration
+import kotlin.time.*
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.TimeSource
 
 fun AdManagerAdView.setupDynamicPrice() {
     appEventListener = { name, info -> handleEventForNimbus(name, info) }
