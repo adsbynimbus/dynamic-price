@@ -6,15 +6,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import com.adsbynimbus.dynamicprice.sample.AdTypes.Interstitial
-import com.adsbynimbus.google.applyDynamicPrice
-import com.adsbynimbus.google.handleEventForNimbus
+import com.adsbynimbus.google.*
+import com.adsbynimbus.lineitem.*
 import com.adsbynimbus.request.NimbusRequest
 import com.adsbynimbus.request.NimbusRequest.Companion.forInterstitialAd
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.admanager.*
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.*
+import kotlin.coroutines.*
 
 @Throws(RuntimeException::class)
 suspend fun loadDynamicPriceInterstitial(
