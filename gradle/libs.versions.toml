@@ -4,7 +4,7 @@ dokka = "2.2.0"
 kotlin = "2.4.0"
 
 ads-google = "25.3.0"
-ads-google-nextgen = "1.1.1"
+ads-google-nextgen = "1.2.0"
 ads-nimbus = "2.37.0"
 
 androidx-activity = "1.13.0"
