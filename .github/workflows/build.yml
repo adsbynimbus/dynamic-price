@@ -58,7 +58,7 @@ jobs:
       - name: Build + Test
         run: xcodebuild build test -scheme dynamic-price ${{ steps.xcodebuild.outputs.options }}
       - name: Cache DerivedData
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         if: ${{ github.ref == 'refs/heads/main' && steps.xcodebuild.outcome.build-cache-hit != 'true' }}
         with:
           path: |
