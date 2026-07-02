@@ -40,6 +40,7 @@ internal class DynamicPriceRewardedAd(
                 FullScreenContentError(
                     code = MEDIATION_SHOW_ERROR,
                     message = "Nimbus controller failed to show",
+                    mediationAdError = null,
                 )
             )
         }

@@ -93,6 +93,7 @@ public fun InterstitialAd.handleEventForNimbus(
                     FullScreenContentError(
                         code = MEDIATION_SHOW_ERROR,
                         message = "Nimbus controller failed to show",
+                        mediationAdError = null,
                     ),
                 )
                 DynamicPriceRenderer.maybeClearInterstitial(activity)
@@ -122,6 +123,7 @@ public suspend fun RewardedAd.Companion.loadDynamicPrice(
             error = LoadAdError(
                 code = NOT_FOUND,
                 message = "Nimbus ad not found in cache",
+                responseInfo = null,
             ),
         )
         else -> this
@@ -190,6 +192,7 @@ public class DynamicPriceRewardedCallback(
                 adError = LoadAdError(
                     code = NOT_FOUND,
                     message = "Nimbus ad not found in cache",
+                    responseInfo = null,
                 ),
             )
             else -> callback.onAdLoaded(ad)
