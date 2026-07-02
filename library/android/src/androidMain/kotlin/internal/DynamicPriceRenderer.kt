@@ -33,35 +33,37 @@ internal class DynamicPriceRenderer(
     @SerialName("na_id") val auctionId: String,
     @SerialName("ga_click") val clickTracker: String,
 ) {
+    @Transient val response = adCache[auctionId]!!
+
     companion object {
         fun render(
             ad: Ad,
             data: String?,
             publisherListener: AdController.Listener?,
             render: suspend (NimbusResponse) -> AdController,
-        ) {
-            renderScope.launch {
-                runCatching {
-                    val renderer = jsonSerializer.decodeFromString(serializer(), data!!)
-                    val nimbusAd = adCache.remove(renderer.auctionId)!!
-                    ad.dynamicPriceAd = DynamicPriceAd(
-                        adController = withContext(Dispatchers.Main) { render(nimbusAd) }.apply {
-                            attachDynamicPriceListener(ad, renderer.clickTracker, renderScope)
-                            publisherListener?.let { listeners.add(it) }
-                        },
-                    )
+        ): DynamicPriceRenderer? {
+            if (data == null) {
+                log(Log.WARN, "na_render data empty - please review the Nimbus creative setup in Ad Manager")
+                return null
+            }
+            val renderer = runCatching { jsonSerializer.decodeFromString(serializer(), data) }
+            renderScope.launch(Dispatchers.Main) {
+                renderer.onSuccess {
+                    ad.dynamicPriceAd = DynamicPriceAd(render(it.response).apply {
+                        attachDynamicPriceListener(ad, it.clickTracker, renderScope)
+                        publisherListener?.let { listeners.add(it) }
+                    })
                 }.onFailure {
-                    withContext(Dispatchers.Main) {
-                        publisherListener?.onError(
-                            NimbusError(
-                                errorType = NimbusError.ErrorType.RENDERER_ERROR,
-                                message = "Failed to render dynamic price ad",
-                                cause = it,
-                            )
+                    publisherListener?.onError(
+                        NimbusError(
+                            errorType = NimbusError.ErrorType.RENDERER_ERROR,
+                            message = "Failed to render dynamic price ad",
+                            cause = it,
                         )
-                    }
+                    )
                 }
             }
+            return renderer.getOrNull()
         }
 
         fun AdController.attachDynamicPriceListener(
@@ -128,7 +130,7 @@ internal class DynamicPriceRenderer(
             ignoreUnknownKeys = true
         }
 
-        val renderScope = CoroutineScope(Dispatchers.Default) + CoroutineName("DynamicPrice")
+        val renderScope = MainScope() + CoroutineName("NimbusRenderer")
     }
 }
 
