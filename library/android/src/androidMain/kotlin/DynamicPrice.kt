@@ -42,30 +42,30 @@ public fun BannerAd.handleEventForNimbus(
     listener: AdController.Listener? = null,
     activity: Activity? = Platform.currentActivity.get(),
 ): NimbusResponse? {
-    var nimbusWin: NimbusResponse? = null
-    if (name == "na_render") DynamicPriceRenderer.render(this, data, listener) { nimbusAd ->
-        nimbusWin = nimbusAd
-        @Suppress("Deprecation") // Revisit this on next SDK update
-        getView(activity!!).webViewParent.let {
-            /*
-                Creating the NimbusAdView with an activity context before rendering fixes a crash
-                that occurs when clicking on a companion ad.
-             */
-            val nimbusAdView = NimbusAdView(activity)
-            nimbusAd.renderInline(nimbusAdView).apply {
-                // A NimbusAdView created outside the Renderer must be added to the container
-                it.addView(nimbusAdView)
-                if (nimbusAd.type() != "video") return@apply
-                it.getChildAt(0)?.doOnLayout { webView ->
-                    view?.updateLayoutParams {
-                        height = webView.height
-                        width = webView.width
+    if (name == "na_render") {
+         return DynamicPriceRenderer.render(this, data, listener) { nimbusAd ->
+            @Suppress("Deprecation") // Revisit this on next SDK update
+            getView(activity!!).webViewParent.let {
+                /*
+                    Creating the NimbusAdView with an activity context before rendering fixes a crash
+                    that occurs when clicking on a companion ad.
+                 */
+                val nimbusAdView = NimbusAdView(activity)
+                nimbusAd.renderInline(nimbusAdView).apply {
+                    // A NimbusAdView created outside the Renderer must be added to the container
+                    it.addView(nimbusAdView)
+                    if (nimbusAd.type() != "video") return@apply
+                    it.getChildAt(0)?.doOnLayout { webView ->
+                        view?.updateLayoutParams {
+                            height = webView.height
+                            width = webView.width
+                        }
                     }
                 }
             }
-        }
+        }?.response
     }
-    return nimbusWin
+    return null
 }
 
 /**
@@ -83,25 +83,24 @@ public fun InterstitialAd.handleEventForNimbus(
     listener: AdController.Listener? = null,
     activity: Activity? = Platform.currentActivity.get(),
 ): NimbusResponse? {
-    var nimbusWin: NimbusResponse? = null
     when (name) {
-        "na_render" -> DynamicPriceRenderer.render(this, data, listener) { nimbusAd ->
-            nimbusWin = nimbusAd
+        "na_render" -> return DynamicPriceRenderer.render(this, data, listener) { nimbusAd ->
             activity!!.loadBlockingAd(nimbusAd)!!
-        }
+        }?.response
         "na_show" -> DynamicPriceRenderer.renderScope.launch(Dispatchers.Main) {
             dynamicPriceAd?.adController?.start() ?: run {
                 adEventCallback?.onAdFailedToShowFullScreenContent(
                     FullScreenContentError(
                         code = MEDIATION_SHOW_ERROR,
                         message = "Nimbus controller failed to show",
+                        mediationAdError = null,
                     ),
                 )
                 DynamicPriceRenderer.maybeClearInterstitial(activity)
             }
         }
     }
-    return nimbusWin
+    return null
 }
 
 /** Loads a RewardedAd and conditionally wraps the response if a Nimbus bid is present */
@@ -124,6 +123,7 @@ public suspend fun RewardedAd.Companion.loadDynamicPrice(
             error = LoadAdError(
                 code = NOT_FOUND,
                 message = "Nimbus ad not found in cache",
+                responseInfo = null,
             ),
         )
         else -> this
@@ -192,6 +192,7 @@ public class DynamicPriceRewardedCallback(
                 adError = LoadAdError(
                     code = NOT_FOUND,
                     message = "Nimbus ad not found in cache",
+                    responseInfo = null,
                 ),
             )
             else -> callback.onAdLoaded(ad)
