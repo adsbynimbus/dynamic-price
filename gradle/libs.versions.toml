@@ -8,7 +8,7 @@ ads-google-nextgen = "1.2.1"
 ads-nimbus = "2.37.0"
 
 androidx-activity = "1.13.0"
-androidx-compose = "2026.06.00"
+androidx-compose = "2026.06.01"
 androidx-core = "1.19.0"
 androidx-lifecycle = "2.11.0"
 androidx-navigation = "2.9.8"
