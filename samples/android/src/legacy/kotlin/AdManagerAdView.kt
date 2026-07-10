@@ -1,6 +1,7 @@
 package com.adsbynimbus.dynamicprice.sample
 
 import android.graphics.Rect
+import android.util.Log
 import android.view.*
 import android.view.View.OnLayoutChangeListener
 import androidx.compose.foundation.layout.*
@@ -39,6 +40,7 @@ suspend fun AdManagerAdView.loadDynamicPrice(
     DynamicPriceHelper.runCatching {
         val nimbusResponse = requestManager.makeRequest(context, nimbusRequest)
         nimbusResponse.applyDynamicPrice(adRequest, mapping = mapping)
+        Log.i("DynamicPrice", "Added Nimbus ${nimbusResponse.bid.type}")
     }
     loadAd(adRequest.build())
 }
@@ -95,7 +97,7 @@ fun BannerVideoScreen(modifier: Modifier = Modifier) {
     val lifecycleOwner = LocalLifecycleOwner.current
     AdManagerInlineAd(
         adUnitId = BuildConfig.ADMANAGER_ADUNIT_ID,
-        adSize = AdSize.MEDIUM_RECTANGLE,
+        adSize =  AdSize.getInlineAdaptiveBannerAdSize(200, 250),
         adListener = LogListener(AdViewBanner.title),
         onLoadAd = {
             it.refreshingDynamicPrice(
@@ -105,7 +107,7 @@ fun BannerVideoScreen(modifier: Modifier = Modifier) {
                 lifecycleOwner = lifecycleOwner,
             )
         },
-        modifier = modifier,
+        modifier = modifier
     )
 }
 
@@ -127,6 +129,7 @@ fun AdManagerInlineAd(
     val adView = remember {
         AdManagerAdView(context).apply {
             setAdSizes(adSize, *additionalSizes)
+            requestVisibleLayout()
             setupDynamicPrice()
         }
     }
@@ -147,6 +150,18 @@ fun AdManagerInlineAd(
         onDispose { adView.destroy() }
     }
 }
+
+/**
+ * Sets minimum width and height to 1 if values are less than 0.
+ *
+ * Used in conjunction with [waitUntilVisible] to prevent [View.getGlobalVisibleRect] from returning
+ * false due to the width or height measuring as 0.
+ */
+fun View.requestVisibleLayout() = apply {
+    if (minimumWidth <= 0) minimumWidth = 1
+    if (minimumHeight <= 0) minimumHeight = 1
+}
+
 
 /**
  * Suspend the current coroutine until the target View is visible on screen

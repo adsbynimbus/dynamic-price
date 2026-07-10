@@ -1,6 +1,7 @@
 package com.adsbynimbus.dynamicprice.sample
 
 import android.util.Log
+import android.view.View
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.LoadAdError
 
