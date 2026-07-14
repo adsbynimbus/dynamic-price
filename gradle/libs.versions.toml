@@ -1,7 +1,7 @@
 [versions]
 android = "9.2.1"
 dokka = "2.2.0"
-kotlin = "2.4.0"
+kotlin = "2.4.10"
 
 ads-google = "25.4.0"
 ads-google-nextgen = "1.2.1"
