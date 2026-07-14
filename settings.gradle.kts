@@ -49,7 +49,7 @@ gradle.beforeProject {
     buildscript.configurations.configureEach {
         resolutionStrategy.eachDependency {
             if (requested.group == "com.fasterxml.jackson.core") {
-                useVersion(if (requested.module.name == "jackson-annotations") "2.22" else "2.22.0")
+                useVersion(if (requested.module.name == "jackson-annotations") "2.22" else "2.22.1")
                 because("Fixes CWE-918 (SSRF)")
             }
         }
