@@ -4,16 +4,18 @@ package com.adsbynimbus.google
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Bundle
-import android.util.Log
-import android.view.ViewGroup
-import androidx.collection.LruCache
-import androidx.core.view.doOnAttach
+import androidx.core.view.doOnLayout
 import androidx.core.view.updateLayoutParams
-import androidx.lifecycle.findViewTreeLifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import com.adsbynimbus.*
+import com.adsbynimbus.dynamicprice.DynamicPriceAd
+import com.adsbynimbus.dynamicprice.dynamicPriceAd
+import com.adsbynimbus.dynamicprice.internal.AdControllerCleanupListener
+import com.adsbynimbus.dynamicprice.internal.AdManagerControllerListener
+import com.adsbynimbus.dynamicprice.internal.DynamicPriceRenderer
+import com.adsbynimbus.dynamicprice.internal.maybeClearInterstitial
+import com.adsbynimbus.dynamicprice.internal.renderInline
+import com.adsbynimbus.dynamicprice.internal.targetView
 import com.adsbynimbus.internal.*
-import com.adsbynimbus.openrtb.request.BidRequest
 import com.adsbynimbus.render.*
 import com.adsbynimbus.render.Renderer.Companion.loadBlockingAd
 import com.adsbynimbus.request.NimbusResponse
@@ -24,10 +26,7 @@ import com.google.android.gms.ads.rewarded.RewardItem
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd
 import kotlinx.coroutines.*
-import kotlinx.serialization.*
-import kotlin.coroutines.cancellation.CancellationException
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
+import java.lang.ref.WeakReference
 
 /**
  * App Event handler for the Nimbus SDK for [com.google.android.gms.ads.admanager.AdManagerAdView] and
@@ -51,62 +50,29 @@ import kotlin.coroutines.resumeWithException
  * @param info the event payload
  * @return true if the event was for the Nimbus SDK.
  */
-fun AdManagerAdView.handleEventForNimbus(name: String, info: String): Boolean = when (name) {
+fun AdManagerAdView.handleEventForNimbus(name: String, info: String): Boolean = when(name) {
     "na_render" -> true.also {
-        context.lifecycleOrNimbusScope.launch(Dispatchers.Main.immediate) {
-            runCatching {
-                nimbusAdController?.destroy()
-                val renderingInfo = jsonSerializer.decodeFromString<RenderEvent>(serializer(), info)
-                val nimbusAd = dynamicPriceAdCache.remove(renderingInfo.auctionId)
-                if (nimbusAd == null) adListener.onAdFailedToLoad(
-                    LoadAdError(-7, "Ad not found in cache".asErrorMessage, Nimbus.sdkName, null, null)
-                ) else doOnAttach {
-                    runCatching {
-                        val adView = NimbusAdView(context)
-                        val adLayout = getChildAt(0) as ViewGroup
-                        adLayout.addView(adView)
-                        adSize?.let { adSize ->
-                            adView.updateLayoutParams {
-                                adSize.getWidthInPixels(context).takeIf { it > 0 }?.let { width = it }
-                                adSize.getHeightInPixels(context).takeIf { it > 0 }?.let { height = it }
-                            }
+        DynamicPriceRenderer.render(info) { nimbusAd, clickEvent ->
+            val container = targetView
+            nimbusAd.renderInline(container).apply {
+                listeners.add(
+                    AdManagerControllerListener(this, clickEvent, adListener = adListener),
+                )
+                view?.addOnAttachStateChangeListener(
+                    AdControllerCleanupListener(
+                        controller = this, rootRef = WeakReference(this@handleEventForNimbus),
+                    )
+                )
+                if (nimbusAd.type() == "video") {
+                    container.getChildAt(0)?.doOnLayout { webView ->
+                        view?.updateLayoutParams {
+                            height = webView.height
+                            width = webView.width
                         }
-                        findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
-                            try {
-                                nimbusAdController = adView.render(nimbusAd).apply {
-                                    listeners.add(
-                                        AdManagerControllerListener(
-                                            renderEvent = renderingInfo,
-                                            adListener = adListener,
-                                        )
-                                    )
-
-                                    listeners.add(object : AdController.Listener {
-                                        override fun onAdEvent(adEvent: AdEvent) {
-                                            if (adEvent == AdEvent.DESTROYED) cancel("Ad Destroyed")
-                                        }
-
-                                        override fun onError(error: NimbusError) {
-                                            cancel(error.message ?: "AdController error")
-                                        }
-                                    })
-                                }
-                                awaitCancellation()
-                            } catch (e: Exception) {
-                                if (e !is CancellationException) adListener.onAdFailedToLoad(
-                                    LoadAdError(-8, "Error Rendering Ad".asErrorMessage, Nimbus.sdkName, null, null)
-                                )
-                            } finally {
-                                nimbusAdController?.destroy()
-                            }
-                        }
-                    }.onFailure {
-                        adListener.onAdFailedToLoad(
-                            LoadAdError(-8, "Google layout error".asErrorMessage, Nimbus.sdkName, null, null)
-                        )
                     }
                 }
-            }.onFailure { throwable -> log(Log.WARN, throwable.message.asErrorMessage) }
+                responseInfo?.responseExtras?.dynamicPriceAd = DynamicPriceAd(this)
+            }
         }
     }
     else -> false
@@ -143,55 +109,25 @@ fun AdManagerAdView.handleEventForNimbus(name: String, info: String): Boolean = 
  */
 fun <T : InterstitialAd> T.handleEventForNimbus(name: String, info: String): Boolean = when (name) {
     "na_render" -> true.also {
-        runCatching {
-            val renderingInfo = jsonSerializer.decodeFromString<RenderEvent>(serializer(), info)
-            val nimbusAd = dynamicPriceAdCache.remove(renderingInfo.auctionId)
-            val original = fullScreenContentCallback
-            fullScreenContentCallback = object : FullScreenContentCallback() {
-                override fun onAdClicked() {
-                    original?.onAdClicked()
-                }
-
-                override fun onAdDismissedFullScreenContent() {
-                    original?.onAdDismissedFullScreenContent()
-                }
-
-                override fun onAdFailedToShowFullScreenContent(p0: AdError) {
-                    original?.onAdFailedToShowFullScreenContent(p0)
-                }
-
-                override fun onAdImpression() {
-                    original?.onAdImpression()
-                }
-
-                override fun onAdShowedFullScreenContent() {
-                    Platform.doOnNextActivity { activity ->
-                        val controller = nimbusAd?.let {
-                            activity.loadBlockingAd(it)?.apply {
-                                listeners.add(AdManagerControllerListener(
-                                    renderingInfo,
-                                    activity,
-                                    fullScreenContentCallback = fullScreenContentCallback
-                                ))
-                            }
-                        }
-                        if (controller != null) controller.start() else {
-                            activity.destroy()
-                            fullScreenContentCallback?.onAdFailedToShowFullScreenContent(
-                                AdError(-6, "Controller was null".asErrorMessage, Nimbus.sdkName)
-                            )
-                        }
-                    }
-                    original?.onAdShowedFullScreenContent()
-                }
-            }
-        }.onFailure {
-            it.message.asErrorMessage.also { message -> log(Log.WARN, message) }.run {
-                fullScreenContentCallback?.onAdFailedToShowFullScreenContent(AdError(-6, this, Nimbus.sdkName))
+        DynamicPriceRenderer.render(info) { nimbusAd, clickEvent ->
+            Platform.currentActivity.get()!!.application.loadBlockingAd(nimbusAd)!!.apply {
+                listeners.add(
+                    AdManagerControllerListener(this, clickEvent, true, fullScreenContentCallback),
+                )
+                responseInfo.responseExtras.dynamicPriceAd = DynamicPriceAd(this)
             }
         }
     }
-
+    "na_show" -> false.also {
+        DynamicPriceRenderer.renderScope.launch(Dispatchers.Main) {
+            responseInfo.responseExtras.dynamicPriceAd?.adController?.start() ?: run {
+                fullScreenContentCallback?.onAdFailedToShowFullScreenContent(
+                    AdError(-6, "Nimbus Interstitial failed to show", Nimbus.sdkName)
+                )
+                maybeClearInterstitial()
+            }
+        }
+    }
     else -> false
 }
 
@@ -317,92 +253,11 @@ interface NimbusRewardCallback {
     fun onError(nimbusError: NimbusError)
 }
 
-
-private val String?.asErrorMessage get() = "Error Rendering Dynamic Price Nimbus Ad [$this]"
-
-private fun Activity.destroy() {
-    finish()
-    overridePendingTransition(0, 0)
-}
-
 /** Internal cache of Nimbus Ads for use with Dynamic Price */
-val dynamicPriceAdCache = LruCache<String, NimbusAd>(10)
-
-internal suspend inline fun ViewGroup.render(ad: NimbusAd) = suspendCancellableCoroutine<AdController> { continuation ->
-    var lifecycleScopeAdController: AdController? = null
-
-    Renderer.loadAd(ad, this@render, object : Renderer.Listener, NimbusError.Listener {
-        override fun onAdRendered(controller: AdController) {
-            if (continuation.isActive) lifecycleScopeAdController =
-                controller.also { continuation.resume(it) } else controller.destroy()
-        }
-
-        override fun onError(error: NimbusError) {
-            if (continuation.isActive) continuation.resumeWithException(error)
-        }
-    })
-
-    continuation.invokeOnCancellation {
-        lifecycleScopeAdController?.destroy()
-    }
-}
-
+val dynamicPriceAdCache by DynamicPriceRenderer::adCache
 
 inline var BaseAdView.nimbusAdController: AdController?
-    get() = getTag(com.adsbynimbus.render.R.id.controller) as? AdController
-    internal set(controller) {
-        setTag(com.adsbynimbus.render.R.id.controller, controller)
+    get() = responseInfo?.responseExtras?.dynamicPriceAd?.adController
+    internal set(_) {
+        /* no-op */
     }
-
-internal class AdManagerControllerListener(
-    val renderEvent: RenderEvent,
-    val activity: Activity? = null,
-    val fullScreenContentCallback: FullScreenContentCallback? = null,
-    val adListener: AdListener? = null,
-) : AdController.Listener {
-
-    override fun onAdEvent(adEvent: AdEvent) {
-        when (adEvent) {
-            AdEvent.CLICKED -> {
-                renderEvent.trackClick()
-                fullScreenContentCallback?.onAdClicked()
-                adListener?.onAdClicked()
-            }
-
-            AdEvent.DESTROYED -> {
-                activity?.destroy()
-                adListener?.onAdClosed()
-            }
-
-            else -> return
-        }
-    }
-
-    override fun onError(error: NimbusError) {
-        log(Log.WARN, error.message.asErrorMessage)
-        activity?.destroy()
-        fullScreenContentCallback?.onAdFailedToShowFullScreenContent(
-            AdError(
-                -7,
-                error.message.asErrorMessage,
-                Nimbus.sdkName
-            )
-        )
-    }
-}
-
-internal fun RenderEvent.trackClick() = nimbusScope.launch(Dispatchers.IO) {
-    Fireable(googleClickEvent).fireTracker(onFailure = {
-        log(Log.WARN, "Error firing Google click tracker")
-    }).also { responseCode ->
-        if (responseCode in 200..399) log(Log.VERBOSE, "Successfully fired Google click tracker")
-    }
-}
-
-internal val jsonSerializer = BidRequest.lenientSerializer
-
-@Serializable
-internal data class RenderEvent(
-    @SerialName("na_id") val auctionId: String,
-    @SerialName("ga_click") val googleClickEvent: String,
-)
