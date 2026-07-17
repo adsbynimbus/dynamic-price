@@ -11,6 +11,8 @@ import android.webkit.WebView
 import androidx.annotation.WorkerThread
 import androidx.collection.LruCache
 import androidx.core.view.allViews
+import androidx.core.view.children
+import androidx.core.view.isEmpty
 import com.adsbynimbus.*
 import com.adsbynimbus.dynamicprice.*
 import com.adsbynimbus.internal.*
@@ -33,37 +35,34 @@ internal class DynamicPriceRenderer(
     @SerialName("na_id") val auctionId: String,
     @SerialName("ga_click") val clickTracker: String,
 ) {
-    @Transient val response = adCache[auctionId]!!
-
     companion object {
         fun render(
             ad: Ad,
             data: String?,
             publisherListener: AdController.Listener?,
             render: suspend (NimbusResponse) -> AdController,
-        ): DynamicPriceRenderer? {
-            if (data == null) {
-                log(Log.WARN, "na_render data empty - please review the Nimbus creative setup in Ad Manager")
-                return null
-            }
-            val renderer = runCatching { jsonSerializer.decodeFromString(serializer(), data) }
-            renderScope.launch(Dispatchers.Main) {
-                renderer.onSuccess {
-                    ad.dynamicPriceAd = DynamicPriceAd(render(it.response).apply {
-                        attachDynamicPriceListener(ad, it.clickTracker, renderScope)
-                        publisherListener?.let { listeners.add(it) }
-                    })
-                }.onFailure {
-                    publisherListener?.onError(
-                        NimbusError(
-                            errorType = NimbusError.ErrorType.RENDERER_ERROR,
-                            message = "Failed to render dynamic price ad",
-                            cause = it,
+        ): NimbusResponse? {
+            val event = runCatching { jsonSerializer.decodeFromString(serializer(), data!!) }
+                .getOrNull() ?: return null
+            return adCache[event.auctionId]?.also { response ->
+                renderScope.launch(Dispatchers.Main) {
+                    runCatching {
+                        val controller = render(response).apply {
+                            attachDynamicPriceListener(ad, event.clickTracker, renderScope)
+                            publisherListener?.let { listeners.add(it) }
+                        }
+                        ad.dynamicPriceAd = DynamicPriceAd(controller)
+                    }.onFailure { error ->
+                        publisherListener?.onError(
+                            NimbusError(
+                                errorType = NimbusError.ErrorType.RENDERER_ERROR,
+                                message = "Failed to render dynamic price ad",
+                                cause = error,
+                            ),
                         )
-                    )
+                    }
                 }
             }
-            return renderer.getOrNull()
         }
 
         fun AdController.attachDynamicPriceListener(
@@ -147,8 +146,10 @@ internal value class OneShotConnection(val connection: HttpURLConnection): AutoC
     inline val responseCode: Int get() = runCatching { connection.responseCode }.getOrDefault(-1)
 }
 
-internal inline val View.webViewParent: ViewGroup
-    get() = allViews.filterIsInstance<WebView>().first().parent as ViewGroup
+internal inline val View.targetView: ViewGroup
+    get() = allViews.filterIsInstance<ViewGroup>().first { viewGroup ->
+        viewGroup.isEmpty() || viewGroup.children.any { it is WebView }
+    }
 
 /** Renders a Nimbus Ad into the provided ViewGroup */
 internal suspend inline fun NimbusAd.renderInline(container: ViewGroup): AdController {
