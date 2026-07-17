@@ -40,16 +40,17 @@ public fun BannerAd.handleEventForNimbus(
     name: String,
     data: String?,
     listener: AdController.Listener? = null,
-    activity: Activity? = Platform.currentActivity.get(),
+    activity: Activity? = null,
 ): NimbusResponse? = when(name) {
     "na_render" -> DynamicPriceRenderer.render(this, data, listener) { nimbusAd ->
+        val context = (activity?.takeUnless { it.isDestroyed } ?: Platform.currentActivity.get())
         @Suppress("Deprecation") // Revisit this on next SDK update
-        val container = getView(activity!!).targetView
+        val container = getView(context!!).targetView
         /*
             Creating the NimbusAdView with an activity context before rendering fixes a crash
             that occurs when clicking on a companion ad.
          */
-        val nimbusAdView = NimbusAdView(activity)
+        val nimbusAdView = NimbusAdView(context)
         nimbusAd.renderInline(nimbusAdView).apply {
             // A NimbusAdView created outside the Renderer must be added to the container
             container.addView(nimbusAdView)
@@ -78,10 +79,11 @@ public fun InterstitialAd.handleEventForNimbus(
     name: String,
     data: String?,
     listener: AdController.Listener? = null,
-    activity: Activity? = Platform.currentActivity.get(),
+    activity: Activity? = null,
 ): NimbusResponse? = when (name) {
     "na_render" -> DynamicPriceRenderer.render(this, data, listener) { nimbusAd ->
-        activity!!.loadBlockingAd(nimbusAd)!!
+        val context = (activity?.takeUnless { it.isDestroyed } ?: Platform.currentActivity.get())
+        context!!.loadBlockingAd(nimbusAd)!!
     }
     "na_show" -> with(DynamicPriceRenderer) {
         renderScope.launch(Dispatchers.Main) {
