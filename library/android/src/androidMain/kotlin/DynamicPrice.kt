@@ -17,6 +17,7 @@ import com.google.android.libraries.ads.mobile.sdk.common.LoadAdError.ErrorCode.
 import com.google.android.libraries.ads.mobile.sdk.interstitial.InterstitialAd
 import com.google.android.libraries.ads.mobile.sdk.rewarded.RewardedAd
 import kotlinx.coroutines.*
+import java.lang.ref.WeakReference
 
 /** Appends Nimbus Key Values to the Ad Manager request and caches the ad for rendering. */
 public fun <T : BaseAdRequestBuilder<T>> BaseAdRequestBuilder<T>.applyDynamicPrice(
@@ -45,7 +46,8 @@ public fun BannerAd.handleEventForNimbus(
     "na_render" -> DynamicPriceRenderer.render(this, data, listener) { nimbusAd ->
         val context = (activity?.takeUnless { it.isDestroyed } ?: Platform.currentActivity.get())
         @Suppress("Deprecation") // Revisit this on next SDK update
-        val container = getView(context!!).targetView
+        val root = getView(context!!)
+        val container = root.targetView
         /*
             Creating the NimbusAdView with an activity context before rendering fixes a crash
             that occurs when clicking on a companion ad.
@@ -54,6 +56,9 @@ public fun BannerAd.handleEventForNimbus(
         nimbusAd.renderInline(nimbusAdView).apply {
             // A NimbusAdView created outside the Renderer must be added to the container
             container.addView(nimbusAdView)
+            view?.addOnAttachStateChangeListener(
+                AdControllerCleanupListener(controller = this, rootRef = WeakReference(root))
+            )
             if (nimbusAd.type() != "video") return@apply
             container.getChildAt(0)?.doOnLayout { webView ->
                 view?.updateLayoutParams {
