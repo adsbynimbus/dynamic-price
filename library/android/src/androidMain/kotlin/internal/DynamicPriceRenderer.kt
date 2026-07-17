@@ -11,6 +11,8 @@ import android.webkit.WebView
 import androidx.annotation.WorkerThread
 import androidx.collection.LruCache
 import androidx.core.view.allViews
+import androidx.core.view.children
+import androidx.core.view.isEmpty
 import com.adsbynimbus.*
 import com.adsbynimbus.dynamicprice.*
 import com.adsbynimbus.internal.*
@@ -144,8 +146,10 @@ internal value class OneShotConnection(val connection: HttpURLConnection): AutoC
     inline val responseCode: Int get() = runCatching { connection.responseCode }.getOrDefault(-1)
 }
 
-internal inline val View.webViewParent: ViewGroup
-    get() = allViews.filterIsInstance<WebView>().first().parent as ViewGroup
+internal inline val View.targetView: ViewGroup
+    get() = allViews.filterIsInstance<ViewGroup>().first { viewGroup ->
+        viewGroup.isEmpty() || viewGroup.children.any { it is WebView }
+    }
 
 /** Renders a Nimbus Ad into the provided ViewGroup */
 internal suspend inline fun NimbusAd.renderInline(container: ViewGroup): AdController {

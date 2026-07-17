@@ -44,7 +44,7 @@ public fun BannerAd.handleEventForNimbus(
 ): NimbusResponse? = when(name) {
     "na_render" -> DynamicPriceRenderer.render(this, data, listener) { nimbusAd ->
         @Suppress("Deprecation") // Revisit this on next SDK update
-        val container = getView(activity!!).webViewParent
+        val container = getView(activity!!).targetView
         /*
             Creating the NimbusAdView with an activity context before rendering fixes a crash
             that occurs when clicking on a companion ad.
