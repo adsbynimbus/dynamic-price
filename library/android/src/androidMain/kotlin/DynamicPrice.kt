@@ -41,31 +41,29 @@ public fun BannerAd.handleEventForNimbus(
     data: String?,
     listener: AdController.Listener? = null,
     activity: Activity? = Platform.currentActivity.get(),
-): NimbusResponse? {
-    if (name == "na_render") {
-         return DynamicPriceRenderer.render(this, data, listener) { nimbusAd ->
-            @Suppress("Deprecation") // Revisit this on next SDK update
-            getView(activity!!).webViewParent.let {
-                /*
-                    Creating the NimbusAdView with an activity context before rendering fixes a crash
-                    that occurs when clicking on a companion ad.
-                 */
-                val nimbusAdView = NimbusAdView(activity)
-                nimbusAd.renderInline(nimbusAdView).apply {
-                    // A NimbusAdView created outside the Renderer must be added to the container
-                    it.addView(nimbusAdView)
-                    if (nimbusAd.type() != "video") return@apply
-                    it.getChildAt(0)?.doOnLayout { webView ->
-                        view?.updateLayoutParams {
-                            height = webView.height
-                            width = webView.width
-                        }
+): NimbusResponse? = when(name) {
+    "na_render" -> DynamicPriceRenderer.render(this, data, listener) { nimbusAd ->
+        @Suppress("Deprecation") // Revisit this on next SDK update
+        getView(activity!!).webViewParent.let {
+            /*
+                Creating the NimbusAdView with an activity context before rendering fixes a crash
+                that occurs when clicking on a companion ad.
+             */
+            val nimbusAdView = NimbusAdView(activity)
+            nimbusAd.renderInline(nimbusAdView).apply {
+                // A NimbusAdView created outside the Renderer must be added to the container
+                it.addView(nimbusAdView)
+                if (nimbusAd.type() != "video") return@apply
+                it.getChildAt(0)?.doOnLayout { webView ->
+                    view?.updateLayoutParams {
+                        height = webView.height
+                        width = webView.width
                     }
                 }
             }
-        }?.response
+        }
     }
-    return null
+    else -> null
 }
 
 /**
@@ -82,12 +80,12 @@ public fun InterstitialAd.handleEventForNimbus(
     data: String?,
     listener: AdController.Listener? = null,
     activity: Activity? = Platform.currentActivity.get(),
-): NimbusResponse? {
-    when (name) {
-        "na_render" -> return DynamicPriceRenderer.render(this, data, listener) { nimbusAd ->
-            activity!!.loadBlockingAd(nimbusAd)!!
-        }?.response
-        "na_show" -> DynamicPriceRenderer.renderScope.launch(Dispatchers.Main) {
+): NimbusResponse? = when (name) {
+    "na_render" -> DynamicPriceRenderer.render(this, data, listener) { nimbusAd ->
+        activity!!.loadBlockingAd(nimbusAd)!!
+    }
+    "na_show" -> with(DynamicPriceRenderer) {
+        renderScope.launch(Dispatchers.Main) {
             dynamicPriceAd?.adController?.start() ?: run {
                 adEventCallback?.onAdFailedToShowFullScreenContent(
                     FullScreenContentError(
@@ -99,8 +97,9 @@ public fun InterstitialAd.handleEventForNimbus(
                 DynamicPriceRenderer.maybeClearInterstitial(activity)
             }
         }
+        null
     }
-    return null
+    else -> null
 }
 
 /** Loads a RewardedAd and conditionally wraps the response if a Nimbus bid is present */
