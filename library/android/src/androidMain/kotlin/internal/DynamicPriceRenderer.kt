@@ -25,6 +25,7 @@ import kotlinx.coroutines.*
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
 import java.lang.AutoCloseable
+import java.lang.ref.WeakReference
 import java.net.*
 import kotlin.coroutines.*
 import kotlin.time.Duration
@@ -167,4 +168,20 @@ internal suspend inline fun NimbusAd.renderInline(container: ViewGroup): AdContr
             },
         )
     }
+}
+
+internal class AdControllerCleanupListener(
+    val controller: AdController,
+    val rootRef: WeakReference<View>,
+): View.OnAttachStateChangeListener {
+    override fun onViewDetachedFromWindow(v: View) {
+        v.post {
+            if (rootRef.get()?.parent == null) {
+                controller.destroy()
+                v.removeOnAttachStateChangeListener(this)
+            }
+        }
+    }
+
+    override fun onViewAttachedToWindow(v: View) { /* no-op */ }
 }
