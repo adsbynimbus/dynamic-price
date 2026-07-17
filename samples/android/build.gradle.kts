@@ -79,6 +79,8 @@ dependencies {
     implementation(libs.androidx.lifecycle)
     implementation(libs.androidx.startup)
 
+    debugImplementation(libs.leakcanary)
+
     constraints {
         implementation(libs.okio)
         implementation(libs.protobuf) {
