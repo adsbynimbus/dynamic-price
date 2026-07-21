@@ -9,8 +9,7 @@ import androidx.core.view.updateLayoutParams
 import com.adsbynimbus.*
 import com.adsbynimbus.dynamicprice.DynamicPriceAd
 import com.adsbynimbus.dynamicprice.dynamicPriceAd
-import com.adsbynimbus.dynamicprice.internal.AdControllerCleanupListener
-import com.adsbynimbus.dynamicprice.internal.AdManagerControllerListener
+import com.adsbynimbus.dynamicprice.internal.DynamicPriceEventHandler
 import com.adsbynimbus.dynamicprice.internal.DynamicPriceRenderer
 import com.adsbynimbus.dynamicprice.internal.maybeClearInterstitial
 import com.adsbynimbus.dynamicprice.internal.renderInline
@@ -56,12 +55,11 @@ fun AdManagerAdView.handleEventForNimbus(name: String, info: String): Boolean = 
             val container = targetView
             nimbusAd.renderInline(container).apply {
                 listeners.add(
-                    AdManagerControllerListener(this, clickEvent, adListener = adListener),
-                )
-                view?.addOnAttachStateChangeListener(
-                    AdControllerCleanupListener(
-                        controller = this, rootRef = WeakReference(this@handleEventForNimbus),
-                    )
+                    DynamicPriceEventHandler(
+                        controller = this,
+                        googleClickTracker = clickEvent,
+                        adViewRef = WeakReference(this@handleEventForNimbus),
+                    ),
                 )
                 if (nimbusAd.type() == "video") {
                     container.getChildAt(0)?.doOnLayout { webView ->
@@ -112,7 +110,11 @@ fun <T : InterstitialAd> T.handleEventForNimbus(name: String, info: String): Boo
         DynamicPriceRenderer.render(info) { nimbusAd, clickEvent ->
             Platform.currentActivity.get()!!.application.loadBlockingAd(nimbusAd)!!.apply {
                 listeners.add(
-                    AdManagerControllerListener(this, clickEvent, true, fullScreenContentCallback),
+                    DynamicPriceEventHandler(
+                        controller = this,
+                        googleClickTracker = clickEvent,
+                        interstitialRef = WeakReference(this@handleEventForNimbus),
+                    ),
                 )
                 responseInfo.responseExtras.dynamicPriceAd = DynamicPriceAd(this)
             }

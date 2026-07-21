@@ -11,16 +11,19 @@ import android.webkit.WebView
 import androidx.annotation.WorkerThread
 import androidx.collection.LruCache
 import androidx.core.view.allViews
+import androidx.core.view.ancestors
 import androidx.core.view.children
 import androidx.core.view.isEmpty
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.adsbynimbus.*
 import com.adsbynimbus.internal.*
 import com.adsbynimbus.render.*
 import com.adsbynimbus.request.NimbusResponse
 import com.google.android.gms.ads.AdActivity
 import com.google.android.gms.ads.AdError
-import com.google.android.gms.ads.AdListener
-import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.BaseAdView
+import com.google.android.gms.ads.interstitial.InterstitialAd
 import kotlinx.coroutines.*
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
@@ -60,7 +63,6 @@ internal class DynamicPriceRenderer(
     }
 }
 
-
 fun maybeClearInterstitial(activity: Activity? = Platform.currentActivity.get()) {
     if (activity is AdActivity) activity.finishWithoutAnimation() else {
         Platform.doOnNextActivity {
@@ -93,14 +95,49 @@ internal value class OneShotConnection(val connection: HttpURLConnection): AutoC
     inline val responseCode: Int get() = runCatching { connection.responseCode }.getOrDefault(-1)
 }
 
-internal class AdManagerControllerListener(
-    val adController: AdController,
+internal class DynamicPriceEventHandler(
+    val controller: AdController,
     val googleClickTracker: String,
-    val isInterstitial: Boolean = false,
-    val fullScreenContentCallback: FullScreenContentCallback? = null,
-    val adListener: AdListener? = null,
+    val adViewRef: WeakReference<BaseAdView> = WeakReference(null),
+    val interstitialRef: WeakReference<InterstitialAd> = WeakReference(null),
     val coroutineScope: CoroutineScope = DynamicPriceRenderer.renderScope,
-) : AdController.Listener {
+) : AdController.Listener, View.OnAttachStateChangeListener {
+
+    val isInterstitial = interstitialRef.get() != null
+    var lifecycleJob: Job? = null
+
+    init {
+        if (!isInterstitial) controller.view?.let {
+            it.addOnAttachStateChangeListener(this)
+            if (it.isAttachedToWindow) it.startLifecycleJob()
+        }
+    }
+
+    inline val skipDestroy get() = CancellationException("na")
+
+    fun View.startLifecycleJob() {
+        lifecycleJob = findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+            try {
+                awaitCancellation()
+            } catch (e: Exception) {
+                if (e.message != "na") controller.destroy()
+            }
+        }
+    }
+
+    override fun onViewAttachedToWindow(v: View) {
+        lifecycleJob?.cancel(skipDestroy)
+        v.startLifecycleJob()
+    }
+
+    override fun onViewDetachedFromWindow(v: View) {
+        v.post {
+            if (adViewRef.get()?.let { v.ancestors.contains(it) } == false) {
+                controller.destroy()
+                v.removeOnAttachStateChangeListener(this)
+            }
+        }
+    }
 
     override fun onAdEvent(adEvent: AdEvent) {
         when (adEvent) {
@@ -111,18 +148,21 @@ internal class AdManagerControllerListener(
                         else -> log(Log.WARN, "Error firing Google click tracker")
                     }
                 }
-                fullScreenContentCallback?.onAdClicked()
-                adListener?.onAdClicked()
+                adViewRef.get()?.adListener?.onAdClicked()
+                interstitialRef.get()?.fullScreenContentCallback?.onAdClicked()
             }
-            AdEvent.DESTROYED -> if (isInterstitial) maybeClearInterstitial()
+            AdEvent.DESTROYED -> if (isInterstitial) maybeClearInterstitial() else {
+                lifecycleJob?.cancel(skipDestroy)
+                controller.view?.removeOnAttachStateChangeListener(this)
+            }
             else -> return
         }
     }
 
     override fun onError(error: NimbusError) {
-        adController.destroy()
+        controller.destroy()
         val errorMessage = "Error Rendering Dynamic Price Nimbus Ad [${error.message}]"
-        fullScreenContentCallback?.onAdFailedToShowFullScreenContent(
+        interstitialRef.get()?.fullScreenContentCallback?.onAdFailedToShowFullScreenContent(
             AdError(-7, errorMessage, Nimbus.sdkName)
         )
         log(Log.WARN, errorMessage)
@@ -150,19 +190,3 @@ internal suspend inline fun NimbusAd.renderInline(container: ViewGroup): AdContr
             },
         )
     }
-
-internal class AdControllerCleanupListener(
-    val controller: AdController,
-    val rootRef: WeakReference<View>,
-): View.OnAttachStateChangeListener {
-    override fun onViewDetachedFromWindow(v: View) {
-        v.post {
-            if (rootRef.get()?.parent == null) {
-                controller.destroy()
-                v.removeOnAttachStateChangeListener(this)
-            }
-        }
-    }
-
-    override fun onViewAttachedToWindow(v: View) { /* no-op */ }
-}
