@@ -34,7 +34,6 @@ extension InterstitialAd {
     ) {
         nimbusInterstitialAd = NimbusDynamicPriceInterstitialAd(
             ad: ad,
-            requestManager: requestManager,
             clientDelegate: delegate,
             gadInterstitialAd: self
         )
@@ -43,11 +42,11 @@ extension InterstitialAd {
     
     /// Call this method inside the `paidEventHandler` property.
     /// - Parameters:
-    ///     - adValue: instance of GADAdValue
+    ///     - adValue: instance of AdValue
+    @available(*, deprecated, message: "updatePrice is no longer used and will be removed in the next feature release")
     public func updatePrice(_ adValue: AdValue) {
-        nimbusInterstitialAd?.updatePrice(adValue)
     }
-    
+
     /// Call this method when you receive a GADAppEventDelegate message of
     /// `interstitialAd(interstitialAd:didReceiveAppEvent:withInfo:)` to see whether Nimbus
     /// can handle the given app event.

@@ -7,14 +7,9 @@
 
 import Foundation
 import NimbusRequestKit
-import GoogleMobileAds
 
 public extension NimbusRequestManager {
+    @available(*, deprecated, message: "notifyError is no longer used and will be removed in the next feature release")
     func notifyError(ad: NimbusAd, error: Error) {
-        let errorCode = RequestError(_nsError: (error as NSError)).code
-        
-        if errorCode == .noFill {
-            notifyLoss(ad: ad, auctionData: NimbusAuctionData(auctionPrice: "-1"))
-        }
     }
 }

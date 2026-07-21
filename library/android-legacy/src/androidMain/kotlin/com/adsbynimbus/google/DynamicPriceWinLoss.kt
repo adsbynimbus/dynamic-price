@@ -1,18 +1,13 @@
+@file:Suppress("Unused")
 package com.adsbynimbus.google
 
-import com.adsbynimbus.internal.nimbusScope
-import com.adsbynimbus.request.AuctionData
 import com.adsbynimbus.request.NimbusResponse
 import com.adsbynimbus.request.RequestManager
-import com.adsbynimbus.request.notifyLoss
-import com.adsbynimbus.request.notifyWin
 import com.google.android.gms.ads.AdValue
 import com.google.android.gms.ads.OnPaidEventListener
 import com.google.android.gms.ads.ResponseInfo
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
+@Deprecated("GoogleAuctionData is longer used and will be removed in the next feature release", ReplaceWith(""))
 class GoogleAuctionData(val ad: NimbusResponse) : OnPaidEventListener {
 
     var price: String = "-1"
@@ -23,19 +18,8 @@ class GoogleAuctionData(val ad: NimbusResponse) : OnPaidEventListener {
     }
 }
 
-fun <T : RequestManager> T.notifyNoFill(auctionData: GoogleAuctionData) = notifyLoss(
-    nimbusResponse = auctionData.ad,
-    auctionData = AuctionData(auctionPrice = auctionData.price)
-)
+@Deprecated("notifyNoFill is longer used and will be removed in the next feature release", ReplaceWith(""))
+fun <T : RequestManager> T.notifyNoFill(auctionData: GoogleAuctionData) = Unit
 
-fun <T : RequestManager> T.notifyImpression(auctionData: GoogleAuctionData, responseInfo: ResponseInfo?) {
-    nimbusScope.launch(Dispatchers.IO) {
-        delay(500)
-        if (auctionData.nimbusWin) notifyWin(auctionData.ad, AuctionData()) else notifyLoss(
-            auctionData.ad, AuctionData(
-                auctionPrice = auctionData.price,
-                winningSource = responseInfo?.mediationAdapterClassName,
-            )
-        )
-    }
-}
+@Deprecated("notifyImpression is longer used and will be removed in the next feature release", ReplaceWith(""))
+fun <T : RequestManager> T.notifyImpression(auctionData: GoogleAuctionData, responseInfo: ResponseInfo?) = Unit
