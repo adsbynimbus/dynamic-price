@@ -144,10 +144,7 @@ fun AdManagerInlineAd(
     }
 
     DisposableEffect(Unit) {
-        onDispose {
-            adView.destroy()
-            adView.dynamicPriceAd?.destroy()
-        }
+        onDispose { adView.destroy() }
     }
 }
 
