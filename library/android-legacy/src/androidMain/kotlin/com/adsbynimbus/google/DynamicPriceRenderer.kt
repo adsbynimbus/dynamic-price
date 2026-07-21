@@ -121,7 +121,7 @@ fun <T : InterstitialAd> T.handleEventForNimbus(name: String, info: String): Boo
         }
     }
     "na_show" -> false.also {
-        DynamicPriceRenderer.renderScope.launch(Dispatchers.Main) {
+        DynamicPriceRenderer.renderScope.launch(Dispatchers.Main.immediate) {
             responseInfo.responseExtras.dynamicPriceAd?.adController?.start() ?: run {
                 fullScreenContentCallback?.onAdFailedToShowFullScreenContent(
                     AdError(-6, "Nimbus Interstitial failed to show", Nimbus.sdkName)
