@@ -12,6 +12,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.*
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.adsbynimbus.dynamicprice.dynamicPriceAd
 import com.adsbynimbus.dynamicprice.sample.AdTypes.AdViewBanner
 import com.adsbynimbus.google.*
 import com.adsbynimbus.lineitem.*

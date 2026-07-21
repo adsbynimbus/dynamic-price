@@ -5,6 +5,7 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import com.adsbynimbus.dynamicprice.dynamicPriceAd
 import com.adsbynimbus.dynamicprice.sample.AdTypes.Interstitial
 import com.adsbynimbus.google.*
 import com.adsbynimbus.lineitem.*
@@ -12,6 +13,7 @@ import com.adsbynimbus.request.NimbusRequest
 import com.adsbynimbus.request.NimbusRequest.Companion.forInterstitialAd
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.admanager.*
+import com.google.android.gms.ads.interstitial.InterstitialAd
 import kotlinx.coroutines.*
 import kotlin.coroutines.*
 
@@ -55,8 +57,9 @@ fun InterstitialScreen(modifier: Modifier = Modifier) {
         Text(modifier = modifier, text = "Unable to resolve Activity")
         return
     }
+    var interstitialAd by remember { mutableStateOf<InterstitialAd?>(null) }
     LaunchedEffect(true) {
-        runCatching {
+        interstitialAd = runCatching {
             loadDynamicPriceInterstitial(
                 context = activity,
                 adUnitId = BuildConfig.ADMANAGER_ADUNIT_ID,
@@ -65,6 +68,10 @@ fun InterstitialScreen(modifier: Modifier = Modifier) {
             )
         }.onSuccess {
             it.show(activity)
-        }
+        }.getOrNull()
+    }
+
+    DisposableEffect(Unit) {
+        onDispose { interstitialAd?.dynamicPriceAd?.destroy() }
     }
 }
