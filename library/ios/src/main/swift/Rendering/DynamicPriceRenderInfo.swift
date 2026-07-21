@@ -1,16 +1,18 @@
 //
-//  NimbusDynamicPriceRenderInfo.swift
-//  NimbusGAMKit
+//  DynamicPriceRenderInfo.swift
+//  DynamicPrice
 //
 //  Created on 23/04/23.
-//  Copyright © 2023 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import Foundation
-import NimbusCoreKit
+import NimbusKit
 
 /// :nodoc:
-struct NimbusDynamicPriceRenderInfo: Codable {
+struct DynamicPriceRenderInfo: Codable {
+    static let jsonDecoder = JSONDecoder()
+    
     let auctionId: String
     let googleClickEventUrl: URL
     
@@ -26,17 +28,12 @@ struct NimbusDynamicPriceRenderInfo: Codable {
     
     init?(info: String?) {
         guard let data = info?.data(using: .utf8) else {
-            Nimbus.shared.logger.log(
-                "Unable to encode render info string to NimbusDynamicPriceRenderInfo",
-                level: .error
-            )
             return nil
         }
         
         do {
-            self = try JSONDecoder().decode(NimbusDynamicPriceRenderInfo.self, from: data)
+            self = try Self.jsonDecoder.decode(DynamicPriceRenderInfo.self, from: data)
         } catch {
-            Nimbus.shared.logger.log("\(error)", level: .error)
             return nil
         }
     }

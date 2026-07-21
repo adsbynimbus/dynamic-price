@@ -1,15 +1,36 @@
 //
 //  NimbusGAMLinearPriceMappingTests.swift
-//  NimbusGAMKitTests
+//  DynamicPriceTests
 //
 //  Created on 6/15/21.
-//  Copyright © 2021 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 @testable import DynamicPrice
 import XCTest
 
 final class NimbusGAMLinearPriceMappingTests: XCTestCase {
+
+    func test_init() {
+        let linearPriceGran = NimbusGAMLinearPriceGranularity(min: 10, max: 200)
+        XCTAssertEqual(linearPriceGran.min, 10)
+        XCTAssertEqual(linearPriceGran.max, 200)
+        XCTAssertEqual(linearPriceGran.step, 20)
+    }
+
+    func test_comparable() {
+        var linearPriceGran1 = NimbusGAMLinearPriceGranularity(min: 10, max: 200)
+        var linearPriceGran2 = NimbusGAMLinearPriceGranularity(min: 20, max: 100)
+        XCTAssertTrue(linearPriceGran1 < linearPriceGran2)
+
+        linearPriceGran1 = NimbusGAMLinearPriceGranularity(min: 10, max: 200)
+        linearPriceGran2 = NimbusGAMLinearPriceGranularity(min: 10, max: 100)
+        XCTAssertEqual(linearPriceGran1, linearPriceGran2)
+
+        linearPriceGran1 = NimbusGAMLinearPriceGranularity(min: 20, max: 100, step: 10)
+        linearPriceGran2 = NimbusGAMLinearPriceGranularity(min: 10, max: 200, step: 20)
+        XCTAssertTrue(linearPriceGran1 > linearPriceGran2)
+    }
 
     func testBannerDefault() {
         let mapping = NimbusGAMLinearPriceMapping.banner()

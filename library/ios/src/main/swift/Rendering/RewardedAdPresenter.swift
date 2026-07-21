@@ -1,14 +1,14 @@
 //
-//  NimbusDynamicPriceRewardedWrapper.swift
-//  Nimbus
+//  RewardedAdPresenter.swift
+//  DynamicPrice
 //
 //  Created on 7/23/23.
-//  Copyright © 2023 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import Foundation
-import NimbusKit
 import GoogleMobileAds
+import NimbusKit
 
 public protocol NimbusRewardedAdPresenterDelegate: AnyObject {
     func didTriggerImpression()
@@ -79,7 +79,7 @@ public final class NimbusRewardedAdPresenter {
             delegate?.didPresentAd()
         } catch {
             Nimbus.shared.logger.log(
-                "NimbusDynamicPriceRenderer: Third-party demand rewarded error: \(error.localizedDescription)",
+                "DynamicPriceRenderer: Third-party demand rewarded error: \(error.localizedDescription)",
                 level: .error
             )
         }
@@ -118,7 +118,7 @@ public final class NimbusRewardedAdPresenter {
 
 /// :nodoc:
 extension NimbusRewardedAdPresenter: AdControllerDelegate {
-    public func didReceiveNimbusEvent(controller: NimbusCoreKit.AdController, event: NimbusCoreKit.NimbusEvent) {
+    public func didReceiveNimbusEvent(controller: AdController, event: NimbusEvent) {
         switch event {
         case .impression:
             delegate?.didTriggerImpression()
@@ -142,7 +142,7 @@ extension NimbusRewardedAdPresenter: AdControllerDelegate {
         }
     }
     
-    public func didReceiveNimbusError(controller: NimbusCoreKit.AdController, error: NimbusCoreKit.NimbusError) {
+    public func didReceiveNimbusError(controller: AdController, error: NimbusError) {
         delegate?.didReceiveError(error: error)
     }
 }

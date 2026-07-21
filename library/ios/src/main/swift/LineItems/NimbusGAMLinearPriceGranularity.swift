@@ -1,12 +1,12 @@
 //
 //  NimbusGAMLinearPriceGranularity.swift
-//  NimbusGAMKit
+//  DynamicPrice
 //
 //  Created on 10/21/20.
-//  Copyright © 2020 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-@_exported import NimbusRequestKit
+import NimbusKit
 
 /**
  * A mapping using a linear step function to generate the keywords

@@ -1,15 +1,16 @@
 //
-//  NimbusDynamicPriceInterstitialAd.swift
-//  NimbusGAMKit
+//  DynamicPriceInterstitialAd.swift
+//  DynamicPrice
+//
 //  Created on 2/16/24
-//  Copyright © 2024 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-import UIKit
 import GoogleMobileAds
 import NimbusKit
+import UIKit
 
-final class NimbusDynamicPriceInterstitialAd: NSObject {
+final class DynamicPriceInterstitialAd: NSObject {
     weak var rootViewController: UIViewController?
     var didPresentGoogleController = false
     
@@ -21,9 +22,7 @@ final class NimbusDynamicPriceInterstitialAd: NSObject {
     
     private var didPresent = false
     private let ad: NimbusAd
-    private var isNimbusWin: Bool { renderInfo != nil }
-    
-    private var renderInfo: NimbusDynamicPriceRenderInfo?
+    private var renderInfo: DynamicPriceRenderInfo?
     private let logger = Nimbus.shared.logger
     
     private var adController: AdController?
@@ -44,7 +43,7 @@ final class NimbusDynamicPriceInterstitialAd: NSObject {
     
     @discardableResult
     func handleEventForNimbus(name: String, info: String?) -> Bool {
-        guard name == "na_render", let info = NimbusDynamicPriceRenderInfo(info: info) else {
+        guard name == "na_render", let info = DynamicPriceRenderInfo(info: info) else {
             return false
         }
         
@@ -59,9 +58,8 @@ final class NimbusDynamicPriceInterstitialAd: NSObject {
     
     /// Make sure this method is called from the main thread
     func present() {
-        guard let rootViewController = gadViewController,
-              didPresentGoogleController, isNimbusWin, !didPresent
-        else {
+        guard renderInfo != nil, let rootViewController = gadViewController,
+              didPresentGoogleController, !didPresent else {
             return
         }
         
@@ -79,7 +77,7 @@ final class NimbusDynamicPriceInterstitialAd: NSObject {
             adController?.start()
         } catch {
             self.logger.log(
-                "NimbusDynamicPriceRenderer: interstitial error: \(error.localizedDescription)",
+                "DynamicPriceRenderer: interstitial error: \(error.localizedDescription)",
                 level: .error
             )
         }
@@ -99,11 +97,11 @@ final class NimbusDynamicPriceInterstitialAd: NSObject {
     
     private func handleClickEvent() {
         guard let gadInterstitialAd else {
-            logger.log("GADInterstitialAd was unexpectedly released before click event could be processed", level: .error)
+            logger.log("InterstitialAd was unexpectedly released before click event could be processed", level: .error)
             return
         }
         guard let renderInfo else {
-            logger.log("NimbusDynamicPriceRenderInfo is not present at click event", level: .error)
+            logger.log("DynamicPriceRenderInfo is not present at click event", level: .error)
             return
         }
 
@@ -115,7 +113,7 @@ final class NimbusDynamicPriceInterstitialAd: NSObject {
 
 // MARK: - AdControllerDelegate
 
-extension NimbusDynamicPriceInterstitialAd: AdControllerDelegate {
+extension DynamicPriceInterstitialAd: AdControllerDelegate {
     func didReceiveNimbusEvent(controller: AdController, event: NimbusEvent) {        
         if event == .clicked {
             handleClickEvent()
@@ -132,9 +130,9 @@ extension NimbusDynamicPriceInterstitialAd: AdControllerDelegate {
     }
 }
 
-// MARK: - GADFullScreenContentDelegate
+// MARK: - FullScreenContentDelegate
 
-extension NimbusDynamicPriceInterstitialAd: FullScreenContentDelegate {
+extension DynamicPriceInterstitialAd: FullScreenContentDelegate {
     func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
         clientDelegate?.ad?(ad, didFailToPresentFullScreenContentWithError: error)
     }
@@ -151,7 +149,7 @@ extension NimbusDynamicPriceInterstitialAd: FullScreenContentDelegate {
         clientDelegate?.adWillPresentFullScreenContent?(ad)
         
         if !didPresentGoogleController {
-            logger.log("Detected GADInterstitialAd.present(fromRootViewController:) was called instead of GADInterstitialAd.presentDynamicPrice(fromRootViewController:)", level: .error)
+            logger.log("Detected InterstitialAd.present(fromRootViewController:) was called instead of InterstitialAd.presentDynamicPrice(fromRootViewController:)", level: .error)
         }
     }
     
@@ -161,17 +159,5 @@ extension NimbusDynamicPriceInterstitialAd: FullScreenContentDelegate {
     
     func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
         clientDelegate?.adDidDismissFullScreenContent?(ad)
-    }
-}
-
-// MARK: - NimbusAdViewControllerDelegate
-
-extension NimbusDynamicPriceInterstitialAd: NimbusAdViewControllerDelegate {
-    func viewWillAppear(animated: Bool) {}
-    func viewDidAppear(animated: Bool) {}
-    func viewWillDisappear(animated: Bool) {}
-    func viewDidDisappear(animated: Bool) {}
-    func didCloseAd(adView: NimbusAdView) {
-        adController?.destroy()
     }
 }

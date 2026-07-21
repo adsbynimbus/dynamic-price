@@ -1,38 +1,38 @@
 //
-//  GADInterstitialAd+Nimbus.swift
-//  NimbusGAMKit
+//  InterstitialAd+Nimbus.swift
+//  DynamicPrice
+//
 //  Created on 2/16/24
-//  Copyright © 2024 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import GoogleMobileAds
-import NimbusCoreKit
-import NimbusRenderKit
+import NimbusKit
 
 extension InterstitialAd {
     private static var nimbusAdKey: Void?
 
-    private var nimbusInterstitialAd: NimbusDynamicPriceInterstitialAd? {
+    private var nimbusInterstitialAd: DynamicPriceInterstitialAd? {
         get {
-            objc_getAssociatedObject(self, &Self.nimbusAdKey) as? NimbusDynamicPriceInterstitialAd
+            objc_getAssociatedObject(self, &Self.nimbusAdKey) as? DynamicPriceInterstitialAd
         }
         set {
             objc_setAssociatedObject(self, &Self.nimbusAdKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
     
-    /// This method initializes nimbus dynamic price for this GADInterstitialAd instance.
+    /// This method initializes nimbus dynamic price for this InterstitialAd instance.
     /// Make sure to call applyDynamicPrice() before any other method below.
     /// - Parameters:
     ///     - ad: NimbusAd to render if Nimbus wins
     ///     - requestManager: A request manager instance
-    ///     - delegate: pass GADFullScreenContentDelegate if you want to receive delegate messages about this interstitial. Do NOT set `fullScreenContentDelegate` property yourself as it would override our proxy, resulting in Nimbus Dynamic Price not working correctly.
+    ///     - delegate: pass FullScreenContentDelegate if you want to receive delegate messages about this interstitial. Do NOT set `fullScreenContentDelegate` property yourself as it would override our proxy, resulting in Nimbus Dynamic Price not working correctly.
     public func applyDynamicPrice(
         ad: NimbusAd,
         requestManager: NimbusRequestManager = NimbusRequestManager(),
         delegate: FullScreenContentDelegate? = nil
     ) {
-        nimbusInterstitialAd = NimbusDynamicPriceInterstitialAd(
+        nimbusInterstitialAd = DynamicPriceInterstitialAd(
             ad: ad,
             clientDelegate: delegate,
             gadInterstitialAd: self
@@ -47,7 +47,7 @@ extension InterstitialAd {
     public func updatePrice(_ adValue: AdValue) {
     }
 
-    /// Call this method when you receive a GADAppEventDelegate message of
+    /// Call this method when you receive a AppEventDelegate message of
     /// `interstitialAd(interstitialAd:didReceiveAppEvent:withInfo:)` to see whether Nimbus
     /// can handle the given app event.
     /// - Parameters:
@@ -60,7 +60,7 @@ extension InterstitialAd {
         return nimbusInterstitialAd?.handleEventForNimbus(name: name, info: info) ?? false
     }
     
-    /// This method calls GADInterstitialAd.present(fromRootViewController:) while making sure
+    /// This method calls InterstitialAd.present(fromRootViewController:) while making sure
     /// the same controller is used for Nimbus rendering (if Nimbus wins).
     ///
     /// Must be called on the main thread. You may call this method even if dynamic price
@@ -83,7 +83,7 @@ extension InterstitialAd {
         
         // setting it right before present() so that we can detect if a user
         // doesn't call this presentation method by observing this value
-        // in delegate: NimbusDynamicPriceInterstitialAd.adWillRender()
+        // in delegate: DynamicPriceInterstitialAd.adWillRender()
         nimbusInterstitialAd?.didPresentGoogleController = true
         present(from: controller)
 
@@ -92,7 +92,7 @@ extension InterstitialAd {
     
     private func validate() -> Bool {
         guard let _ = nimbusInterstitialAd else {
-            Nimbus.shared.logger.log("GADInterstitialAd.applyDynamicPrice was not called", level: .error)
+            Nimbus.shared.logger.log("InterstitialAd.applyDynamicPrice was not called", level: .error)
             return false
         }
         
@@ -100,8 +100,8 @@ extension InterstitialAd {
     }
     
     private func validateDelegate() -> Bool {
-        guard fullScreenContentDelegate is NimbusDynamicPriceInterstitialAd else {
-            Nimbus.shared.logger.log("Custom GADInterstitialAd.fullScreenContentDelegate was set while using Nimbus Dynamic Price implementation. Please pass your delegate in GADInterstitialAd.applyDynamicPrice instead.", level: .error)
+        guard fullScreenContentDelegate is DynamicPriceInterstitialAd else {
+            Nimbus.shared.logger.log("Custom InterstitialAd.fullScreenContentDelegate was set while using Dynamic Price implementation. Please pass your delegate in InterstitialAd.applyDynamicPrice instead.", level: .error)
             return false
         }
         

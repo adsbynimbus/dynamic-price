@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "dynamic-price",
+    name: "DynamicPrice",
     platforms: [.iOS(.v15)],
     products: [
         .library(

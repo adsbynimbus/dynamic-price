@@ -1,16 +1,16 @@
 //
-//  NimbusDynamicPriceBannerAdTests.swift
-//  NimbusGAMKitTests
+//  DynamicPriceBannerAdTests.swift
+//  DynamicPriceTests
+//
 //  Created on 2/28/24
-//  Copyright © 2024 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-import XCTest
 @testable import DynamicPrice
 import GoogleMobileAds
-import NimbusKit
+import XCTest
 
-final class NimbusDynamicPriceBannerAdTests: XCTestCase {
+final class DynamicPriceBannerAdTests: XCTestCase {
 
     let rootVC = UIViewController()
 
@@ -18,7 +18,7 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
         let bannerView = AdManagerBannerView()
         bannerView.rootViewController = rootVC
 
-        var bannerAd: NimbusDynamicPriceBannerAd? = NimbusDynamicPriceBannerAd(ad: nimbusAd, bannerView: bannerView)
+        var bannerAd: DynamicPriceBannerAd? = DynamicPriceBannerAd(ad: nimbusAd, bannerView: bannerView)
 
         bannerAd!.handleEventForNimbus(
             name: "na_render",
@@ -35,7 +35,7 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     func test_attach_adview_at_app_event() {
         let bannerView = AdManagerBannerView()
         bannerView.rootViewController = rootVC
-        let bannerAd = NimbusDynamicPriceBannerAd(
+        let bannerAd = DynamicPriceBannerAd(
             ad: nimbusAd,
             bannerView: bannerView
         )
@@ -45,7 +45,7 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
 
         bannerAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
-        let expectation = XCTestExpectation(description: "attach adView to GAMBannerView")
+        let expectation = XCTestExpectation(description: "attach adView to BannerView")
 
         DispatchQueue.main.async {
             XCTAssertTrue(bannerView.subviews.last is NimbusAdView)
@@ -56,12 +56,12 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     }
 
     func test_click_event_should_fire_google_click_delegate_message() {
-        let clientDelegate = MockGADBannerDelegate()
+        let clientDelegate = MockBannerDelegate()
         let bannerView = AdManagerBannerView()
         bannerView.delegate = clientDelegate
         bannerView.rootViewController = rootVC
 
-        let bannerAd = NimbusDynamicPriceBannerAd(
+        let bannerAd = DynamicPriceBannerAd(
             ad: nimbusAd,
             bannerView: bannerView
         )
@@ -92,11 +92,11 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
 
 
     func test_click_event_wont_fire_google_click_delegate_message_without_bannerview() {
-        let clientDelegate = MockGADBannerDelegate()
+        let clientDelegate = MockBannerDelegate()
         var bannerView: AdManagerBannerView! = AdManagerBannerView()
         bannerView.delegate = clientDelegate
 
-        let bannerAd = NimbusDynamicPriceBannerAd(
+        let bannerAd = DynamicPriceBannerAd(
             ad: nimbusAd,
             bannerView: bannerView
         )
@@ -117,11 +117,11 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     }
 
     func test_click_event_wont_fire_google_click_delegate_message_without_renderinfo() {
-        let clientDelegate = MockGADBannerDelegate()
+        let clientDelegate = MockBannerDelegate()
         let bannerView = AdManagerBannerView()
         bannerView.delegate = clientDelegate
 
-        let bannerAd = NimbusDynamicPriceBannerAd(
+        let bannerAd = DynamicPriceBannerAd(
             ad: nimbusAd,
             bannerView: bannerView
         )
@@ -142,7 +142,7 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
         let bannerView = AdManagerBannerView()
         bannerView.rootViewController = rootVC
 
-        let bannerAd = NimbusDynamicPriceBannerAd(
+        let bannerAd = DynamicPriceBannerAd(
             ad: nimbusAd,
             bannerView: bannerView
         )
@@ -166,7 +166,7 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     func test_detect_root_view_controller_fail_if_bannerview_not_attached_to_hierarchy() {
         let bannerView = AdManagerBannerView()
 
-        let bannerAd = NimbusDynamicPriceBannerAd(
+        let bannerAd = DynamicPriceBannerAd(
             ad: nimbusAd,
             bannerView: bannerView
         )
@@ -180,7 +180,7 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
 
         vc.view.addSubview(bannerView)
 
-        let bannerAd = NimbusDynamicPriceBannerAd(
+        let bannerAd = DynamicPriceBannerAd(
             ad: nimbusAd,
             bannerView: bannerView
         )
@@ -189,36 +189,14 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
         XCTAssertIdentical(bannerAd.detectedViewController, vc)
     }
 
-    private var nimbusAd: NimbusAd {
-        NimbusAd(
-            position: "pos",
-            auctionType: .static,
-            bidRaw: 0,
-            bidInCents: 0,
-            contentType: "",
-            auctionId: "abc",
-            network: "def",
-            markup: "",
-            isInterstitial: false,
-            placementId: "dsf",
-            duration: nil,
-            adDimensions: NimbusAdDimensions(width: 320, height: 50),
-            trackers: nil,
-            isMraid: false,
-            extensions: nil
-        )
-    }
-
-    private var renderInfo: NimbusDynamicPriceRenderInfo {
-        NimbusDynamicPriceRenderInfo(
-            auctionId: "abc",
-            googleClickEventUrl: URL(string: "https://nimbus.co")!
-        )
-    }
-
+    private let nimbusAd: NimbusAd = createNimbusAd(dimensPresent: true)
+    private let renderInfo: DynamicPriceRenderInfo = DynamicPriceRenderInfo(
+        auctionId: "abc",
+        googleClickEventUrl: URL(string: "https://nimbus.co")!
+    )
 }
 
-extension NimbusDynamicPriceRenderInfo {
+extension DynamicPriceRenderInfo {
     var json: String {
         String(decoding: try! JSONEncoder().encode(self), as: UTF8.self)
     }
