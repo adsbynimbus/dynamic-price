@@ -69,7 +69,7 @@ fun AdManagerAdView.handleEventForNimbus(name: String, info: String): Boolean = 
                         }
                     }
                 }
-                responseInfo?.responseExtras?.dynamicPriceAd = DynamicPriceAd(this)
+                dynamicPriceAd = DynamicPriceAd(this)
             }
         }
     }
@@ -116,13 +116,13 @@ fun <T : InterstitialAd> T.handleEventForNimbus(name: String, info: String): Boo
                         interstitialRef = WeakReference(this@handleEventForNimbus),
                     ),
                 )
-                responseInfo.responseExtras.dynamicPriceAd = DynamicPriceAd(this)
+                dynamicPriceAd = DynamicPriceAd(this)
             }
         }
     }
     "na_show" -> false.also {
         DynamicPriceRenderer.renderScope.launch(Dispatchers.Main.immediate) {
-            responseInfo.responseExtras.dynamicPriceAd?.adController?.start() ?: run {
+            dynamicPriceAd?.adController?.start() ?: run {
                 fullScreenContentCallback?.onAdFailedToShowFullScreenContent(
                     AdError(-6, "Nimbus Interstitial failed to show", Nimbus.sdkName)
                 )
@@ -259,7 +259,5 @@ interface NimbusRewardCallback {
 val dynamicPriceAdCache by DynamicPriceRenderer::adCache
 
 inline var BaseAdView.nimbusAdController: AdController?
-    get() = responseInfo?.responseExtras?.dynamicPriceAd?.adController
-    internal set(_) {
-        /* no-op */
-    }
+    get() = dynamicPriceAd?.adController
+    internal set(_) { /* no-op */ }

@@ -26,8 +26,9 @@ class DynamicPriceAd(@PublishedApi internal val adController: AdController) : ja
  * bannerAd?.dynamicPriceAd?.destroy()
  * ```
  */
-inline val BaseAdView.dynamicPriceAd: DynamicPriceAd?
+inline var BaseAdView.dynamicPriceAd: DynamicPriceAd?
     get() = responseInfo?.responseExtras?.dynamicPriceAd
+    internal set(value) { responseInfo?.responseExtras?.dynamicPriceAd = value }
 
 /**
  * Retrieves the Nimbus rendered [DynamicPriceAd] if it won the auction.
@@ -40,8 +41,9 @@ inline val BaseAdView.dynamicPriceAd: DynamicPriceAd?
  * interstitialAd?.dynamicPriceAd?.destroy()
  * ```
  */
-inline val InterstitialAd.dynamicPriceAd: DynamicPriceAd?
+inline var InterstitialAd.dynamicPriceAd: DynamicPriceAd?
     get() = responseInfo.responseExtras.dynamicPriceAd
+    internal set(value) { responseInfo.responseExtras.dynamicPriceAd = value }
 
 @PublishedApi
 internal inline var Bundle.dynamicPriceAd: DynamicPriceAd?
