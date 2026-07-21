@@ -18,7 +18,6 @@ final class NimbusDynamicPriceBannerAd: NSObject {
     
     private var renderInfo: NimbusDynamicPriceRenderInfo?
     private var isNimbusWin: Bool { renderInfo != nil }
-    private var price = "-1"
     private let logger = Nimbus.shared.logger
     
     deinit {
@@ -37,10 +36,6 @@ final class NimbusDynamicPriceBannerAd: NSObject {
         super.init()
     }
     
-    func updatePrice(_ adValue: AdValue) {
-        price = adValue.nimbusPrice
-    }
-    
     @discardableResult
     func handleEventForNimbus(name: String, info: String?) -> Bool {
         guard name == "na_render", let info = NimbusDynamicPriceRenderInfo(info: info) else {
@@ -48,7 +43,6 @@ final class NimbusDynamicPriceBannerAd: NSObject {
         }
         
         renderInfo = info
-        notifyWin()
         DispatchQueue.main.async { [weak self] in self?.attachAdView() }
         
         return true
@@ -74,28 +68,7 @@ final class NimbusDynamicPriceBannerAd: NSObject {
         
         self.adView = adView
     }
-    
-    // MARK: - Notify Win/Loss
-    
-    func scheduleLossNotification() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            if !self.isNimbusWin {
-                self.notifyLoss()
-            }
-        }
-    }
-    
-    func notifyWin() {
-        requestManager.notifyWin(ad: ad, auctionData: NimbusAuctionData())
-    }
-    
-    func notifyLoss() {
-        requestManager.notifyLoss(ad: ad, auctionData: NimbusAuctionData(
-            auctionPrice: price,
-            winningSource: bannerView?.responseInfo?.loadedAdNetworkResponseInfo?.adNetworkClassName
-        ))
-    }
-    
+
     // MARK: - NimbusEvent Handling
     
     func handleClickEvent() {
@@ -133,11 +106,9 @@ final class NimbusDynamicPriceBannerAd: NSObject {
 
 extension NimbusDynamicPriceBannerAd: BannerViewDelegate {
     func bannerView(_ bannerView: BannerView, didFailToReceiveAdWithError error: Error) {
-        requestManager.notifyError(ad: ad, error: error)
     }
     
     func bannerViewDidRecordImpression(_ bannerView: BannerView) {
-        scheduleLossNotification()
     }
 }
 
