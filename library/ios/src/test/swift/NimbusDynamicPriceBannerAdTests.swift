@@ -5,10 +5,9 @@
 //  Copyright © 2024 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-import XCTest
 @testable import DynamicPrice
 import GoogleMobileAds
-import NimbusKit
+import XCTest
 
 final class NimbusDynamicPriceBannerAdTests: XCTestCase {
 

@@ -5,9 +5,9 @@
 //  Copyright © 2024 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-import UIKit
 import GoogleMobileAds
 import NimbusKit
+import UIKit
 
 final class NimbusDynamicPriceInterstitialAd: NSObject {
     weak var rootViewController: UIViewController?

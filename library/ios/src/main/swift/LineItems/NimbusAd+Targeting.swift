@@ -6,8 +6,8 @@
 //  Copyright © 2022 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-@_exported import NimbusRequestKit
 import GoogleMobileAds
+@_exported import NimbusKit
 
 public extension NimbusAd {
 

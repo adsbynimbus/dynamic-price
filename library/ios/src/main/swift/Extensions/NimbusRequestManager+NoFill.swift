@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import NimbusRequestKit
+import NimbusKit
 
 public extension NimbusRequestManager {
     @available(*, deprecated, message: "notifyError is no longer used and will be removed in the next feature release")

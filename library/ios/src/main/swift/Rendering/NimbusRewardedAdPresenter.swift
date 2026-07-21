@@ -7,8 +7,8 @@
 //
 
 import Foundation
-import NimbusKit
 import GoogleMobileAds
+import NimbusKit
 
 public protocol NimbusRewardedAdPresenterDelegate: AnyObject {
     func didTriggerImpression()

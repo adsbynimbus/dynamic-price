@@ -5,9 +5,10 @@
 //  Copyright © 2024 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-import XCTest
+
 @testable import DynamicPrice
 import GoogleMobileAds
+import XCTest
 
 class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
     func test_handle_app_event_not_na_render() {

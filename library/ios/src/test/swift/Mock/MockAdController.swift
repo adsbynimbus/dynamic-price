@@ -5,7 +5,7 @@
 //  Copyright © 2024 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-import NimbusKit
+import DynamicPrice
 import UIKit
 
 class MockAdController: AdController {

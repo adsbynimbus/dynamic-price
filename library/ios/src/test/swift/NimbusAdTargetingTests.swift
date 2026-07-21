@@ -7,7 +7,6 @@
 //
 
 @testable import DynamicPrice
-import NimbusKit
 import GoogleMobileAds
 import XCTest
 

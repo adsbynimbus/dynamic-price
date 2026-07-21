@@ -6,8 +6,8 @@
 //  Copyright © 2020 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-@_exported import NimbusRequestKit
 import Foundation
+import NimbusKit
 
 /// A mapping composed of multiple LinearPriceGranularities in ascending order
 public struct NimbusGAMLinearPriceMapping: NimbusDynamicPriceMapping {
