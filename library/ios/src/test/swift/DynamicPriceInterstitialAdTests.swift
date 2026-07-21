@@ -135,6 +135,6 @@ import Testing
 
     private let renderInfo = DynamicPriceRenderer(
         auctionId: "interstitialAuction1",
-        googleClickEventUrl: URL(string: "https://nimbus.co")!
+        googleClickTracker: URL(string: "https://nimbus.co")!
     )
 }

@@ -209,7 +209,7 @@ struct DynamicPriceBannerAdTests {
     private var renderInfo: DynamicPriceRenderer {
         DynamicPriceRenderer(
             auctionId: "abc",
-            googleClickEventUrl: URL(string: "https://nimbus.co")!
+            googleClickTracker: URL(string: "https://nimbus.co")!
         )
     }
 }

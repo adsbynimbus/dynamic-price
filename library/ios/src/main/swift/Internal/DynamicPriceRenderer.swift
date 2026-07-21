@@ -10,20 +10,43 @@ import Foundation
 import NimbusKit
 
 /// :nodoc:
-struct DynamicPriceRenderer: Codable {
+internal struct DynamicPriceRenderer: Codable {
+
+    class CachedAd: NSObject {
+        let value: NimbusAd
+
+        init(_ ad: NimbusAd) {
+            self.value = ad
+        }
+    }
+
     static let jsonDecoder = JSONDecoder()
-    
+    static let adCache = NSCache<NSString, CachedAd>()
+
+    static func render(data: String?, block: @escaping (NimbusAd, URL) -> Void) {
+        Task {
+            guard let renderer = DynamicPriceRenderer(info: data),
+                  let nimbusAd = DynamicPriceRenderer[renderer.auctionId] else {
+                return
+            }
+
+            await MainActor.run {
+                block(nimbusAd, renderer.googleClickTracker)
+            }
+        }
+    }
+
     let auctionId: String
-    let googleClickEventUrl: URL
-    
+    let googleClickTracker: URL
+
     enum CodingKeys: String, CodingKey {
         case auctionId = "na_id"
-        case googleClickEventUrl = "ga_click"
+        case googleClickTracker = "ga_click"
     }
     
-    init(auctionId: String, googleClickEventUrl: URL) {
+    init(auctionId: String, googleClickTracker: URL) {
         self.auctionId = auctionId
-        self.googleClickEventUrl = googleClickEventUrl
+        self.googleClickTracker = googleClickTracker
     }
     
     init?(info: String?) {
@@ -33,5 +56,18 @@ struct DynamicPriceRenderer: Codable {
         }
 
         self = _self
+    }
+
+    static subscript (_ id: String) -> NimbusAd? {
+        get {
+            Self.adCache.object(forKey: id as NSString)?.value
+        }
+        set(newValue) {
+            if let newValue {
+                Self.adCache.setObject(CachedAd(newValue), forKey: id as NSString)
+            } else {
+                Self.adCache.removeObject(forKey: id as NSString)
+            }
+        }
     }
 }
