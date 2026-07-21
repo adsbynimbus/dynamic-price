@@ -6,36 +6,49 @@
 //  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
+import GoogleMobileAds
+import NimbusKit
+import Testing
 
 @testable import DynamicPrice
-import GoogleMobileAds
-import XCTest
 
-class DynamicPriceInterstitialAdTests: XCTestCase {
-    func test_handle_app_event_not_na_render() {
+@Suite struct DynamicPriceInterstitialAdTests {
+
+    @Test("handle app event not na render")
+    func handle_app_event_not_na_render() {
         let interstitial = DynamicPriceInterstitialAd(ad: createNimbusAd())
 
-        XCTAssertFalse(interstitial.handleEventForNimbus(name: "test", info: nil))
+        #expect(interstitial.handleEventForNimbus(name: "na_render", info: nil) == false)
     }
 
-    func test_handle_app_event_with_invalid_info() {
+    @Test("handle app event with invalid info")
+    func handle_app_event_with_invalid_info() {
         let interstitial = DynamicPriceInterstitialAd(ad: createNimbusAd())
 
-        var handled = interstitial.handleEventForNimbus(name: "na_render", info: "{\"ga_click\": \"https://adsbynimbus.com/lkjl32423\"}")
-        XCTAssertFalse(handled)
+        var handled = interstitial.handleEventForNimbus(
+            name: "na_render",
+            info: "{\"ga_click\": \"https://adsbynimbus.com/lkjl32423\"}"
+        )
 
-        handled = interstitial.handleEventForNimbus(name: "na_render", info: "{\"na_id\": \"asdjfkl23-234dsf\"}")
-        XCTAssertFalse(handled)
+        #expect(handled == false)
+
+        handled = interstitial.handleEventForNimbus(
+            name: "na_render",
+            info: "{\"na_id\": \"asdjfkl23-234dsf\"}"
+        )
+        #expect(handled == false)
     }
 
-    func test_handle_app_event() {
+    @Test("handle app event")
+    func handle_app_event() {
         let interstitial = DynamicPriceInterstitialAd(ad: createNimbusAd())
 
         let handled = interstitial.handleEventForNimbus(name: "na_render", info: renderInfo.json)
-        XCTAssertTrue(handled)
+        #expect(handled == true)
     }
 
-    func test_click_event_should_fire_google_click_delegate_message() {
+    @Test("click event should fire google click delegate message")
+    func click_event_should_fire_google_click_delegate_message() async throws {
         let delegate = MockFullScreenContentDelegate()
         let gadInterstitial = InterstitialAd()
 
@@ -49,10 +62,11 @@ class DynamicPriceInterstitialAdTests: XCTestCase {
 
         interstitialAd.didReceiveNimbusEvent(controller: MockAdController(), event: .clicked)
 
-        XCTAssertEqual(delegate.state, .adDidRecordClick(ad: gadInterstitial))
+        #expect(delegate.state == .adDidRecordClick(ad: gadInterstitial))
     }
 
-    func test_click_event_wont_fire_if_gadinterstitial_missing() {
+    @Test("click event wont fire if gadinterstitial missing")
+    func click_event_wont_fire_if_gadinterstitial_missing() async throws {
         let delegate = MockFullScreenContentDelegate()
 
         let interstitialAd = DynamicPriceInterstitialAd(
@@ -64,10 +78,11 @@ class DynamicPriceInterstitialAdTests: XCTestCase {
 
         interstitialAd.didReceiveNimbusEvent(controller: MockAdController(), event: .clicked)
 
-        XCTAssertNil(delegate.state)
+        #expect(delegate.state == nil)
     }
 
-    func test_click_event_wont_fire_if_renderinfo_missing() {
+    @Test("click event wont fire if renderinfo missing")
+    func click_event_wont_fire_if_renderinfo_missing() async throws {
         let delegate = MockFullScreenContentDelegate()
         let gadInterstitial = InterstitialAd()
 
@@ -79,10 +94,11 @@ class DynamicPriceInterstitialAdTests: XCTestCase {
 
         interstitialAd.didReceiveNimbusEvent(controller: MockAdController(), event: .clicked)
 
-        XCTAssertNil(delegate.state)
+        #expect(delegate.state == nil)
     }
 
-    func test_interstitial_ad_forwards_all_google_delegate_messages() {
+    @Test("interstitial ad forwards all google delegate messages")
+    func interstitial_ad_forwards_all_google_delegate_messages() {
         let delegate = MockFullScreenContentDelegate()
         let gadInterstitial = InterstitialAd()
 
@@ -92,23 +108,29 @@ class DynamicPriceInterstitialAdTests: XCTestCase {
             gadInterstitialAd: gadInterstitial
         )
 
-        interstitialAd.ad(gadInterstitial, didFailToPresentFullScreenContentWithError: NSError(domain: "a", code: 1))
-        XCTAssertEqual(delegate.state, .didFailToPresent(ad: gadInterstitial, error: NSError(domain: "a", code: 1)))
+        interstitialAd.ad(
+            gadInterstitial,
+            didFailToPresentFullScreenContentWithError: NSError(domain: "a", code: 1)
+        )
+        #expect(
+            delegate.state
+                == .didFailToPresent(ad: gadInterstitial, error: NSError(domain: "a", code: 1))
+        )
 
         interstitialAd.adDidRecordImpression(gadInterstitial)
-        XCTAssertEqual(delegate.state, .adDidRecordImpression(ad: gadInterstitial))
+        #expect(delegate.state == .adDidRecordImpression(ad: gadInterstitial))
 
         interstitialAd.adDidRecordClick(gadInterstitial)
-        XCTAssertEqual(delegate.state, .adDidRecordClick(ad: gadInterstitial))
+        #expect(delegate.state == .adDidRecordClick(ad: gadInterstitial))
 
         interstitialAd.adWillPresentFullScreenContent(gadInterstitial)
-        XCTAssertEqual(delegate.state, .adWillPresentFullScreenContent(ad: gadInterstitial))
+        #expect(delegate.state == .adWillPresentFullScreenContent(ad: gadInterstitial))
 
         interstitialAd.adWillDismissFullScreenContent(gadInterstitial)
-        XCTAssertEqual(delegate.state, .adWillDismissFullScreenContent(ad: gadInterstitial))
+        #expect(delegate.state == .adWillDismissFullScreenContent(ad: gadInterstitial))
 
         interstitialAd.adDidDismissFullScreenContent(gadInterstitial)
-        XCTAssertEqual(delegate.state, .adDidDismissFullScreenContent(ad: gadInterstitial))
+        #expect(delegate.state == .adDidDismissFullScreenContent(ad: gadInterstitial))
     }
 
     private let renderInfo = DynamicPriceRenderInfo(

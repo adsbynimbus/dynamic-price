@@ -95,17 +95,28 @@ final class MockFullScreenContentDelegate: NSObject, FullScreenContentDelegate {
             rhs: MockFullScreenContentDelegate.State
         ) -> Bool {
             switch (lhs, rhs) {
-            case (.didFailToPresent(let lhsAd, let lhsError), .didFailToPresent(let rhsAd, let rhsError)):
+            case (
+                .didFailToPresent(let lhsAd, let lhsError),
+                .didFailToPresent(let rhsAd, let rhsError)
+            ):
                 return lhsAd === rhsAd && (lhsError as NSError) == (rhsError as NSError)
             case (.adDidRecordImpression(let lhsAd), .adDidRecordImpression(let rhsAd)):
                 return lhsAd === rhsAd
             case (.adDidRecordClick(let lhsAd), .adDidRecordClick(let rhsAd)):
                 return lhsAd === rhsAd
-            case (.adWillPresentFullScreenContent(let lhsAd), .adWillPresentFullScreenContent(let rhsAd)):
+            case (
+                .adWillPresentFullScreenContent(let lhsAd),
+                .adWillPresentFullScreenContent(let rhsAd)
+            ):
                 return lhsAd === rhsAd
-            case (.adWillDismissFullScreenContent(let lhsAd), .adWillDismissFullScreenContent(let rhsAd)):
+            case (
+                .adWillDismissFullScreenContent(let lhsAd),
+                .adWillDismissFullScreenContent(let rhsAd)
+            ):
                 return lhsAd === rhsAd
-            case (.adDidDismissFullScreenContent(let lhsAd), .adDidDismissFullScreenContent(let rhsAd)):
+            case (
+                .adDidDismissFullScreenContent(let lhsAd), .adDidDismissFullScreenContent(let rhsAd)
+            ):
                 return lhsAd === rhsAd
             default:
                 return false

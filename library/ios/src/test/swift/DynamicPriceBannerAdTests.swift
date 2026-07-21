@@ -6,56 +6,60 @@
 //  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-@testable import DynamicPrice
 import GoogleMobileAds
-import XCTest
+import NimbusKit
+import Testing
 
-final class DynamicPriceBannerAdTests: XCTestCase {
+@testable import DynamicPrice
+
+@Suite @MainActor
+struct DynamicPriceBannerAdTests {
 
     let rootVC = UIViewController()
 
-    func test_adview_destroy_at_deinit() {
+    @Test("adview destroy at deinit")
+    func adview_destroy_at_deinit() async throws {
         let bannerView = AdManagerBannerView()
         bannerView.rootViewController = rootVC
 
-        var bannerAd: DynamicPriceBannerAd? = DynamicPriceBannerAd(ad: nimbusAd, bannerView: bannerView)
-
-        bannerAd!.handleEventForNimbus(
-            name: "na_render",
-            info: renderInfo.json
+        var bannerAd: DynamicPriceBannerAd? = DynamicPriceBannerAd(
+            ad: nimbusAd,
+            bannerView: bannerView
         )
 
-        DispatchQueue.main.async {
-            XCTAssertTrue(bannerView.subviews.last is NimbusAdView)
-            bannerAd = nil
-            XCTAssertFalse(bannerView.subviews.last is NimbusAdView)
-        }
+        bannerAd!.handleEventForNimbus(name: "na_render", info: renderInfo.json)
+
+        // We need to wait for the async block in the implementation
+        try await Task.sleep(nanoseconds: 10_000_000)
+
+        #expect(bannerView.subviews.last is NimbusAdView)
+        bannerAd = nil
+        #expect(!(bannerView.subviews.last is NimbusAdView))
     }
 
-    func test_attach_adview_at_app_event() {
+    @Test("attach adview at app event")
+    func attach_adview_at_app_event() async throws {
         let bannerView = AdManagerBannerView()
         bannerView.rootViewController = rootVC
+
         let bannerAd = DynamicPriceBannerAd(
             ad: nimbusAd,
             bannerView: bannerView
         )
 
         // no adview yet
-        XCTAssertFalse(bannerView.subviews.last is NimbusAdView)
+        #expect(!(bannerView.subviews.last is NimbusAdView))
 
         bannerAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
-        let expectation = XCTestExpectation(description: "attach adView to BannerView")
+        // Wait for the DispatchQueue.main.async in implementation
+        try await Task.sleep(nanoseconds: 10_000_000)
 
-        DispatchQueue.main.async {
-            XCTAssertTrue(bannerView.subviews.last is NimbusAdView)
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 1)
+        #expect(bannerView.subviews.last is NimbusAdView)
     }
 
-    func test_click_event_should_fire_google_click_delegate_message() {
+    @Test("click event should fire google click delegate message")
+    func click_event_should_fire_google_click_delegate_message() async throws {
         let clientDelegate = MockBannerDelegate()
         let bannerView = AdManagerBannerView()
         bannerView.delegate = clientDelegate
@@ -68,33 +72,34 @@ final class DynamicPriceBannerAdTests: XCTestCase {
 
         bannerAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
-        var expectation = XCTestExpectation(description: "fire google click message")
+        await confirmation { confirmation in
+            clientDelegate.onDidRecordClick = { (banner) in
+                #expect(bannerView === banner)
+                confirmation.confirm()
+            }
 
-        clientDelegate.onDidRecordClick = { (banner) in
-            XCTAssertIdentical(bannerView, banner)
-            expectation.fulfill()
+            bannerAd.handleClickEvent()
         }
-
-        bannerAd.handleClickEvent()
-
-        wait(for: [expectation], timeout: 0.1)
 
         // Test that it fires click on NimbusEvent.clicked
-        expectation = XCTestExpectation(description: "fire google click message at NimbusEvent.clicked")
+        await confirmation { confirmation in
+            clientDelegate.onDidRecordClick = { (banner) in
+                confirmation.confirm()
+            }
 
-        // run in async block as NimbusAdView is added to the hierarchy in an async block as well
-        DispatchQueue.main.async {
-            bannerAd.adView?.didReceiveNimbusEvent(controller: MockAdController(), event: .clicked)
+            await MainActor.run {
+                bannerAd.adView?.didReceiveNimbusEvent(
+                    controller: MockAdController(),
+                    event: .clicked
+                )
+            }
         }
-
-        wait(for: [expectation], timeout: 0.1)
     }
 
-
-    func test_click_event_wont_fire_google_click_delegate_message_without_bannerview() {
+    @Test("click event wont fire google click delegate message without bannerview")
+    func click_event_wont_fire_google_click_delegate_message_without_bannerview() async throws {
         let clientDelegate = MockBannerDelegate()
         var bannerView: AdManagerBannerView! = AdManagerBannerView()
-        bannerView.delegate = clientDelegate
 
         let bannerAd = DynamicPriceBannerAd(
             ad: nimbusAd,
@@ -103,42 +108,43 @@ final class DynamicPriceBannerAdTests: XCTestCase {
 
         bannerAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
-        let expectation = XCTestExpectation(description: "fire google click message")
-        expectation.isInverted = true
-
-        clientDelegate.onDidRecordClick = { (banner) in
-            expectation.fulfill()
+        var didRecordClick = false
+        clientDelegate.onDidRecordClick = { _ in
+            didRecordClick = true
         }
 
         bannerView = nil
         bannerAd.handleClickEvent()
 
-        wait(for: [expectation], timeout: 0.1)
+        try await Task.sleep(nanoseconds: 50_000_000)
+        #expect(!didRecordClick)
     }
 
-    func test_click_event_wont_fire_google_click_delegate_message_without_renderinfo() {
+    @Test("click event wont fire google click delegate message without renderinfo")
+    func click_event_wont_fire_google_click_delegate_message_without_renderinfo() async throws {
         let clientDelegate = MockBannerDelegate()
         let bannerView = AdManagerBannerView()
-        bannerView.delegate = clientDelegate
 
         let bannerAd = DynamicPriceBannerAd(
             ad: nimbusAd,
             bannerView: bannerView
         )
 
-        let expectation = XCTestExpectation(description: "fire google click message")
-        expectation.isInverted = true
+        bannerAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
-        clientDelegate.onDidRecordClick = { (banner) in
-            expectation.fulfill()
+        var didRecordClick = false
+        clientDelegate.onDidRecordClick = { _ in
+            didRecordClick = true
         }
 
         bannerAd.handleClickEvent()
 
-        wait(for: [expectation], timeout: 0.1)
+        try await Task.sleep(nanoseconds: 50_000_000)
+        #expect(!didRecordClick)
     }
 
-    func test_adview_gets_destroyed_at_nimbus_error() {
+    @Test("adview gets destroyed at nimbus error")
+    func adview_gets_destroyed_at_nimbus_error() async throws {
         let bannerView = AdManagerBannerView()
         bannerView.rootViewController = rootVC
 
@@ -149,21 +155,29 @@ final class DynamicPriceBannerAdTests: XCTestCase {
 
         bannerAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
-        DispatchQueue.main.async {
-            guard let adView = bannerAd.adView else {
-                XCTFail("expected NimbusAdView to be attached")
-                return
-            }
+        // Wait for the async block in implementation
+        try await Task.sleep(nanoseconds: 10_000_000)
 
-            XCTAssertTrue(bannerView.subviews.last is NimbusAdView)
-
-            adView.didReceiveNimbusError(controller: MockAdController(), error: NimbusRenderError.alreadyDestroyed)
-
-            XCTAssertFalse(bannerView.subviews.last is NimbusAdView)
+        guard let adView = bannerAd.adView else {
+            Issue.record("expected NimbusAdView to be attached")
+            return
         }
+
+        #expect(bannerView.subviews.last is NimbusAdView)
+
+        await MainActor.run {
+            adView.didReceiveNimbusError(
+                controller: MockAdController(),
+                error: NimbusRenderError.alreadyDestroyed
+            )
+        }
+
+        try await Task.sleep(nanoseconds: 10_000_000)
+        #expect(!(bannerView.subviews.last is NimbusAdView))
     }
 
-    func test_detect_root_view_controller_fail_if_bannerview_not_attached_to_hierarchy() {
+    @Test("detect root view controller fail if bannerview not attached to hierarchy")
+    func detect_root_view_controller_fail_if_bannerview_not_attached_to_hierarchy() async {
         let bannerView = AdManagerBannerView()
 
         let bannerAd = DynamicPriceBannerAd(
@@ -171,11 +185,12 @@ final class DynamicPriceBannerAdTests: XCTestCase {
             bannerView: bannerView
         )
 
-        XCTAssertNil(bannerAd.detectedViewController)
+        #expect(bannerAd.detectedViewController == nil)
     }
 
-    func test_detect_root_view_controller() {
-        let vc = UIViewController()
+    @Test("detect root view controller")
+    func detect_root_view_controller() async {
+        let vc = await MainActor.run { UIViewController() }
         let bannerView = AdManagerBannerView()
 
         vc.view.addSubview(bannerView)
@@ -185,15 +200,18 @@ final class DynamicPriceBannerAdTests: XCTestCase {
             bannerView: bannerView
         )
 
-        XCTAssertNotNil(bannerAd.detectedViewController)
-        XCTAssertIdentical(bannerAd.detectedViewController, vc)
+        #expect(bannerAd.detectedViewController != nil)
+        #expect(bannerAd.detectedViewController === vc)
     }
 
-    private let nimbusAd: NimbusAd = createNimbusAd(dimensPresent: true)
-    private let renderInfo: DynamicPriceRenderInfo = DynamicPriceRenderInfo(
-        auctionId: "abc",
-        googleClickEventUrl: URL(string: "https://nimbus.co")!
-    )
+    private let nimbusAd = createNimbusAd()
+
+    private var renderInfo: DynamicPriceRenderInfo {
+        DynamicPriceRenderInfo(
+            auctionId: "abc",
+            googleClickEventUrl: URL(string: "https://nimbus.co")!
+        )
+    }
 }
 
 extension DynamicPriceRenderInfo {
