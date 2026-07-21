@@ -6,43 +6,49 @@
 //  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-
-@testable import DynamicPrice
 import GoogleMobileAds
 import NimbusKit
 import Testing
 
+@testable import DynamicPrice
+
 @Suite struct DynamicPriceInterstitialAdTests {
 
     @Test("handle app event not na render")
-    func test_handle_app_event_not_na_render() {
+    func handle_app_event_not_na_render() {
         let interstitial = DynamicPriceInterstitialAd(ad: createNimbusAd())
-        
+
         #expect(interstitial.handleEventForNimbus(name: "na_render", info: nil) == false)
     }
-    
+
     @Test("handle app event with invalid info")
-    func test_handle_app_event_with_invalid_info() {
+    func handle_app_event_with_invalid_info() {
         let interstitial = DynamicPriceInterstitialAd(ad: createNimbusAd())
 
-        var handled = interstitial.handleEventForNimbus(name: "na_render", info: "{\"ga_click\": \"https://adsbynimbus.com/lkjl32423\"}")
+        var handled = interstitial.handleEventForNimbus(
+            name: "na_render",
+            info: "{\"ga_click\": \"https://adsbynimbus.com/lkjl32423\"}"
+        )
 
         #expect(handled == false)
 
-        handled = interstitial.handleEventForNimbus(name: "na_render", info: "{\"na_id\": \"asdjfkl23-234dsf\"}")
+        handled = interstitial.handleEventForNimbus(
+            name: "na_render",
+            info: "{\"na_id\": \"asdjfkl23-234dsf\"}"
+        )
         #expect(handled == false)
     }
-    
+
     @Test("handle app event")
-    func test_handle_app_event() {
+    func handle_app_event() {
         let interstitial = DynamicPriceInterstitialAd(ad: createNimbusAd())
 
         let handled = interstitial.handleEventForNimbus(name: "na_render", info: renderInfo.json)
         #expect(handled == true)
     }
-    
+
     @Test("click event should fire google click delegate message")
-    func test_click_event_should_fire_google_click_delegate_message() async throws {
+    func click_event_should_fire_google_click_delegate_message() async throws {
         let delegate = MockFullScreenContentDelegate()
         let gadInterstitial = InterstitialAd()
 
@@ -55,12 +61,12 @@ import Testing
         interstitialAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
         interstitialAd.didReceiveNimbusEvent(controller: MockAdController(), event: .clicked)
-        
+
         #expect(delegate.state == .adDidRecordClick(ad: gadInterstitial))
     }
-    
+
     @Test("click event wont fire if gadinterstitial missing")
-    func test_click_event_wont_fire_if_gadinterstitial_missing() async throws {
+    func click_event_wont_fire_if_gadinterstitial_missing() async throws {
         let delegate = MockFullScreenContentDelegate()
 
         let interstitialAd = DynamicPriceInterstitialAd(
@@ -71,12 +77,12 @@ import Testing
         interstitialAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
         interstitialAd.didReceiveNimbusEvent(controller: MockAdController(), event: .clicked)
-        
+
         #expect(delegate.state == nil)
     }
-    
+
     @Test("click event wont fire if renderinfo missing")
-    func test_click_event_wont_fire_if_renderinfo_missing() async throws {
+    func click_event_wont_fire_if_renderinfo_missing() async throws {
         let delegate = MockFullScreenContentDelegate()
         let gadInterstitial = InterstitialAd()
 
@@ -85,14 +91,14 @@ import Testing
             clientDelegate: delegate,
             gadInterstitialAd: gadInterstitial
         )
-        
+
         interstitialAd.didReceiveNimbusEvent(controller: MockAdController(), event: .clicked)
-        
+
         #expect(delegate.state == nil)
     }
 
     @Test("interstitial ad forwards all google delegate messages")
-    func test_interstitial_ad_forwards_all_google_delegate_messages() {
+    func interstitial_ad_forwards_all_google_delegate_messages() {
         let delegate = MockFullScreenContentDelegate()
         let gadInterstitial = InterstitialAd()
 
@@ -102,8 +108,14 @@ import Testing
             gadInterstitialAd: gadInterstitial
         )
 
-        interstitialAd.ad(gadInterstitial, didFailToPresentFullScreenContentWithError: NSError(domain: "a", code: 1))
-        #expect(delegate.state == .didFailToPresent(ad: gadInterstitial, error: NSError(domain: "a", code: 1)))
+        interstitialAd.ad(
+            gadInterstitial,
+            didFailToPresentFullScreenContentWithError: NSError(domain: "a", code: 1)
+        )
+        #expect(
+            delegate.state
+                == .didFailToPresent(ad: gadInterstitial, error: NSError(domain: "a", code: 1))
+        )
 
         interstitialAd.adDidRecordImpression(gadInterstitial)
         #expect(delegate.state == .adDidRecordImpression(ad: gadInterstitial))

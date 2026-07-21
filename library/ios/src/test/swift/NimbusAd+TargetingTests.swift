@@ -6,10 +6,11 @@
 //  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-@testable import DynamicPrice
 import GoogleMobileAds
 import NimbusKit
 import Testing
+
+@testable import DynamicPrice
 
 @Suite(.serialized) struct NimbusAdTargetingTests {
 
@@ -18,7 +19,7 @@ import Testing
     )
 
     @Test("keywords present static")
-    func test_keywordsPresent_static() {
+    func keywordsPresent_static() {
         let ad = createNimbusAd(type: .static)
         let request = AdManagerRequest()
         ad.applyDynamicPrice(into: request)
@@ -26,14 +27,17 @@ import Testing
         #expect(request.customTargeting?["na_id"] as? String == ad.auctionId)
         #expect(request.customTargeting?["na_bid"] as? String == mapping.getKeywords(ad: ad))
         #expect(request.customTargeting?["na_network"] as? String == ad.network)
-        #expect(request.customTargeting?["na_size"] as? String == "\(ad.adDimensions!.width)x\(ad.adDimensions!.height)")
+        #expect(
+            request.customTargeting?["na_size"] as? String
+                == "\(ad.adDimensions!.width)x\(ad.adDimensions!.height)"
+        )
         #expect(request.customTargeting?["na_type"] as? String == NimbusAuctionType.static.rawValue)
         #expect(request.customTargeting?["na_bid_video"] == nil)
         #expect(request.customTargeting?["na_duration"] == nil)
     }
 
     @Test("keywords present video")
-    func test_keywordsPresent_video() {
+    func keywordsPresent_video() {
         let ad = createNimbusAd(type: .video, dimensPresent: false)
         let request = AdManagerRequest()
 
@@ -49,7 +53,7 @@ import Testing
     }
 
     @Test("keywords present existing keywords")
-    func test_keywordsPresent_existingKeywords() {
+    func keywordsPresent_existingKeywords() {
         let ad = createNimbusAd(type: .static)
         let request = AdManagerRequest()
         request.customTargeting = [:]
@@ -60,7 +64,10 @@ import Testing
 
         #expect(request.customTargeting?["na_id"] as? String == ad.auctionId)
         #expect(request.customTargeting?["na_network"] as? String == ad.network)
-        #expect(request.customTargeting?["na_size"] as? String == "\(ad.adDimensions!.width)x\(ad.adDimensions!.height)")
+        #expect(
+            request.customTargeting?["na_size"] as? String
+                == "\(ad.adDimensions!.width)x\(ad.adDimensions!.height)"
+        )
         #expect(request.customTargeting?["na_bid"] as? String == "200")
         #expect(request.customTargeting?["na_duration"] == nil)
         #expect(request.customTargeting?["na_type"] as? String == NimbusAuctionType.static.rawValue)
@@ -68,7 +75,7 @@ import Testing
     }
 
     @Test("static ad keywords override in test mode")
-    func test_static_ad_keywords_override_in_test_mode() {
+    func static_ad_keywords_override_in_test_mode() {
         Nimbus.shared.testMode = true
         let ad = createNimbusAd(type: .static)
         let request = AdManagerRequest()
@@ -76,15 +83,15 @@ import Testing
 
         let mapping = NimbusGAMLinearPriceMapping.banner()
         ad.applyDynamicPrice(into: request, mapping: mapping)
-        
+
         #expect(request.customTargeting?["na_bid"] as? String == "0")
         #expect(request.customTargeting?["na_bid_video"] == nil)
-        
+
         Nimbus.shared.testMode = false
     }
-    
+
     @Test("video ad keywords override in test mode")
-    func test_video_ad_keywords_override_in_test_mode() {
+    func video_ad_keywords_override_in_test_mode() {
         Nimbus.shared.testMode = true
         let ad = createNimbusAd(type: .video)
         let request = AdManagerRequest()
@@ -92,7 +99,7 @@ import Testing
 
         let mapping = NimbusGAMLinearPriceMapping.banner()
         ad.applyDynamicPrice(into: request, mapping: mapping)
-        
+
         #expect(request.customTargeting?["na_bid_video"] as? String == "0")
         #expect(request.customTargeting?["na_bid"] == nil)
 
