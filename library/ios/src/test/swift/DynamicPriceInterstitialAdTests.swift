@@ -133,7 +133,7 @@ import Testing
         #expect(delegate.state == .adDidDismissFullScreenContent(ad: gadInterstitial))
     }
 
-    private let renderInfo = DynamicPriceRenderInfo(
+    private let renderInfo = DynamicPriceRenderer(
         auctionId: "interstitialAuction1",
         googleClickEventUrl: URL(string: "https://nimbus.co")!
     )

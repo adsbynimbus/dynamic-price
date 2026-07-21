@@ -15,7 +15,7 @@ final class DynamicPriceBannerAd: NSObject {
     weak var adView: NimbusAdView?
     
     private let ad: NimbusAd
-    private var renderInfo: DynamicPriceRenderInfo?
+    private var renderInfo: DynamicPriceRenderer?
     private let logger = Nimbus.shared.logger
     
     deinit {
@@ -32,7 +32,7 @@ final class DynamicPriceBannerAd: NSObject {
     
     @discardableResult
     func handleEventForNimbus(name: String, info: String?) -> Bool {
-        guard name == "na_render", let info = DynamicPriceRenderInfo(info: info) else {
+        guard name == "na_render", let info = DynamicPriceRenderer(info: info) else {
             return false
         }
         
@@ -71,7 +71,7 @@ final class DynamicPriceBannerAd: NSObject {
             return
         }
         guard let renderInfo else {
-            logger.log("DynamicPriceRenderInfo is not present at click event", level: .error)
+            logger.log("DynamicPriceRenderer is not present at click event", level: .error)
             return
         }
 

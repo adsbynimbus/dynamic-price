@@ -1,5 +1,5 @@
 //
-//  DynamicPriceRenderInfo.swift
+//  DynamicPriceRenderer.swift
 //  DynamicPrice
 //
 //  Created on 23/04/23.
@@ -10,7 +10,7 @@ import Foundation
 import NimbusKit
 
 /// :nodoc:
-struct DynamicPriceRenderInfo: Codable {
+struct DynamicPriceRenderer: Codable {
     static let jsonDecoder = JSONDecoder()
     
     let auctionId: String
@@ -27,14 +27,11 @@ struct DynamicPriceRenderInfo: Codable {
     }
     
     init?(info: String?) {
-        guard let data = info?.data(using: .utf8) else {
+        guard let data = info?.data(using: .utf8),
+            let _self = try? Self.jsonDecoder.decode(DynamicPriceRenderer.self, from: data) else {
             return nil
         }
-        
-        do {
-            self = try Self.jsonDecoder.decode(DynamicPriceRenderInfo.self, from: data)
-        } catch {
-            return nil
-        }
+
+        self = _self
     }
 }

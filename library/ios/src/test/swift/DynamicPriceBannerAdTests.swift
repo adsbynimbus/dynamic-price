@@ -206,15 +206,15 @@ struct DynamicPriceBannerAdTests {
 
     private let nimbusAd = createNimbusAd()
 
-    private var renderInfo: DynamicPriceRenderInfo {
-        DynamicPriceRenderInfo(
+    private var renderInfo: DynamicPriceRenderer {
+        DynamicPriceRenderer(
             auctionId: "abc",
             googleClickEventUrl: URL(string: "https://nimbus.co")!
         )
     }
 }
 
-extension DynamicPriceRenderInfo {
+extension DynamicPriceRenderer {
     var json: String {
         String(decoding: try! JSONEncoder().encode(self), as: UTF8.self)
     }
