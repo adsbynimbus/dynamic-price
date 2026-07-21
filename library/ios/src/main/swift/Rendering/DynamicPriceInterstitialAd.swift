@@ -22,8 +22,6 @@ final class DynamicPriceInterstitialAd: NSObject {
     
     private var didPresent = false
     private let ad: NimbusAd
-    private var isNimbusWin: Bool { renderInfo != nil }
-    
     private var renderInfo: DynamicPriceRenderInfo?
     private let logger = Nimbus.shared.logger
     
@@ -60,9 +58,8 @@ final class DynamicPriceInterstitialAd: NSObject {
     
     /// Make sure this method is called from the main thread
     func present() {
-        guard let rootViewController = gadViewController,
-              didPresentGoogleController, isNimbusWin, !didPresent
-        else {
+        guard renderInfo != nil, let rootViewController = gadViewController,
+              didPresentGoogleController, !didPresent else {
             return
         }
         

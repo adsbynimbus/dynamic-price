@@ -15,20 +15,15 @@ final class DynamicPriceBannerAd: NSObject {
     weak var adView: NimbusAdView?
     
     private let ad: NimbusAd
-
-    
     private var renderInfo: DynamicPriceRenderInfo?
-    private var isNimbusWin: Bool { renderInfo != nil }
     private let logger = Nimbus.shared.logger
     
     deinit {
         adView?.destroy()
     }
     
-    init(
-        ad: NimbusAd,
-        bannerView: AdManagerBannerView
-    ) {
+
+    init(ad: NimbusAd, bannerView: AdManagerBannerView) {
         self.ad = ad
         self.bannerView = bannerView
         
