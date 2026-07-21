@@ -1,8 +1,9 @@
 //
-//  NimbusDynamicPriceBannerAdTests.swift
-//  NimbusGAMKitTests
+//  DynamicPriceBannerAdTests.swift
+//  DynamicPriceTests
+//
 //  Created on 2/28/24
-//  Copyright © 2024 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 @testable import DynamicPrice
@@ -44,7 +45,7 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
 
         bannerAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
-        let expectation = XCTestExpectation(description: "attach adView to GAMBannerView")
+        let expectation = XCTestExpectation(description: "attach adView to BannerView")
 
         DispatchQueue.main.async {
             XCTAssertTrue(bannerView.subviews.last is NimbusAdView)
@@ -55,7 +56,7 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     }
 
     func test_click_event_should_fire_google_click_delegate_message() {
-        let clientDelegate = MockGADBannerDelegate()
+        let clientDelegate = MockBannerDelegate()
         let bannerView = AdManagerBannerView()
         bannerView.delegate = clientDelegate
         bannerView.rootViewController = rootVC
@@ -91,7 +92,7 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
 
 
     func test_click_event_wont_fire_google_click_delegate_message_without_bannerview() {
-        let clientDelegate = MockGADBannerDelegate()
+        let clientDelegate = MockBannerDelegate()
         var bannerView: AdManagerBannerView! = AdManagerBannerView()
         bannerView.delegate = clientDelegate
 
@@ -116,7 +117,7 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     }
 
     func test_click_event_wont_fire_google_click_delegate_message_without_renderinfo() {
-        let clientDelegate = MockGADBannerDelegate()
+        let clientDelegate = MockBannerDelegate()
         let bannerView = AdManagerBannerView()
         bannerView.delegate = clientDelegate
 
@@ -188,25 +189,7 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
         XCTAssertIdentical(bannerAd.detectedViewController, vc)
     }
 
-    private var nimbusAd: NimbusAd {
-        NimbusAd(
-            position: "pos",
-            auctionType: .static,
-            bidRaw: 0,
-            bidInCents: 0,
-            contentType: "",
-            auctionId: "abc",
-            network: "def",
-            markup: "",
-            isInterstitial: false,
-            placementId: "dsf",
-            duration: nil,
-            adDimensions: NimbusAdDimensions(width: 320, height: 50),
-            trackers: nil,
-            isMraid: false,
-            extensions: nil
-        )
-    }
+    private let nimbusAd: NimbusAd = createNimbusAd(dimensPresent: true)
 
     private var renderInfo: NimbusDynamicPriceRenderInfo {
         NimbusDynamicPriceRenderInfo(

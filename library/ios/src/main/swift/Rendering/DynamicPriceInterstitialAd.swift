@@ -1,8 +1,9 @@
 //
-//  NimbusDynamicPriceInterstitialAd.swift
-//  NimbusGAMKit
+//  DynamicPriceInterstitialAd.swift
+//  DynamicPrice
+//
 //  Created on 2/16/24
-//  Copyright © 2024 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import GoogleMobileAds
@@ -99,7 +100,7 @@ final class NimbusDynamicPriceInterstitialAd: NSObject {
     
     private func handleClickEvent() {
         guard let gadInterstitialAd else {
-            logger.log("GADInterstitialAd was unexpectedly released before click event could be processed", level: .error)
+            logger.log("InterstitialAd was unexpectedly released before click event could be processed", level: .error)
             return
         }
         guard let renderInfo else {
@@ -132,7 +133,7 @@ extension NimbusDynamicPriceInterstitialAd: AdControllerDelegate {
     }
 }
 
-// MARK: - GADFullScreenContentDelegate
+// MARK: - FullScreenContentDelegate
 
 extension NimbusDynamicPriceInterstitialAd: FullScreenContentDelegate {
     func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
@@ -151,7 +152,7 @@ extension NimbusDynamicPriceInterstitialAd: FullScreenContentDelegate {
         clientDelegate?.adWillPresentFullScreenContent?(ad)
         
         if !didPresentGoogleController {
-            logger.log("Detected GADInterstitialAd.present(fromRootViewController:) was called instead of GADInterstitialAd.presentDynamicPrice(fromRootViewController:)", level: .error)
+            logger.log("Detected InterstitialAd.present(fromRootViewController:) was called instead of InterstitialAd.presentDynamicPrice(fromRootViewController:)", level: .error)
         }
     }
     

@@ -1,8 +1,9 @@
 //
 //  NimbusRequestManager+NoFill.swift
-//  Nimbus
+//  DynamicPrice
+//
 //  Created on 2/21/24
-//  Copyright © 2024 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import Foundation

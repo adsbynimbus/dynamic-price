@@ -1,9 +1,9 @@
 //
-//  NimbusAdTargetingTests.swift
-//  NimbusGAMKitTests
+//  NimbusAd+TargetingTests.swift
+//  DynamicPriceTests
 //
 //  Created on 8/12/22.
-//  Copyright © 2022 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 @testable import DynamicPrice
@@ -86,28 +86,5 @@ class NimbusAdTargetingTests: XCTestCase {
         XCTAssertNil(request.customTargeting?["na_bid"])
 
         Nimbus.shared.testMode = false
-    }
-
-    private func createNimbusAd(
-        type: NimbusAuctionType = .static,
-        dimensPresent: Bool = true
-    ) -> NimbusAd {
-        NimbusAd(
-            position: "position",
-            auctionType: type,
-            bidRaw: 0,
-            bidInCents: 200,
-            contentType: "",
-            auctionId: "123456",
-            network: "network",
-            markup: "markup",
-            isInterstitial: true,
-            placementId: "",
-            duration: type == .video ? 1 : nil,
-            adDimensions: dimensPresent ? NimbusAdDimensions(width: 320, height: 50) : nil,
-            trackers: nil,
-            isMraid: true,
-            extensions: nil
-        )
     }
 }

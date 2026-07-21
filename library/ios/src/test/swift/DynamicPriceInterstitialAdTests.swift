@@ -1,8 +1,9 @@
 //
-//  NimbusDynamicPriceInterstitialAdTests.swift
-//  NimbusGAMKitTests
+//  DynamicPriceInterstitialAdTests.swift
+//  DynamicPriceTests
+//
 //  Created on 2/21/24
-//  Copyright © 2024 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 
@@ -29,7 +30,6 @@ class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
 
     func test_handle_app_event() {
         let ad = createNimbusAd()
-
         let interstitial = NimbusDynamicPriceInterstitialAd(ad: ad)
 
         let handled = interstitial.handleEventForNimbus(name: "na_render", info: renderInfo.json)
@@ -37,8 +37,7 @@ class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
     }
 
     func test_click_event_should_fire_google_click_delegate_message() {
-        let delegate = MockGADFullScreenContentDelegate()
-
+        let delegate = MockFullScreenContentDelegate()
         let gadInterstitial = InterstitialAd()
 
         let interstitialAd = NimbusDynamicPriceInterstitialAd(
@@ -55,7 +54,7 @@ class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
     }
 
     func test_click_event_wont_fire_if_gadinterstitial_missing() {
-        let delegate = MockGADFullScreenContentDelegate()
+        let delegate = MockFullScreenContentDelegate()
 
         let interstitialAd = NimbusDynamicPriceInterstitialAd(
             ad: createNimbusAd(),
@@ -70,8 +69,7 @@ class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
     }
 
     func test_click_event_wont_fire_if_renderinfo_missing() {
-        let delegate = MockGADFullScreenContentDelegate()
-
+        let delegate = MockFullScreenContentDelegate()
         let gadInterstitial = InterstitialAd()
 
         let interstitialAd = NimbusDynamicPriceInterstitialAd(
@@ -86,7 +84,7 @@ class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
     }
 
     func test_interstitial_ad_forwards_all_google_delegate_messages() {
-        let delegate = MockGADFullScreenContentDelegate()
+        let delegate = MockFullScreenContentDelegate()
         let gadInterstitial = InterstitialAd()
 
         let interstitialAd = NimbusDynamicPriceInterstitialAd(
@@ -112,30 +110,6 @@ class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
 
         interstitialAd.adDidDismissFullScreenContent(gadInterstitial)
         XCTAssertEqual(delegate.state, .adDidDismissFullScreenContent(ad: gadInterstitial))
-    }
-
-    private func createNimbusAd(
-        type: NimbusAuctionType = .static,
-        dimensPresent: Bool = true,
-        network: String = "network"
-    ) -> NimbusAd {
-        NimbusAd(
-            position: "position",
-            auctionType: type,
-            bidRaw: 0,
-            bidInCents: 200,
-            contentType: "",
-            auctionId: "123456",
-            network: network,
-            markup: "markup",
-            isInterstitial: true,
-            placementId: "",
-            duration: type == .video ? 1 : nil,
-            adDimensions: dimensPresent ? NimbusAdDimensions(width: 320, height: 50) : nil,
-            trackers: nil,
-            isMraid: true,
-            extensions: nil
-        )
     }
 
     private var renderInfo: NimbusDynamicPriceRenderInfo {

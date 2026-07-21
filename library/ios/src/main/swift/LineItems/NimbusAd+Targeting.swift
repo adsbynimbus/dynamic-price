@@ -1,9 +1,9 @@
 //
 //  NimbusAd+Targeting.swift
-//  NimbusGAMKit
+//  DynamicPrice
 //
 //  Created on 8/12/22.
-//  Copyright © 2022 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import GoogleMobileAds
@@ -11,9 +11,9 @@ import GoogleMobileAds
 
 public extension NimbusAd {
 
-    /// Add keywords for custom targeting from Nimbus ad to GAMRequest
+    /// Add keywords for custom targeting from Nimbus ad to AdManagerRequest
     /// - Parameters:
-    ///   - request: GAMRequest to add keywords to
+    ///   - request: AdManagerRequest to add keywords to
     ///   - mapping: A mapping composed of multiple LinearPriceGranularities in ascending order. Default: NimbusGAMLinearPriceMapping.banner()
     func applyDynamicPrice(into request: AdManagerRequest, mapping: NimbusGAMLinearPriceMapping = .banner()) {
         applyDynamicPrice(into: request, keywords: mapping.getKeywords(ad: self))

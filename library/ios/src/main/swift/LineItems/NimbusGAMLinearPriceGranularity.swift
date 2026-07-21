@@ -1,9 +1,9 @@
 //
 //  NimbusGAMLinearPriceGranularity.swift
-//  NimbusGAMKit
+//  DynamicPrice
 //
 //  Created on 10/21/20.
-//  Copyright © 2020 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import NimbusKit

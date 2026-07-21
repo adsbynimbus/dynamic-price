@@ -1,8 +1,9 @@
 //
-//  NimbusDynamicPriceBannerAd.swift
-//  Nimbus
+//  DynamicPriceBannerAd.swift
+//  DynamicPrice
+//
 //  Created on 2/26/24
-//  Copyright © 2024 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import GoogleMobileAds
@@ -48,7 +49,7 @@ final class NimbusDynamicPriceBannerAd: NSObject {
     
     func attachAdView() {
         guard let bannerView, let rootViewController = bannerView.rootViewController ?? detectedViewController else {
-            logger.log("GADBannerView.rootViewController was not set and we failed to detect it, please set the rootViewController property.", level: .error)
+            logger.log("BannerView.rootViewController was not set and we failed to detect it, please set the rootViewController property.", level: .error)
             return
         }
         
@@ -71,7 +72,7 @@ final class NimbusDynamicPriceBannerAd: NSObject {
     
     func handleClickEvent() {
         guard let bannerView else {
-            logger.log("GAMBannerView was unexpectedly released before click event could be processed", level: .error)
+            logger.log("BannerView was unexpectedly released before click event could be processed", level: .error)
             return
         }
         guard let renderInfo else {

@@ -1,9 +1,9 @@
 //
-//  NimbusDynamicPriceRenderInfo.swift
-//  NimbusGAMKit
+//  DynamicPriceRenderInfo.swift
+//  DynamicPrice
 //
 //  Created on 23/04/23.
-//  Copyright © 2023 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import Foundation

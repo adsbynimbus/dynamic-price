@@ -1,9 +1,9 @@
 //
 //  NimbusGAMLinearPriceMappingTests.swift
-//  NimbusGAMKitTests
+//  DynamicPriceTests
 //
 //  Created on 6/15/21.
-//  Copyright © 2021 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 @testable import DynamicPrice

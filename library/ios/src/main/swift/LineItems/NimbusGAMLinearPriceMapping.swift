@@ -1,9 +1,9 @@
 //
 //  NimbusGAMLinearPriceMapping.swift
-//  NimbusGAMKit
+//  DynamicPrice
 //
 //  Created on 12/10/20.
-//  Copyright © 2020 Nimbus Advertising Solutions Inc. All rights reserved.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import Foundation
