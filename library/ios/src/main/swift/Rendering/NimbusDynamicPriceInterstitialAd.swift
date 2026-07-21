@@ -20,7 +20,6 @@ final class NimbusDynamicPriceInterstitialAd: NSObject {
     private var gadViewController: UIViewController? { rootViewController?.presentedViewController }
     
     private var didPresent = false
-    private let requestManager: NimbusRequestManager
     private let ad: NimbusAd
     private var isNimbusWin: Bool { renderInfo != nil }
     
@@ -31,13 +30,11 @@ final class NimbusDynamicPriceInterstitialAd: NSObject {
     
     init(
         ad: NimbusAd,
-        requestManager: NimbusRequestManager,
         clientDelegate: FullScreenContentDelegate? = nil,
         rootViewController: UIViewController? = nil,
         gadInterstitialAd: InterstitialAd? = nil
     ) {
         self.ad = ad
-        self.requestManager = requestManager
         self.clientDelegate = clientDelegate
         self.rootViewController = rootViewController
         self.gadInterstitialAd = gadInterstitialAd

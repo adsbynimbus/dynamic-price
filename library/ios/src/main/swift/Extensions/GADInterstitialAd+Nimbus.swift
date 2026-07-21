@@ -34,7 +34,6 @@ extension InterstitialAd {
     ) {
         nimbusInterstitialAd = NimbusDynamicPriceInterstitialAd(
             ad: ad,
-            requestManager: requestManager,
             clientDelegate: delegate,
             gadInterstitialAd: self
         )

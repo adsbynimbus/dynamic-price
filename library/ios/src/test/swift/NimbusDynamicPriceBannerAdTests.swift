@@ -55,7 +55,6 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     }
 
     func test_click_event_should_fire_google_click_delegate_message() {
-        let requestManager = NimbusRequestManager()
         let clientDelegate = MockGADBannerDelegate()
         let bannerView = AdManagerBannerView()
         bannerView.delegate = clientDelegate
@@ -92,7 +91,6 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
 
 
     func test_click_event_wont_fire_google_click_delegate_message_without_bannerview() {
-        let requestManager = NimbusRequestManager()
         let clientDelegate = MockGADBannerDelegate()
         var bannerView: AdManagerBannerView! = AdManagerBannerView()
         bannerView.delegate = clientDelegate
@@ -118,7 +116,6 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     }
 
     func test_click_event_wont_fire_google_click_delegate_message_without_renderinfo() {
-        let requestManager = NimbusRequestManager()
         let clientDelegate = MockGADBannerDelegate()
         let bannerView = AdManagerBannerView()
         bannerView.delegate = clientDelegate
@@ -141,7 +138,6 @@ final class NimbusDynamicPriceBannerAdTests: XCTestCase {
     }
 
     func test_adview_gets_destroyed_at_nimbus_error() {
-        let requestManager = NimbusRequestManager()
         let bannerView = AdManagerBannerView()
         bannerView.rootViewController = rootVC
 
