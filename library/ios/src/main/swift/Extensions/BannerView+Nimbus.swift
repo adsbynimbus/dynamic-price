@@ -12,12 +12,12 @@ import NimbusKit
 extension AdManagerBannerView {
     private static var nimbusBannerAdKey: Void?
     
-    private var nimbusBannerAd: NimbusDynamicPriceBannerAd? {
+    private var nimbusBannerAd: DynamicPriceBannerAd? {
         get {
             objc_getAssociatedObject(
                 self, 
                 &Self.nimbusBannerAdKey
-            ) as? NimbusDynamicPriceBannerAd
+            ) as? DynamicPriceBannerAd
         }
         set {
             objc_setAssociatedObject(
@@ -90,7 +90,7 @@ extension AdManagerBannerView {
     
     private func validate() -> Bool {
         guard let _ = nimbusBannerAd else {
-            Nimbus.shared.logger.log("NimbusDynamicPriceBannerAd was not initialized", level: .error)
+            Nimbus.shared.logger.log("DynamicPriceBannerAd was not initialized", level: .error)
             return false
         }
         
@@ -104,7 +104,7 @@ extension AdManagerBannerView {
             return
         }
         
-        nimbusBannerAd = NimbusDynamicPriceBannerAd(
+        nimbusBannerAd = DynamicPriceBannerAd(
             ad: ad,
             bannerView: self
         )

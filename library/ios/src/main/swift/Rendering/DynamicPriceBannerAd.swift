@@ -10,14 +10,14 @@ import GoogleMobileAds
 import NimbusKit
 import UIKit
 
-final class NimbusDynamicPriceBannerAd: NSObject {
+final class DynamicPriceBannerAd: NSObject {
     private weak var bannerView: AdManagerBannerView?
     weak var adView: NimbusAdView?
     
     private let ad: NimbusAd
 
     
-    private var renderInfo: NimbusDynamicPriceRenderInfo?
+    private var renderInfo: DynamicPriceRenderInfo?
     private var isNimbusWin: Bool { renderInfo != nil }
     private let logger = Nimbus.shared.logger
     
@@ -37,7 +37,7 @@ final class NimbusDynamicPriceBannerAd: NSObject {
     
     @discardableResult
     func handleEventForNimbus(name: String, info: String?) -> Bool {
-        guard name == "na_render", let info = NimbusDynamicPriceRenderInfo(info: info) else {
+        guard name == "na_render", let info = DynamicPriceRenderInfo(info: info) else {
             return false
         }
         
@@ -76,7 +76,7 @@ final class NimbusDynamicPriceBannerAd: NSObject {
             return
         }
         guard let renderInfo else {
-            logger.log("NimbusDynamicPriceRenderInfo is not present at click event", level: .error)
+            logger.log("DynamicPriceRenderInfo is not present at click event", level: .error)
             return
         }
 
@@ -101,7 +101,9 @@ final class NimbusDynamicPriceBannerAd: NSObject {
     }
 }
 
-extension NimbusDynamicPriceBannerAd: AdControllerDelegate {
+// MARK: - AdControllerDelegate
+
+extension DynamicPriceBannerAd: AdControllerDelegate {
     func didReceiveNimbusEvent(controller: AdController, event: NimbusEvent) {
         if event == .clicked {
             handleClickEvent()

@@ -11,15 +11,15 @@
 import GoogleMobileAds
 import XCTest
 
-class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
+class DynamicPriceInterstitialAdTests: XCTestCase {
     func test_handle_app_event_not_na_render() {
-        let interstitial = NimbusDynamicPriceInterstitialAd(ad: createNimbusAd())
+        let interstitial = DynamicPriceInterstitialAd(ad: createNimbusAd())
 
-        XCTAssertFalse(interstitial.handleEventForNimbus(name: "na_render", info: nil))
+        XCTAssertFalse(interstitial.handleEventForNimbus(name: "test", info: nil))
     }
 
     func test_handle_app_event_with_invalid_info() {
-        let interstitial = NimbusDynamicPriceInterstitialAd(ad: createNimbusAd())
+        let interstitial = DynamicPriceInterstitialAd(ad: createNimbusAd())
 
         var handled = interstitial.handleEventForNimbus(name: "na_render", info: "{\"ga_click\": \"https://adsbynimbus.com/lkjl32423\"}")
         XCTAssertFalse(handled)
@@ -29,8 +29,7 @@ class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
     }
 
     func test_handle_app_event() {
-        let ad = createNimbusAd()
-        let interstitial = NimbusDynamicPriceInterstitialAd(ad: ad)
+        let interstitial = DynamicPriceInterstitialAd(ad: createNimbusAd())
 
         let handled = interstitial.handleEventForNimbus(name: "na_render", info: renderInfo.json)
         XCTAssertTrue(handled)
@@ -40,7 +39,7 @@ class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
         let delegate = MockFullScreenContentDelegate()
         let gadInterstitial = InterstitialAd()
 
-        let interstitialAd = NimbusDynamicPriceInterstitialAd(
+        let interstitialAd = DynamicPriceInterstitialAd(
             ad: createNimbusAd(),
             clientDelegate: delegate,
             gadInterstitialAd: gadInterstitial
@@ -56,7 +55,7 @@ class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
     func test_click_event_wont_fire_if_gadinterstitial_missing() {
         let delegate = MockFullScreenContentDelegate()
 
-        let interstitialAd = NimbusDynamicPriceInterstitialAd(
+        let interstitialAd = DynamicPriceInterstitialAd(
             ad: createNimbusAd(),
             clientDelegate: delegate
         )
@@ -72,7 +71,7 @@ class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
         let delegate = MockFullScreenContentDelegate()
         let gadInterstitial = InterstitialAd()
 
-        let interstitialAd = NimbusDynamicPriceInterstitialAd(
+        let interstitialAd = DynamicPriceInterstitialAd(
             ad: createNimbusAd(),
             clientDelegate: delegate,
             gadInterstitialAd: gadInterstitial
@@ -87,7 +86,7 @@ class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
         let delegate = MockFullScreenContentDelegate()
         let gadInterstitial = InterstitialAd()
 
-        let interstitialAd = NimbusDynamicPriceInterstitialAd(
+        let interstitialAd = DynamicPriceInterstitialAd(
             ad: createNimbusAd(),
             clientDelegate: delegate,
             gadInterstitialAd: gadInterstitial
@@ -112,10 +111,8 @@ class NimbusDynamicPriceInterstitialAdTests: XCTestCase {
         XCTAssertEqual(delegate.state, .adDidDismissFullScreenContent(ad: gadInterstitial))
     }
 
-    private var renderInfo: NimbusDynamicPriceRenderInfo {
-        NimbusDynamicPriceRenderInfo(
-            auctionId: "interstitialAuction1",
-            googleClickEventUrl: URL(string: "https://nimbus.co")!
-        )
-    }
+    private let renderInfo = DynamicPriceRenderInfo(
+        auctionId: "interstitialAuction1",
+        googleClickEventUrl: URL(string: "https://nimbus.co")!
+    )
 }

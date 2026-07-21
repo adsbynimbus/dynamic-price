@@ -12,9 +12,9 @@ import NimbusKit
 extension InterstitialAd {
     private static var nimbusAdKey: Void?
 
-    private var nimbusInterstitialAd: NimbusDynamicPriceInterstitialAd? {
+    private var nimbusInterstitialAd: DynamicPriceInterstitialAd? {
         get {
-            objc_getAssociatedObject(self, &Self.nimbusAdKey) as? NimbusDynamicPriceInterstitialAd
+            objc_getAssociatedObject(self, &Self.nimbusAdKey) as? DynamicPriceInterstitialAd
         }
         set {
             objc_setAssociatedObject(self, &Self.nimbusAdKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
@@ -32,7 +32,7 @@ extension InterstitialAd {
         requestManager: NimbusRequestManager = NimbusRequestManager(),
         delegate: FullScreenContentDelegate? = nil
     ) {
-        nimbusInterstitialAd = NimbusDynamicPriceInterstitialAd(
+        nimbusInterstitialAd = DynamicPriceInterstitialAd(
             ad: ad,
             clientDelegate: delegate,
             gadInterstitialAd: self
@@ -83,7 +83,7 @@ extension InterstitialAd {
         
         // setting it right before present() so that we can detect if a user
         // doesn't call this presentation method by observing this value
-        // in delegate: NimbusDynamicPriceInterstitialAd.adWillRender()
+        // in delegate: DynamicPriceInterstitialAd.adWillRender()
         nimbusInterstitialAd?.didPresentGoogleController = true
         present(from: controller)
 
@@ -100,8 +100,8 @@ extension InterstitialAd {
     }
     
     private func validateDelegate() -> Bool {
-        guard fullScreenContentDelegate is NimbusDynamicPriceInterstitialAd else {
-            Nimbus.shared.logger.log("Custom InterstitialAd.fullScreenContentDelegate was set while using Nimbus Dynamic Price implementation. Please pass your delegate in InterstitialAd.applyDynamicPrice instead.", level: .error)
+        guard fullScreenContentDelegate is DynamicPriceInterstitialAd else {
+            Nimbus.shared.logger.log("Custom InterstitialAd.fullScreenContentDelegate was set while using Dynamic Price implementation. Please pass your delegate in InterstitialAd.applyDynamicPrice instead.", level: .error)
             return false
         }
         
