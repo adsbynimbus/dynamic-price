@@ -2,7 +2,7 @@
 //  DynamicPriceRenderer.swift
 //  DynamicPrice
 //
-//  Created on 23/04/23.
+//  Created on 7/21/26.
 //  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 

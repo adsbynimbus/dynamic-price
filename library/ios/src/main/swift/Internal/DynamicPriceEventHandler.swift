@@ -1,8 +1,9 @@
 //
-//  Untitled.swift
-//  
+//  DynamicPriceEventHandler.swift
+//  DynamicPrice
 //
-//  Created by Jason Sznol on 7/21/26.
+//  Created on 7/21/26.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 import GoogleMobileAds
