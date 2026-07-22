@@ -77,7 +77,7 @@ final class DynamicPriceBannerAd: NSObject {
 
         bannerView.delegate?.bannerViewDidRecordClick?(bannerView)
         
-        URLSession.trackClick(url: renderInfo.googleClickTracker, logger: logger)
+      //  URLSession.trackClick(url: renderInfo.googleClickTracker, logger: logger)
     }
     
     // MARK: Detect banner view's controller

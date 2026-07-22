@@ -23,7 +23,7 @@ internal struct DynamicPriceRenderer: Codable {
     static let jsonDecoder = JSONDecoder()
     static let adCache = NSCache<NSString, CachedAd>()
 
-    static func render(data: String?, block: @escaping (NimbusAd, URL) -> Void) {
+    static func render(data: String?, block: @escaping (CachedAd, URL) -> Void) {
         Task {
             guard let renderer = DynamicPriceRenderer(info: data),
                   let nimbusAd = DynamicPriceRenderer[renderer.auctionId] else {
@@ -58,13 +58,13 @@ internal struct DynamicPriceRenderer: Codable {
         self = _self
     }
 
-    static subscript (_ id: String) -> NimbusAd? {
+    static subscript (_ id: String) -> CachedAd? {
         get {
-            Self.adCache.object(forKey: id as NSString)?.value
+            Self.adCache.object(forKey: id as NSString)
         }
         set(newValue) {
             if let newValue {
-                Self.adCache.setObject(CachedAd(newValue), forKey: id as NSString)
+                Self.adCache.setObject(newValue, forKey: id as NSString)
             } else {
                 Self.adCache.removeObject(forKey: id as NSString)
             }

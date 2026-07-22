@@ -74,19 +74,6 @@ extension AdManagerBannerView {
     @available(*, deprecated, message: "updatePrice is no longer used and will be removed in the next feature release")
     public func updatePrice(_ adValue: AdValue) {
     }
-
-    /// Call this method when you receive a AppEventDelegate message of
-    /// `adView(banner:didReceiveAppEvent:withInfo:)` to see whether Nimbus
-    /// can handle the given app event.
-    /// - Parameters:
-    ///     - name: The event name
-    ///     - info: The event information
-    /// - Returns: True if Nimbus will render the ad, false otherwise
-    @discardableResult
-    public func handleEventForNimbus(name: String, info: String?) -> Bool {
-        guard validate() else { return false }
-        return nimbusBannerAd?.handleEventForNimbus(name: name, info: info) ?? false
-    }
     
     private func validate() -> Bool {
         guard let _ = nimbusBannerAd else {

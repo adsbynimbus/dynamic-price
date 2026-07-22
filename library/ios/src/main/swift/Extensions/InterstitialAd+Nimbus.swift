@@ -47,19 +47,6 @@ extension InterstitialAd {
     public func updatePrice(_ adValue: AdValue) {
     }
 
-    /// Call this method when you receive a AppEventDelegate message of
-    /// `interstitialAd(interstitialAd:didReceiveAppEvent:withInfo:)` to see whether Nimbus
-    /// can handle the given app event.
-    /// - Parameters:
-    ///     - name: The event name
-    ///     - info: The event information
-    /// - Returns: True if Nimbus will render the ad, false otherwise
-    @discardableResult
-    public func handleEventForNimbus(name: String, info: String?) -> Bool {
-        guard validate() else { return false }
-        return nimbusInterstitialAd?.handleEventForNimbus(name: name, info: info) ?? false
-    }
-    
     /// This method calls InterstitialAd.present(fromRootViewController:) while making sure
     /// the same controller is used for Nimbus rendering (if Nimbus wins).
     ///

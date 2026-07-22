@@ -107,7 +107,7 @@ final class DynamicPriceInterstitialAd: NSObject {
 
         adDidRecordClick(gadInterstitialAd)
         
-        URLSession.trackClick(url: renderInfo.googleClickTracker, logger: logger)
+       // URLSession.trackClick(url: renderInfo.googleClickTracker, logger: logger)
     }
 }
 
