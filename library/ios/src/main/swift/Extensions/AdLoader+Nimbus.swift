@@ -10,40 +10,19 @@ import GoogleMobileAds
 import NimbusKit
 
 public extension AdLoader {
-    private static var nimbusAdKey: Void?
-    
-    private(set) var nimbusAd: NimbusAd? {
-        get {
-            objc_getAssociatedObject(
-                self,
-                &Self.nimbusAdKey
-            ) as? NimbusAd
-        }
-        set {
-            objc_setAssociatedObject(
-                self,
-                &Self.nimbusAdKey,
-                newValue,
-                .OBJC_ASSOCIATION_RETAIN_NONATOMIC
-            )
-        }
-    }
-    
     /// This method applies dynamic price targeting and calls `AdLoader.load()`.
     /// - Parameters:
     ///     - gamRequest: Instance of AdManagerRequest
     ///     - ad: NimbusAd to render if Nimbus wins
     ///     - mapping: Default is `NimbusGAMLinearPriceMapping.banner()`
+    @available(*, deprecated, message: "AdLoader.applyDynamicPrice is no longer used and will be removed in the next feature release. Use NimbusAd.applyDynamicPrice(adManagerRequest) and AdLoader.load(adManagerRequest) instead.")
     func loadDynamicPrice(
         gamRequest: AdManagerRequest,
         ad: NimbusAd? = nil,
         mapping: NimbusGAMLinearPriceMapping = .banner()
     ) {
-        if !gamRequest.hasDynamicPrice {
-            ad?.applyDynamicPrice(into: gamRequest, mapping: mapping)
-        }
-        
-        nimbusAd = ad
+        ad?.applyDynamicPrice(into: gamRequest, mapping: mapping)
+
         load(gamRequest)
     }
 }

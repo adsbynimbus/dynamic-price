@@ -10,34 +10,21 @@ import GoogleMobileAds
 import NimbusKit
 
 extension InterstitialAd {
-    private static var nimbusAdKey: Void?
-
-    private var nimbusInterstitialAd: DynamicPriceInterstitialAd? {
-        get {
-            objc_getAssociatedObject(self, &Self.nimbusAdKey) as? DynamicPriceInterstitialAd
-        }
-        set {
-            objc_setAssociatedObject(self, &Self.nimbusAdKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        }
-    }
-    
     /// This method initializes nimbus dynamic price for this InterstitialAd instance.
     /// Make sure to call applyDynamicPrice() before any other method below.
     /// - Parameters:
     ///     - ad: NimbusAd to render if Nimbus wins
     ///     - requestManager: A request manager instance
     ///     - delegate: pass FullScreenContentDelegate if you want to receive delegate messages about this interstitial. Do NOT set `fullScreenContentDelegate` property yourself as it would override our proxy, resulting in Nimbus Dynamic Price not working correctly.
+    @available(*, deprecated, message: "InterstitialAd.applyDynamicPrice is no longer used and will be removed in the next feature release")
     public func applyDynamicPrice(
         ad: NimbusAd,
         requestManager: NimbusRequestManager = NimbusRequestManager(),
         delegate: FullScreenContentDelegate? = nil
     ) {
-        nimbusInterstitialAd = DynamicPriceInterstitialAd(
-            ad: ad,
-            clientDelegate: delegate,
-            gadInterstitialAd: self
-        )
-        fullScreenContentDelegate = nimbusInterstitialAd
+        if delegate != nil {
+            self.fullScreenContentDelegate = delegate
+        }
     }
     
     /// Call this method inside the `paidEventHandler` property.
@@ -55,45 +42,12 @@ extension InterstitialAd {
     ///
     /// - Parameters:
     ///     - rootViewController: A view controller that should present the interstitial ad. We'll detect a root view controller if this parameter is nil
+    @available(*, deprecated, message: "presentDynamicPrice is no longer used and will be removed in the next feature release. Use InterstitialAd.present instead")
     public func presentDynamicPrice(fromRootViewController: UIViewController?) {
         guard let controller = fromRootViewController ?? Nimbus.detectedRootViewController else {
             Nimbus.shared.logger.log("\(#function) did not receive a rootViewController and it failed to detect rootViewController on its own", level: .error)
             return
         }
-        guard let _ = nimbusInterstitialAd else {
-            present(from: controller)
-            return
-        }
-        guard validateDelegate() else { return }
-        
-        nimbusInterstitialAd?.rootViewController = controller
-        
-        // setting it right before present() so that we can detect if a user
-        // doesn't call this presentation method by observing this value
-        // in delegate: DynamicPriceInterstitialAd.adWillRender()
-        nimbusInterstitialAd?.didPresentGoogleController = true
         present(from: controller)
-
-        self.nimbusInterstitialAd?.present()
     }
-    
-    private func validate() -> Bool {
-        guard let _ = nimbusInterstitialAd else {
-            Nimbus.shared.logger.log("InterstitialAd.applyDynamicPrice was not called", level: .error)
-            return false
-        }
-        
-        return validateDelegate()
-    }
-    
-    private func validateDelegate() -> Bool {
-        guard fullScreenContentDelegate is DynamicPriceInterstitialAd else {
-            Nimbus.shared.logger.log("Custom InterstitialAd.fullScreenContentDelegate was set while using Dynamic Price implementation. Please pass your delegate in InterstitialAd.applyDynamicPrice instead.", level: .error)
-            return false
-        }
-        
-        return true
-    }
-    
-    
 }

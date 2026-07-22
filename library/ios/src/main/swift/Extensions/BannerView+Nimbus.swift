@@ -9,40 +9,19 @@
 import GoogleMobileAds
 import NimbusKit
 
-extension AdManagerBannerView {
-    private static var nimbusBannerAdKey: Void?
-    
-    private var nimbusBannerAd: DynamicPriceBannerAd? {
-        get {
-            objc_getAssociatedObject(
-                self, 
-                &Self.nimbusBannerAdKey
-            ) as? DynamicPriceBannerAd
-        }
-        set {
-            objc_setAssociatedObject(
-                self,
-                &Self.nimbusBannerAdKey,
-                newValue,
-                .OBJC_ASSOCIATION_RETAIN_NONATOMIC
-            )
-        }
-    }
-    
+extension AdManagerBannerView {    
     /// This method initializes nimbus dynamic price for this AdManagerBannerView instance.
     /// Make sure to call applyDynamicPrice() before any other method below.
     /// - Parameters:
     ///     - ad: NimbusAd to render if Nimbus wins
     ///     - requestManager: A request manager instance
     ///     - delegate: pass BannerViewDelegate if you want to receive delegate messages about this banner. Do NOT set `bannerView.delegate` property yourself as it would override our proxy, resulting in Nimbus Dynamic Price not working correctly.
+    @available(*, deprecated, message: "AdManagerAdView.applyDynamicPrice is no longer used and will be removed in the next feature release")
     public func applyDynamicPrice(
         requestManager: NimbusRequestManager = NimbusRequestManager(),
         delegate: BannerViewDelegate? = nil,
         ad: NimbusAd? = nil
     ) {
-        self.delegate = delegate
-
-        initBannerAd(ad: ad)
     }
     
     /// This method should be used instead of AdManagerBannerView.load() and only if the ad is loaded
@@ -52,6 +31,7 @@ extension AdManagerBannerView {
     ///     - ad: NimbusAd to render if Nimbus wins
     ///     - gamRequest: Instance of AdManagerRequest
     ///     - mapping: Default is `NimbusGAMLinearPriceMapping.banner()`
+    @available(*, deprecated, message: "loadDynamicPrice is no longer used and will be removed in the next feature release")
     public func loadDynamicPrice(
         gamRequest: AdManagerRequest,
         ad: NimbusAd? = nil,
@@ -59,10 +39,6 @@ extension AdManagerBannerView {
     ) {
         if !gamRequest.hasDynamicPrice {
             ad?.applyDynamicPrice(into: gamRequest, mapping: mapping)
-        }
-
-        if ad != nil && nimbusBannerAd == nil {
-            applyDynamicPrice(delegate: self.delegate, ad: ad)
         }
 
         load(gamRequest)
@@ -73,27 +49,5 @@ extension AdManagerBannerView {
     ///     - adValue: instance of AdValue
     @available(*, deprecated, message: "updatePrice is no longer used and will be removed in the next feature release")
     public func updatePrice(_ adValue: AdValue) {
-    }
-    
-    private func validate() -> Bool {
-        guard let _ = nimbusBannerAd else {
-            Nimbus.shared.logger.log("DynamicPriceBannerAd was not initialized", level: .error)
-            return false
-        }
-        
-        return true
-    }
-    
-    private func initBannerAd(ad: NimbusAd?) {
-        guard let ad else {
-            // To make sure there's no stale nimbus-rendered ad
-            nimbusBannerAd = nil
-            return
-        }
-        
-        nimbusBannerAd = DynamicPriceBannerAd(
-            ad: ad,
-            bannerView: self
-        )
     }
 }
