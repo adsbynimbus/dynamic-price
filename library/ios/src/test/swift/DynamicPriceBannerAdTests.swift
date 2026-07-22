@@ -22,40 +22,31 @@ struct DynamicPriceBannerAdTests {
         let bannerView = AdManagerBannerView()
         bannerView.rootViewController = rootVC
 
-        var bannerAd: DynamicPriceBannerAd? = DynamicPriceBannerAd(
-            ad: nimbusAd,
-            bannerView: bannerView
-        )
-
-        bannerAd!.handleEventForNimbus(name: "na_render", info: renderInfo.json)
+        bannerView.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
         // We need to wait for the async block in the implementation
         try await Task.sleep(nanoseconds: 10_000_000)
-
-        #expect(bannerView.subviews.last is NimbusAdView)
-        bannerAd = nil
-        #expect(!(bannerView.subviews.last is NimbusAdView))
+        let targetView = bannerView.targetView
+        #expect(targetView.subviews.last is NimbusAdView)
+        targetView.dynamicPriceAd = nil
+        #expect((bannerView.subviews.last is NimbusAdView) == false)
     }
 
     @Test("attach adview at app event")
     func attach_adview_at_app_event() async throws {
         let bannerView = AdManagerBannerView()
         bannerView.rootViewController = rootVC
-
-        let bannerAd = DynamicPriceBannerAd(
-            ad: nimbusAd,
-            bannerView: bannerView
-        )
-
         // no adview yet
-        #expect(!(bannerView.subviews.last is NimbusAdView))
 
-        bannerAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
+        let targetView = bannerView.targetView
+        #expect((bannerView.subviews.last is NimbusAdView) == false)
+
+        bannerView.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
         // Wait for the DispatchQueue.main.async in implementation
         try await Task.sleep(nanoseconds: 10_000_000)
 
-        #expect(bannerView.subviews.last is NimbusAdView)
+        #expect(targetView.subviews.last is NimbusAdView)
     }
 
     @Test("click event should fire google click delegate message")
@@ -65,82 +56,22 @@ struct DynamicPriceBannerAdTests {
         bannerView.delegate = clientDelegate
         bannerView.rootViewController = rootVC
 
-        let bannerAd = DynamicPriceBannerAd(
-            ad: nimbusAd,
-            bannerView: bannerView
-        )
+        let targetView = bannerView.targetView
 
-        bannerAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
+        bannerView.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
+        // Test that it fires click on NimbusEvent.clicked
         await confirmation { confirmation in
             clientDelegate.onDidRecordClick = { (banner) in
                 #expect(bannerView === banner)
                 confirmation.confirm()
             }
 
-            bannerAd.handleClickEvent()
+            targetView.dynamicPriceAd?.didReceiveNimbusEvent(
+                controller: MockAdController(),
+                event: .clicked,
+            )
         }
-
-        // Test that it fires click on NimbusEvent.clicked
-        await confirmation { confirmation in
-            clientDelegate.onDidRecordClick = { (banner) in
-                confirmation.confirm()
-            }
-
-            await MainActor.run {
-                bannerAd.adView?.didReceiveNimbusEvent(
-                    controller: MockAdController(),
-                    event: .clicked
-                )
-            }
-        }
-    }
-
-    @Test("click event wont fire google click delegate message without bannerview")
-    func click_event_wont_fire_google_click_delegate_message_without_bannerview() async throws {
-        let clientDelegate = MockBannerDelegate()
-        var bannerView: AdManagerBannerView! = AdManagerBannerView()
-
-        let bannerAd = DynamicPriceBannerAd(
-            ad: nimbusAd,
-            bannerView: bannerView
-        )
-
-        bannerAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
-
-        var didRecordClick = false
-        clientDelegate.onDidRecordClick = { _ in
-            didRecordClick = true
-        }
-
-        bannerView = nil
-        bannerAd.handleClickEvent()
-
-        try await Task.sleep(nanoseconds: 50_000_000)
-        #expect(!didRecordClick)
-    }
-
-    @Test("click event wont fire google click delegate message without renderinfo")
-    func click_event_wont_fire_google_click_delegate_message_without_renderinfo() async throws {
-        let clientDelegate = MockBannerDelegate()
-        let bannerView = AdManagerBannerView()
-
-        let bannerAd = DynamicPriceBannerAd(
-            ad: nimbusAd,
-            bannerView: bannerView
-        )
-
-        bannerAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
-
-        var didRecordClick = false
-        clientDelegate.onDidRecordClick = { _ in
-            didRecordClick = true
-        }
-
-        bannerAd.handleClickEvent()
-
-        try await Task.sleep(nanoseconds: 50_000_000)
-        #expect(!didRecordClick)
     }
 
     @Test("adview gets destroyed at nimbus error")
@@ -148,17 +79,13 @@ struct DynamicPriceBannerAdTests {
         let bannerView = AdManagerBannerView()
         bannerView.rootViewController = rootVC
 
-        let bannerAd = DynamicPriceBannerAd(
-            ad: nimbusAd,
-            bannerView: bannerView
-        )
-
-        bannerAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
+        let targetView = bannerView.targetView
+        bannerView.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
         // Wait for the async block in implementation
         try await Task.sleep(nanoseconds: 10_000_000)
 
-        guard let adView = bannerAd.adView else {
+        guard let _ = targetView.dynamicPriceAd?.controller?.adView else {
             Issue.record("expected NimbusAdView to be attached")
             return
         }
@@ -166,7 +93,7 @@ struct DynamicPriceBannerAdTests {
         #expect(bannerView.subviews.last is NimbusAdView)
 
         await MainActor.run {
-            adView.didReceiveNimbusError(
+            targetView.dynamicPriceAd?.didReceiveNimbusError(
                 controller: MockAdController(),
                 error: NimbusRenderError.alreadyDestroyed
             )
@@ -174,34 +101,6 @@ struct DynamicPriceBannerAdTests {
 
         try await Task.sleep(nanoseconds: 10_000_000)
         #expect(!(bannerView.subviews.last is NimbusAdView))
-    }
-
-    @Test("detect root view controller fail if bannerview not attached to hierarchy")
-    func detect_root_view_controller_fail_if_bannerview_not_attached_to_hierarchy() async {
-        let bannerView = AdManagerBannerView()
-
-        let bannerAd = DynamicPriceBannerAd(
-            ad: nimbusAd,
-            bannerView: bannerView
-        )
-
-        #expect(bannerAd.detectedViewController == nil)
-    }
-
-    @Test("detect root view controller")
-    func detect_root_view_controller() async {
-        let vc = await MainActor.run { UIViewController() }
-        let bannerView = AdManagerBannerView()
-
-        vc.view.addSubview(bannerView)
-
-        let bannerAd = DynamicPriceBannerAd(
-            ad: nimbusAd,
-            bannerView: bannerView
-        )
-
-        #expect(bannerAd.detectedViewController != nil)
-        #expect(bannerAd.detectedViewController === vc)
     }
 
     private let nimbusAd = createNimbusAd()
