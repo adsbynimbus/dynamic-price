@@ -14,10 +14,11 @@ internal class DynamicPriceEventHandler: NSObject, AdControllerDelegate {
     let googleClickTracker: URL
     let isInterstitial: Bool
     var cachedAd: DynamicPriceRenderer.CachedAd?
+    var interstitialStrongRef: AdController? = nil
     weak var adView: BannerView?
     weak var interstitial: InterstitialAd?
-    weak var controller: AdController?
     weak var presentingController: UIViewController?
+    weak var controller: AdController?
 
     private let logger = Nimbus.shared.logger
 
@@ -25,19 +26,23 @@ internal class DynamicPriceEventHandler: NSObject, AdControllerDelegate {
         cachedAd: DynamicPriceRenderer.CachedAd,
         googleClickTracker: URL,
         adView: BannerView? = nil,
-        interstiital: InterstitialAd? = nil,
+        interstitial: InterstitialAd? = nil,
     ) {
         self.cachedAd = cachedAd
         self.googleClickTracker = googleClickTracker
         self.adView = adView
-        self.interstitial = interstiital
-        self.isInterstitial = interstiital != nil
+        self.interstitial = interstitial
+        self.isInterstitial = interstitial != nil
         super.init()
     }
 
     deinit {
-        cachedAd = nil
-        controller?.destroy()
+        guard let controller else { return }
+        if Thread.isMainThread {
+            controller.destroy()
+        } else {
+            Task { @MainActor in controller.destroy() }
+        }
     }
 
     func present(from viewController: UIViewController) {
@@ -50,6 +55,7 @@ internal class DynamicPriceEventHandler: NSObject, AdControllerDelegate {
         ) else { return }
         self.presentingController = viewController
         self.controller = controller
+        self.interstitialStrongRef = controller
         controller.start()
     }
 
@@ -66,6 +72,7 @@ internal class DynamicPriceEventHandler: NSObject, AdControllerDelegate {
         } else if event == .destroyed {
             if isInterstitial {
                 interstitial?.dynamicPriceAd = nil
+                interstitialStrongRef = nil
                 Task { @MainActor in
                     self.presentingController?.dismiss(animated: false)
                 }
@@ -107,7 +114,7 @@ internal extension UIView {
 
     var dynamicPriceAd: DynamicPriceEventHandler? {
         get {
-            objc_getAssociatedObject(self,&Self.dynamicPriceAdKey) as? DynamicPriceEventHandler
+            objc_getAssociatedObject(self, &Self.dynamicPriceAdKey) as? DynamicPriceEventHandler
         }
         set {
             objc_setAssociatedObject(self, &Self.dynamicPriceAdKey, newValue,

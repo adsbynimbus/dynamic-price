@@ -14,6 +14,10 @@ import Testing
 
 @Suite struct DynamicPriceInterstitialAdTests {
 
+    init() async throws {
+        DynamicPriceRenderer["interstitialAuction1"] = .init(createNimbusAd())
+    }
+
     @Test("handle app event not na render")
     func handle_app_event_not_na_render() {
         let interstitialAd = InterstitialAd()
@@ -30,28 +34,42 @@ import Testing
             info: "{\"ga_click\": \"https://adsbynimbus.com/lkjl32423\"}"
         )
 
-        #expect(handled == false)
+        #expect(handled == true)
 
         handled = interstitial.handleEventForNimbus(
             name: "na_render",
             info: "{\"na_id\": \"asdjfkl23-234dsf\"}"
         )
-        #expect(handled == false)
+        #expect(handled == true)
     }
 
     @Test("click event should fire google click delegate message")
     func click_event_should_fire_google_click_delegate_message() async throws {
         let delegate = MockFullScreenContentDelegate()
-        let interstitialAd = InterstitialAd()
+        let interstitialAd = AdManagerInterstitialAd()
+        interstitialAd.fullScreenContentDelegate = delegate
 
         interstitialAd.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
-        interstitialAd.dynamicPriceAd?.didReceiveNimbusEvent(
-            controller: MockAdController(),
-            event: .clicked,
-        )
+        #expect(interstitialAd.dynamicPriceAd != nil)
 
-        #expect(delegate.state == .adDidRecordClick(ad: interstitialAd))
+        _ = await MainActor.run {
+            interstitialAd.handleEventForNimbus(name: "na_show", info: nil, viewController: UIViewController())
+        }
+
+        // Test that it fires click on NimbusEvent.clicked
+        await confirmation { confirmation in
+            delegate.onDidRecordClick = { (interstitial) in
+                #expect(interstitial === interstitialAd)
+                confirmation.confirm()
+            }
+
+
+            interstitialAd.dynamicPriceAd?.didReceiveNimbusEvent(
+                controller: interstitialAd.dynamicPriceAd!.controller!,
+                event: .clicked,
+            )
+        }
     }
 
     private let renderInfo = DynamicPriceRenderer(

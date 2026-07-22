@@ -24,16 +24,12 @@ internal struct DynamicPriceRenderer: Codable {
     static let adCache = NSCache<NSString, CachedAd>()
 
     static func render(data: String?, block: @escaping (CachedAd, URL) -> Void) {
-        Task {
-            guard let renderer = DynamicPriceRenderer(info: data),
-                  let nimbusAd = DynamicPriceRenderer[renderer.auctionId] else {
-                return
-            }
-
-            await MainActor.run {
-                block(nimbusAd, renderer.googleClickTracker)
-            }
+        guard let renderer = DynamicPriceRenderer(info: data),
+              let nimbusAd = DynamicPriceRenderer[renderer.auctionId] else {
+            return
         }
+        
+        block(nimbusAd, renderer.googleClickTracker)
     }
 
     let auctionId: String

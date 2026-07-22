@@ -17,11 +17,22 @@ extension BannerView {
     /// - Parameters:
     ///     - name: The event name
     ///     - info: The event information
+    ///     - viewController: Optional UIViewController; bannerView.rootViewController used automatically if omitted
     /// - Returns: True if Nimbus will render the ad, false otherwise
     @discardableResult
-    public func handleEventForNimbus(name: String, info: String?) -> Bool {
+    public func handleEventForNimbus(
+        name: String,
+        info: String?,
+        viewController: UIViewController? = nil,
+    ) -> Bool {
         guard name == "na_render" else { return false }
         DynamicPriceRenderer.render(data: info) { nimbusAd, clickTracker in
+            guard let vc =  self.rootViewController ?? viewController ??
+                    Nimbus.detectedRootViewController else {
+                self.delegate?.bannerView?(self, didFailToReceiveAdWithError:
+                    NimbusRenderError.adRenderingFailed(message: "No UIViewController detected"))
+                return
+            }
             let targetView = self.targetView
             let eventHandler = DynamicPriceEventHandler(
                 cachedAd: nimbusAd,
@@ -31,7 +42,7 @@ extension BannerView {
             eventHandler.controller = Nimbus.load(
                 ad: nimbusAd.value,
                 container: targetView,
-                adPresentingViewController: self.rootViewController ?? Nimbus.detectedRootViewController!,
+                adPresentingViewController: vc,
                 delegate: eventHandler,
             )
             targetView.dynamicPriceAd = eventHandler
@@ -47,24 +58,31 @@ public extension InterstitialAd {
     /// - Parameters:
     ///     - name: The event name
     ///     - info: The event information
+    ///     - viewController: Optional UIViewController to present from; root detected automatically if omitted.
     /// - Returns: True if Nimbus will render the ad, false otherwise
     @discardableResult
-    func handleEventForNimbus(name: String, info: String?) -> Bool {
+    func handleEventForNimbus(
+        name: String,
+        info: String?,
+        viewController: UIViewController? = nil,
+    ) -> Bool {
         switch name {
         case "na_render":
             DynamicPriceRenderer.render(data: info) { nimbusAd, clickTracker in
                 self.dynamicPriceAd = DynamicPriceEventHandler(
                     cachedAd: nimbusAd,
                     googleClickTracker: clickTracker,
-                    interstiital: self,
+                    interstitial: self,
                 )
             }
             return true
         case "na_show":
-            Task { @MainActor in
-                guard let viewController = Nimbus.detectedRootViewController else { return }
-                self.dynamicPriceAd?.present(from: viewController)
+            guard let viewController = viewController ?? Nimbus.detectedRootViewController else {
+                fullScreenContentDelegate?.ad?(self, didFailToPresentFullScreenContentWithError:
+                    NimbusRenderError.adRenderingFailed(message: "No UIViewController detected"))
+                break
             }
+            self.dynamicPriceAd?.present(from: viewController)
         default: break
         }
         return false

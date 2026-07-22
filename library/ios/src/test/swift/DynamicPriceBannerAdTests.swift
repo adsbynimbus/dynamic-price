@@ -17,16 +17,22 @@ struct DynamicPriceBannerAdTests {
 
     let rootVC = UIViewController()
 
+    init() async throws {
+        Nimbus.shared.initialize(publisher: "wee", apiKey: "woo")
+        DynamicPriceRenderer["abc"] = .init(createNimbusAd())
+    }
+
     @Test("adview destroy at deinit")
     func adview_destroy_at_deinit() async throws {
         let bannerView = AdManagerBannerView()
         bannerView.rootViewController = rootVC
 
+        let targetView = bannerView.targetView
         bannerView.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
+        #expect(targetView.dynamicPriceAd != nil)
+
         // We need to wait for the async block in the implementation
-        try await Task.sleep(nanoseconds: 10_000_000)
-        let targetView = bannerView.targetView
         #expect(targetView.subviews.last is NimbusAdView)
         targetView.dynamicPriceAd = nil
         #expect((bannerView.subviews.last is NimbusAdView) == false)
@@ -36,15 +42,12 @@ struct DynamicPriceBannerAdTests {
     func attach_adview_at_app_event() async throws {
         let bannerView = AdManagerBannerView()
         bannerView.rootViewController = rootVC
-        // no adview yet
 
+        // no adview yet
         let targetView = bannerView.targetView
-        #expect((bannerView.subviews.last is NimbusAdView) == false)
+        #expect((targetView.subviews.last is NimbusAdView) == false)
 
         bannerView.handleEventForNimbus(name: "na_render", info: renderInfo.json)
-
-        // Wait for the DispatchQueue.main.async in implementation
-        try await Task.sleep(nanoseconds: 10_000_000)
 
         #expect(targetView.subviews.last is NimbusAdView)
     }
@@ -68,7 +71,7 @@ struct DynamicPriceBannerAdTests {
             }
 
             targetView.dynamicPriceAd?.didReceiveNimbusEvent(
-                controller: MockAdController(),
+                controller: targetView.dynamicPriceAd!.controller!,
                 event: .clicked,
             )
         }
@@ -82,28 +85,19 @@ struct DynamicPriceBannerAdTests {
         let targetView = bannerView.targetView
         bannerView.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
-        // Wait for the async block in implementation
-        try await Task.sleep(nanoseconds: 10_000_000)
-
         guard let _ = targetView.dynamicPriceAd?.controller?.adView else {
             Issue.record("expected NimbusAdView to be attached")
             return
         }
 
-        #expect(bannerView.subviews.last is NimbusAdView)
+        #expect(targetView.subviews.last is NimbusAdView)
+        targetView.dynamicPriceAd?.didReceiveNimbusError(
+            controller: targetView.dynamicPriceAd!.controller!,
+            error: NimbusRenderError.alreadyDestroyed
+        )
 
-        await MainActor.run {
-            targetView.dynamicPriceAd?.didReceiveNimbusError(
-                controller: MockAdController(),
-                error: NimbusRenderError.alreadyDestroyed
-            )
-        }
-
-        try await Task.sleep(nanoseconds: 10_000_000)
-        #expect(!(bannerView.subviews.last is NimbusAdView))
+        #expect((targetView.subviews.last is NimbusAdView) == false)
     }
-
-    private let nimbusAd = createNimbusAd()
 
     private var renderInfo: DynamicPriceRenderer {
         DynamicPriceRenderer(

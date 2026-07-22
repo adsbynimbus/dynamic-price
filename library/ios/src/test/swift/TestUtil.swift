@@ -32,18 +32,6 @@ func createNimbusAd(
     )
 }
 
-class MockAdController: AdController {
-    var delegate: AdControllerDelegate?
-    var friendlyObstructions: [UIView]?
-    var isClickProtectionEnabled: Bool = true
-    var volume: Int = 0
-    var adView: UIView?
-    var adDuration: CGFloat = 0.0
-    func start() {}
-    func stop() {}
-    func destroy() {}
-}
-
 final class MockBannerDelegate: NSObject, BannerViewDelegate {
     var onDidFailToReceiveAd: ((BannerView, Error) -> Void)?
     func bannerView(_ bannerView: BannerView, didFailToReceiveAdWithError error: Error) {
@@ -134,8 +122,10 @@ final class MockFullScreenContentDelegate: NSObject, FullScreenContentDelegate {
         state = .adDidRecordImpression(ad: ad)
     }
 
+    var onDidRecordClick: ((FullScreenPresentingAd) -> Void)?
     func adDidRecordClick(_ ad: FullScreenPresentingAd) {
         state = .adDidRecordClick(ad: ad)
+        onDidRecordClick?(ad)
     }
 
     func adWillPresentFullScreenContent(_ ad: FullScreenPresentingAd) {
