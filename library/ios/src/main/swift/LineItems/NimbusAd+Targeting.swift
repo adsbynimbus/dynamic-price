@@ -17,6 +17,7 @@ public extension NimbusAd {
     ///   - mapping: A mapping composed of multiple LinearPriceGranularities in ascending order. Default: NimbusGAMLinearPriceMapping.banner()
     func applyDynamicPrice(into request: AdManagerRequest, mapping: NimbusGAMLinearPriceMapping = .banner()) {
         applyDynamicPrice(into: request, keywords: mapping.getKeywords(ad: self))
+        DynamicPriceRenderer[auctionId] = .init(self)
     }
 }
 
@@ -46,9 +47,4 @@ extension NimbusAd {
 
         request.customTargeting?[bidKey] = Nimbus.shared.testMode ? "0" : keywords
     }
-}
-
-/// :nodoc:
-extension AdManagerRequest {
-    var hasDynamicPrice: Bool { customTargeting?["na_id"] != nil }
 }

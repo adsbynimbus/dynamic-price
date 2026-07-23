@@ -9,17 +9,18 @@ import DynamicPrice
 import GoogleMobileAds
 
 func createNimbusAd(
+    index: Int = 0,
     type: NimbusAuctionType = .static,
     dimensPresent: Bool = true,
     network: String = "network"
 ) -> NimbusAd {
     NimbusAd(
-        position: "position",
+        position: "position-\(index)",
         auctionType: type,
         bidRaw: 0,
         bidInCents: 200,
         contentType: "",
-        auctionId: "123456",
+        auctionId: "auctionId-\(index)",
         network: network,
         markup: "markup",
         isInterstitial: true,
@@ -30,18 +31,6 @@ func createNimbusAd(
         isMraid: true,
         extensions: nil
     )
-}
-
-class MockAdController: AdController {
-    var delegate: AdControllerDelegate?
-    var friendlyObstructions: [UIView]?
-    var isClickProtectionEnabled: Bool = true
-    var volume: Int = 0
-    var adView: UIView?
-    var adDuration: CGFloat = 0.0
-    func start() {}
-    func stop() {}
-    func destroy() {}
 }
 
 final class MockBannerDelegate: NSObject, BannerViewDelegate {
@@ -134,8 +123,10 @@ final class MockFullScreenContentDelegate: NSObject, FullScreenContentDelegate {
         state = .adDidRecordImpression(ad: ad)
     }
 
+    var onDidRecordClick: ((FullScreenPresentingAd) -> Void)?
     func adDidRecordClick(_ ad: FullScreenPresentingAd) {
         state = .adDidRecordClick(ad: ad)
+        onDidRecordClick?(ad)
     }
 
     func adWillPresentFullScreenContent(_ ad: FullScreenPresentingAd) {
