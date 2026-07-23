@@ -1,4 +1,4 @@
-import GoogleMobileAds
+@preconcurrency import GoogleMobileAds
 @preconcurrency import DynamicPrice
 import SwiftUI
 
@@ -13,15 +13,10 @@ func loadDynamicPriceInterstitialAd(
     let nimbusResponse = try? await nimbusRequestManager.makeRequest(nimbusRequest)
     // Apply Key-Values to AdManagerRequest
     nimbusResponse?.applyDynamicPrice(into: adRequest, mapping: DynamicPriceApp.mapping)
+
     let interstitialAd = try await AdManagerInterstitialAd.load(with: adUnitId, request: adRequest)
     interstitialAd.appEventDelegate = interstitialAd
-    if let nimbusResponse {
-        interstitialAd.applyDynamicPrice(
-            ad: nimbusResponse,
-            requestManager: nimbusRequestManager,
-            delegate: delegate,
-        )
-    }
+
     return interstitialAd
 }
 
@@ -52,10 +47,11 @@ final class InterstitialAdViewModel: NSObject, FullScreenContentDelegate {
         isLoading = false 
     }
 
+    @MainActor
     func showAd() {
         guard !didShow, let interstitialAd else { return }
 
-        interstitialAd.presentDynamicPrice(fromRootViewController: nil)
+        interstitialAd.present(from: nil)
         didShow = true
     }
 }
