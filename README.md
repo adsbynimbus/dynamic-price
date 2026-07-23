@@ -51,27 +51,57 @@ dependencies: [
 
 ### Banner Ad
 
-**Android**
+**[Android](samples/android/src/nextgen/kotlin/BannerAd.kt)**
 ```kotlin
-// In your Composable or Activity
-val nimbusRequest = forBannerAd(AdViewBanner.title, BANNER_320_50)
-adView.loadDynamicPrice(
-    adRequest = BannerAdRequest.Builder(BuildConfig.ADMANAGER_ADUNIT_ID, AdSize.BANNER),
-    nimbusRequest = nimbusRequest
-)
+suspend fun AdManagerAdView.loadDynamicPrice(
+    priceMapping: LinearPriceMapping,
+    nimbusRequest: NimbusRequest = forBannerAd(adUnitId, BANNER_320_50),
+    nimbusAdManager: NimbusAdManager = NimbusAdManager(),
+) {
+    // Create a new AdManagerAdRequest.Builder for each request
+    val adManagerRequest = AdManagerAdRequest.Builder()
+
+    //  Request an ad from Nimbus
+    runCatching {
+        nimbusAdManager.makeRequest(context, nimbusRequest)
+    }.onSuccess { nimbusAd ->
+        // Call applyDynamicPrice on the adManagerRequest
+        adManagerRequest.applyDynamicPrice(nimbusAd, mapping = priceMapping)
+    }
+
+    // Set the appEventListener and call handleEventForNimbus
+    appEventListener = AppEventListener { name, info ->
+        // handleEventForNimbus is called when Nimbus wins the auction
+        handleEventForNimbus(name, info)
+    }
+
+    // Send the adManagerRequest to Google
+    loadAd(adManagerRequest.build())
+}
 ```
 
-**iOS**
+**[iOS](samples/ios/Sources/AdManagerBannerView.swift)**
 ```swift
-adView.loadDynamicPrice(
-    adRequest: AdManagerRequest(),
-    nimbusRequest: .forBannerAd(position: AdTypes.Banner.id)
-)
+extension AdManagerBannerView {
+    func loadDynamicPrice(adRequest: AdManagerRequest, nimbusRequest: NimbusRequest) {
+        Task {
+            // See samples/ios/Sources/DynamicPrice+Helper.swift for makeRequest async method
+            let nimbusRequestManager = NimbusRequestManager()
+            let nimbusResponse = try? await nimbusRequestManager.makeRequest(nimbusRequest)
+
+            // Apply Key-Values to AdManagerRequest
+            nimbusResponse?.applyDynamicPrice(into: adRequest, mapping: DynamicPriceApp.mapping)
+
+            // Send the adRequest to Google
+            load(adRequest)
+        }
+    }
+}
 ```
 
 ### Interstitial Ad
 
-**Android**
+**[Android](samples/android/src/nextgen/kotlin/InterstitialAd.kt)**
 ```kotlin
 val adResponse = loadDynamicPriceInterstitial(
     context = context,
@@ -83,7 +113,7 @@ if (adResponse is AdLoadResult.Success<InterstitialAd>) {
 }
 ```
 
-**iOS**
+**[iOS](samples/ios/Sources/AdManagerInterstitialAd.swift)**
 ```swift
 let interstitialAd = try await loadDynamicPriceInterstitial(
     adUnitId: "YOUR_AD_UNIT_ID",
@@ -96,12 +126,12 @@ interstitialAd.present(from: nil)
 
 ### Rewarded Ad
 
-**Android**
+**[Android](samples/android/src/nextgen/kotlin/RewardedAd.kt)**
 ```kotlin
 val adResponse = loadDynamicPriceRewardedVideo(
     context = context,
-    adRequest = AdRequest.Builder(BuildConfig.ADMANAGER_ADUNIT_ID),
-    nimbusRequest = forRewardedVideo(RewardedVideo.title),
+    adRequest: AdRequest.Builder(BuildConfig.ADMANAGER_ADUNIT_ID),
+    nimbusRequest: forRewardedVideo(RewardedVideo.title),
 )
 if (adResponse is AdLoadResult.Success<RewardedAd>) {
     adResponse.ad.show(activity) {
@@ -110,7 +140,7 @@ if (adResponse is AdLoadResult.Success<RewardedAd>) {
 }
 ```
 
-**iOS**
+**[iOS](samples/ios/Sources/AdManagerRewardedAd.swift)**
 ```swift
 do {
     let (googleAd, nimbusBid) = try await loadDynamicPriceRewardedVideo(
