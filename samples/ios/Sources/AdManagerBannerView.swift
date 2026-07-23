@@ -13,15 +13,7 @@ extension AdManagerBannerView: @retroactive AppEventDelegate {
             let nimbusResponse = try? await nimbusRequestManager.makeRequest(nimbusRequest)
             // Apply Key-Values to AdManagerRequest
             nimbusResponse?.applyDynamicPrice(into: adRequest, mapping: DynamicPriceApp.mapping)
-            /*
-                Clears any previously rendered Dynamic Price Ads and optionally prepares the
-                bid from Nimbus for rendering.
-             */
-            applyDynamicPrice(
-                requestManager: nimbusRequestManager,
-                delegate: delegate,
-                ad: nimbusResponse,
-            )
+
             load(adRequest)
         }
     }
