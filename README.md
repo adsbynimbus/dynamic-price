@@ -13,7 +13,6 @@ Nimbus bid to the Ad Manager request and rendering the ad when Nimbus wins the a
 - [Usage Examples](#usage-examples)
     - [Banner Ad](#banner-ad)
     - [Interstitial Ad](#interstitial-ad)
-    - [Rewarded Ad](#rewarded-ad)
 
 ## Minimum Requirements
 
@@ -103,53 +102,69 @@ extension AdManagerBannerView {
 
 **[Android](samples/android/src/nextgen/kotlin/InterstitialAd.kt)**
 ```kotlin
-val adResponse = loadDynamicPriceInterstitial(
-    context = context,
-    adRequest = AdRequest.Builder(BuildConfig.ADMANAGER_ADUNIT_ID),
-    nimbusRequest = forInterstitialAd(Interstitial.title),
-)
-if (adResponse is AdLoadResult.Success<InterstitialAd>) {
-    adResponse.ad.show(activity)
+suspend fun loadDynamicPriceInterstitial(
+    priceMapping: LinearPriceMapping,
+    adUnitId: String,
+    nimbusRequest: NimbusRequest = NimbusRequest.forInterstitialAd(adUnitId),
+    nimbusAdManager: NimbusAdManager = NimbusAdManager(),
+): AdManagerInterstitialAd? {
+    // Create a new AdManagerAdRequest.Builder for each request
+    val adManagerRequest = AdManagerAdRequest.Builder()
+
+    //  Request an ad from Nimbus
+    runCatching {
+        nimbusAdManager.makeRequest(context, nimbusRequest)
+    }.onSuccess { nimbusAd ->
+        // Call applyDynamicPrice on the adManagerRequest
+        adManagerRequest.applyDynamicPrice(nimbusAd, mapping = priceMapping)
+    }
+
+    return runCatching {
+        suspendCancellableCoroutine { continuation ->
+            AdManagerInterstitialAd.load(context, adUnitId, adManagerRequest.build(),
+                object : AdManagerInterstitialAdLoadCallback() {
+                    override fun onAdLoaded(ad: AdManagerInterstitialAd) {
+                        // Set the appEventListener before returning the AdManagerInterstitialAd
+                        ad.appEventListener = AppEventListener { name, info ->
+                            ad.handleEventForNimbus(name, info)
+                        }
+
+                        if (continuation.isActive) continuation.resume(ad)
+                    }
+
+                    override fun onAdFailedToLoad(p0: LoadAdError) {
+                        if (continuation.isActive) {
+                            continuation.resumeWithException(RuntimeException(p0.message))
+                        }
+                    }
+                },
+            )
+        }
+    }.getOrNull()
 }
 ```
 
 **[iOS](samples/ios/Sources/AdManagerInterstitialAd.swift)**
 ```swift
-let interstitialAd = try await loadDynamicPriceInterstitial(
-    adUnitId: "YOUR_AD_UNIT_ID",
-    adRequest: AdManagerRequest(),
-    delegate: self,
-    nimbusRequest: .forInterstitialAd(position: .interstitial)
-)
-interstitialAd.present(from: nil)
-```
-
-### Rewarded Ad
-
-**[Android](samples/android/src/nextgen/kotlin/RewardedAd.kt)**
-```kotlin
-val adResponse = loadDynamicPriceRewardedVideo(
-    context = context,
-    adRequest: AdRequest.Builder(BuildConfig.ADMANAGER_ADUNIT_ID),
-    nimbusRequest: forRewardedVideo(RewardedVideo.title),
-)
-if (adResponse is AdLoadResult.Success<RewardedAd>) {
-    adResponse.ad.show(activity) {
-        // Handle reward
+extension AdManagerInterstitialAd: @retroactive AppEventDelegate {
+    public func adView(_ interstitialAd: InterstitialAd, didReceiveAppEvent name: String, with info: String?) {
+        handleEventForNimbus(name: name, info: info)
     }
 }
-```
 
-**[iOS](samples/ios/Sources/AdManagerRewardedAd.swift)**
-```swift
-do {
-    let (googleAd, nimbusBid) = try await loadDynamicPriceRewardedVideo(
-        adUnitId: "YOUR_AD_UNIT_ID",
-        adRequest: AdManagerRequest(),
-        nimbusRequest: .forRewardedVideo(position: .rewarded)
-    )
-    // Use the rewarded ad
-} catch {
-    // Handle error
+func loadDynamicPriceInterstitialAd(adUnitId: String) async throws -> InterstitialAd? {
+    let nimbusRequestManager = NimbusRequestManager()
+    let nimbusRequest = NimbusRequest.forInterstitialAd(position: adUnitId)
+    let nimbusResponse = try? await nimbusRequestManager.makeRequest(nimbusRequest)
+    // Apply Key-Values to AdManagerRequest
+    nimbusResponse?.applyDynamicPrice(into: adRequest, mapping: DynamicPriceApp.mapping)
+
+    // See samples/ios/Sources/DynamicPrice+Helper.swift for load async method
+    let interstitialAd = try? await AdManagerInterstitialAd.load(with: adUnitId, request: adRequest)
+    interstitialAd?.appEventDelegate = interstitialAd
+
+    return interstitialAd
 }
+
+interstitialAd.present(from: nil)
 ```
