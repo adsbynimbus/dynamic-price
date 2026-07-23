@@ -49,8 +49,7 @@ struct BannerVideoScreen: View {
                     position: AdTypes.BannerVideo.id,
                     format: .letterbox,
                 )
-                nimbusRequest.impressions[0].video = .interstitial()
-                nimbusRequest.impressions[0].video?.position = .unknown
+                nimbusRequest.addInlineVideo()
                 adView.loadDynamicPrice(
                     adRequest: AdManagerRequest(),
                     nimbusRequest: nimbusRequest,
