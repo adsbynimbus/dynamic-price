@@ -20,8 +20,12 @@ internal struct DynamicPriceRenderer: Codable {
         }
     }
 
+    static let adCache = {
+        let cache = NSCache<NSString, CachedAd>()
+        cache.countLimit = 12
+        return cache
+    }()
     static let jsonDecoder = JSONDecoder()
-    static let adCache = NSCache<NSString, CachedAd>()
 
     static func render(data: String?, block: @escaping (CachedAd, URL) -> Void) {
         guard let renderer = DynamicPriceRenderer(info: data),

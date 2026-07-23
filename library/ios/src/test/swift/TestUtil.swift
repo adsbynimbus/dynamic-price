@@ -9,17 +9,18 @@ import DynamicPrice
 import GoogleMobileAds
 
 func createNimbusAd(
+    index: Int = 0,
     type: NimbusAuctionType = .static,
     dimensPresent: Bool = true,
     network: String = "network"
 ) -> NimbusAd {
     NimbusAd(
-        position: "position",
+        position: "position-\(index)",
         auctionType: type,
         bidRaw: 0,
         bidInCents: 200,
         contentType: "",
-        auctionId: "123456",
+        auctionId: "auctionId-\(index)",
         network: network,
         markup: "markup",
         isInterstitial: true,
