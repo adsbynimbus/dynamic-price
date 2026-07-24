@@ -29,8 +29,11 @@ Add the DynamicPrice library to your `build.gradle.kts` file:
 
 ```kotlin
 dependencies {
-    // Replace with the actual version once published
-    implementation("com.adsbynimbus:dynamic-price:1.0.0")
+    // For use with the Google Mobile Ads Next Gen SDK
+    implementation("com.adsbynimbus.dynamicprice:dynamicprice:1.0.1")
+
+    // For use with the Google Mobile Ads (Legacy) SDK
+    implementation("com.adsbynimbus.dynamicprice:dynamicprice-legacy:1.0.0-beta")
 }
 ```
 
@@ -39,8 +42,17 @@ dependencies {
 Add the following dependency to your `Package.swift`:
 
 ```swift
+let package = Pack
 dependencies: [
-    .package(url: "https://github.com/adsbynimbus/dynamic-price", from: "1.0.0")
+    .package(url: "https://github.com/adsbynimbus/dynamic-price", from: "1.0.0-beta")
+],
+targets: [
+    .target(
+        name: "YOUR_APP_TARGET",
+        dependencies: [
+            .product(name: "DynamicPrice", package: "dynamic-price")
+        ]
+    )
 ]
 ```
 
