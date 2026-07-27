@@ -10,6 +10,9 @@ Nimbus bid to the Ad Manager request and rendering the ad when Nimbus wins the a
 - [Integration](#integration)
     - [Android (Gradle)](#android-gradle)
     - [iOS (Swift Package Manager)](#ios-swift-package-manager)
+- [Migration Guide](#migration-guide)
+    - [extension-google](#extension-google)
+    - [NimbusGAMKit](#nimbusgamkit)
 - [Usage Examples](#usage-examples)
     - [Banner Ad](#banner-ad)
     - [Interstitial Ad](#interstitial-ad)
@@ -55,6 +58,50 @@ targets: [
     )
 ]
 ```
+
+---
+
+## Migration Guide
+
+Before migrating to the modules in this repository, ensure your Ad Manager creatives have been
+updated to include the new `na_show` event for displaying interstitials which is backwards
+compatible with all existing inventory running Dynamic Price with Nimbus Rendering.
+
+```html
+<script type="text/javascript" src="https://www.gstatic.com/afma/api/v1/google_mobile_app_ads.js" ></script>
+<script type="text/javascript">
+  admob.events.dispatchAppEvent("na_render", '{"na_id": "%%PATTERN:na_id%%", "ga_click": "%%CLICK_URL_UNESC%%"}');
+  admob.events.addEventListener("onshow", () => admob.events.dispatchAppEvent("na_show", "na_show"));
+</script>
+```
+
+### extension-google
+
+1. Remove `com.adsbynimbus.android:extension-google` from your `build.gradle(.kts)` file.
+2. Add `com.adsbynimbus.dynamicprice:dynamicprice-legacy:1.+` to your `build.gradle(.kts)` file.
+3. Remove all references to `GoogleAuctionData`, `RequestManager.notifyNoFill` and
+`RequestManager.notifyImpression`. These classes and methods are no longer used and will be
+removed in an upcoming release.
+
+### NimbusGAMKit
+
+1. Remove the `NimbusGAMKit` library from your Swift Package or Xcode project.
+2. Add the `https://github.com/adsbynimbus/dynamic-price` Swift Package and `DynamicPrice` library
+to your application target.
+3. *Perform a clean build!* The change in step 4 can cause a build failure if using a stale build.
+4. The `handleEventForNimbus` extension has been moved to the `BannerView` class so it is no longer
+required to cast to `AdManagerBannerView` in the `AppEventDelegate` callback.
+5. Remove all references to `AdManagerBannerView.updatePrice`, `InterstitialAd.updatePrice`, and
+`NimbusRequestManager.notifyError`. These methods are no longer used and will be removed in an
+upcoming release.
+6. `AdLoader.loadDynamicPrice` and `AdManagerBannerView.loadDynamicPrice` have been deprecated.
+Replace any occurrences with the original load methods and ensure you are calling
+`NimbusAd.applyDynamicPrice(AdManagerRequest)` prior to calling `(AdLoader/AdManagerAdView).load(AdManagerRequest)`.
+7. Remove all occurrences of `AdManagerAdView.applyDynamicPrice` and `InterstitialAd.applyDynamicPrice`.
+These methods are no longer required for Nimbus rendering and will be removed in an upcoming release.
+8. `InterstitialAd.presentDynamicPrice(from: )` has been deprecated and should be replaced with the
+original `InterstitialAd.present(from: nil)` method. The `DynamicPrice` SDK will automatically
+present the Nimbus rendered interstitial after the Google interstitial has been presented.
 
 ---
 
