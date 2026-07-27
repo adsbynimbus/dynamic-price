@@ -73,7 +73,7 @@ dokka {
     moduleName = "Dynamic Price"
     dokkaGeneratorIsolation = ClassLoaderIsolation()
     dokkaSourceSets.configureEach {
-        includes.from("Module.md")
+        includes.from("README.md")
 
         perPackageOption {
             matchingRegex = """.*\.internal.*"""
