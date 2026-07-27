@@ -6,4 +6,4 @@ Manager mediated auction using the [Next Gen SDK](https://developers.google.com/
 [Ad Manager setup instructions](https://docs.adsbynimbus.com/docs/extended-documentation/dynamic-price/ad-manager-setup)
 are available in the Dynamic Price section of the Nimbus Extended Documentation.
 
-# Package com.adsbynimbus.dynamicprice.nextgen
+# Package com.adsbynimbus.dynamicprice
