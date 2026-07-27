@@ -1,5 +1,5 @@
 [versions]
-android = "9.3.0"
+android = "9.3.1"
 dokka = "2.2.0"
 kotlin = "2.4.10"
 
@@ -16,7 +16,7 @@ androidx-startup = "1.2.0"
 kotlinx-coroutines = "1.11.0"
 leakcanary = "3.0-alpha-9"
 mockk = "1.14.11"
-okio = "3.17.0"
+okio = "3.18.0"
 #noinspection NewerVersionAvailable
 protobuf = "3.25.9"
 
