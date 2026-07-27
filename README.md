@@ -20,11 +20,11 @@ Nimbus bid to the Ad Manager request and rendering the ad when Nimbus wins the a
 
 ## Minimum Requirements
 
-| Platform                               | Minimum Requirement                               |
-|:---------------------------------------|:--------------------------------------------------|
-| **Android Next Gen**                   | SDK 24 (Android 7.0), Kotlin 2.0+, Next Gen 1.2.1 |
-| **Android Legacy**                     | SDK 23 (Android 6.0), Kotlin 2.0+, GMA 25.4.0     |
-| **iOS**                                | iOS 15.0+, GMA 12+                                |
+| Platform                                     | Minimum Requirement                               |
+|:---------------------------------------------|:--------------------------------------------------|
+| [**Android Next Gen**](library/android)      | SDK 24 (Android 7.0), Kotlin 2.0+, Next Gen 1.2.1 |
+| [**Android Legacy**](library/android-legacy) | SDK 23 (Android 6.0), Kotlin 2.0+, GMA 25.4.0     |
+| [**iOS**](library/ios)                       | iOS 15.0+, GMA 12+                                |
 
 ## Integration
 
