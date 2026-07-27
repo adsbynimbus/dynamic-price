@@ -11,8 +11,9 @@ Nimbus bid to the Ad Manager request and rendering the ad when Nimbus wins the a
     - [Android (Gradle)](#android-gradle)
     - [iOS (Swift Package Manager)](#ios-swift-package-manager)
 - [Migration Guide](#migration-guide)
-    - [extension-google](#extension-google)
-    - [NimbusGAMKit](#nimbusgamkit)
+    - [Summary of Changes](#summary-of-changes)
+    - [Android Migration (extension-google)](#android-migration-extension-google)
+    - [iOS Migration (NimbusGAMKit)](#ios-migration-nimbusgamkit)
 - [Usage Examples](#usage-examples)
     - [Banner Ad](#banner-ad)
     - [Interstitial Ad](#interstitial-ad)
@@ -45,18 +46,19 @@ dependencies {
 Add the following dependency to your `Package.swift`:
 
 ```swift
-let package = Pack
-dependencies: [
-    .package(url: "https://github.com/adsbynimbus/dynamic-price", from: "1.0.0-beta")
-],
-targets: [
-    .target(
-        name: "YOUR_APP_TARGET",
-        dependencies: [
-            .product(name: "DynamicPrice", package: "dynamic-price")
-        ]
-    )
-]
+let package = Package(
+    dependencies: [
+        .package(url: "https://github.com/adsbynimbus/dynamic-price", from: "1.0.0-beta")
+    ],
+    targets: [
+        .target(
+            name: "YOUR_APP_TARGET",
+            dependencies: [
+                .product(name: "DynamicPrice", package: "dynamic-price")
+            ]
+        )
+    ]
+)
 ```
 
 ---
@@ -64,7 +66,7 @@ targets: [
 ## Migration Guide
 
 Before migrating to the modules in this repository, ensure your Ad Manager creatives have been
-updated to include the new `na_show` event for displaying interstitials which is backwards
+updated to include the new `na_show` event for displaying interstitials, which is backwards
 compatible with all existing inventory running Dynamic Price with Nimbus Rendering.
 
 ```html
@@ -75,7 +77,28 @@ compatible with all existing inventory running Dynamic Price with Nimbus Renderi
 </script>
 ```
 
-### extension-google
+### Summary of Changes
+
+#### Win / Loss (Android + iOS)
+
+Win/Loss functionality has been deprecated on both platforms and will be removed in an upcoming
+release.
+
+#### `applyDynamicPrice` (iOS Only)
+
+The implementation on iOS has been updated to store the `NimbusAd` in a LRU Cache automatically when
+calling `NimbusAd.applyDynamicPrice(AdManagerRequest)` for rendering in `handleEventForNimbus`. It
+is no longer required to call `applyDynamicPrice` on the `AdManagerBannerView` or
+`AdManagerInterstitialAd` objects.
+
+#### `BannerView.handleEventForNimbus` (iOS Only)
+
+The `handleEventForNimbus` extension method has been moved from `AdManagerBannerView` to
+the `BannerView` class which requires a clean build if migrating from `NimbusGAMKit`. As such,
+it is no longer required to cast the `banner` parameter of the `AppEventDelegate` callback to an `
+AdManagerBannerView` before calling `handleEventForNimbus`.
+
+### Android Migration (extension-google)
 
 1. Remove `com.adsbynimbus.android:extension-google` from your `build.gradle(.kts)` file.
 2. Add `com.adsbynimbus.dynamicprice:dynamicprice-legacy:1.+` to your `build.gradle(.kts)` file.
@@ -83,7 +106,7 @@ compatible with all existing inventory running Dynamic Price with Nimbus Renderi
 `RequestManager.notifyImpression`. These classes and methods are no longer used and will be
 removed in an upcoming release.
 
-### NimbusGAMKit
+### iOS Migration (NimbusGAMKit)
 
 1. Remove the `NimbusGAMKit` library from your Swift Package or Xcode project.
 2. Add the `https://github.com/adsbynimbus/dynamic-price` Swift Package and `DynamicPrice` library
@@ -119,7 +142,7 @@ suspend fun AdManagerAdView.loadDynamicPrice(
     // Create a new AdManagerAdRequest.Builder for each request
     val adManagerRequest = AdManagerAdRequest.Builder()
 
-    //  Request an ad from Nimbus
+    // Request an ad from Nimbus
     runCatching {
         nimbusAdManager.makeRequest(context, nimbusRequest)
     }.onSuccess { nimbusAd ->
@@ -140,9 +163,18 @@ suspend fun AdManagerAdView.loadDynamicPrice(
 
 **[iOS](samples/ios/Sources/AdManagerBannerView.swift)**
 ```swift
-extension AdManagerBannerView {
+// The AppEventDelegate conformance on the AdManagerBannerView extension demonstrates the required
+// usage of `handleEventForNimbus`. The object that implements the AppEventDelegate must be
+// strongly retained through the lifecycle of the AdManagerBannerView.
+extension AdManagerBannerView: @retroactive AppEventDelegate {
+    public func adView(_ banner: BannerView, didReceiveAppEvent name: String, with info: String?) {
+        banner.handleEventForNimbus(name: name, info: info)
+    }
+
     func loadDynamicPrice(adRequest: AdManagerRequest, nimbusRequest: NimbusRequest) {
         Task {
+            // Set the appEventDelegate that includes the call to `handleEventForNimbus`
+            self.appEventDelegate = self
             // See samples/ios/Sources/DynamicPrice+Helper.swift for makeRequest async method
             let nimbusRequestManager = NimbusRequestManager()
             let nimbusResponse = try? await nimbusRequestManager.makeRequest(nimbusRequest)
@@ -170,7 +202,7 @@ suspend fun loadDynamicPriceInterstitial(
     // Create a new AdManagerAdRequest.Builder for each request
     val adManagerRequest = AdManagerAdRequest.Builder()
 
-    //  Request an ad from Nimbus
+    // Request an ad from Nimbus
     runCatching {
         nimbusAdManager.makeRequest(context, nimbusRequest)
     }.onSuccess { nimbusAd ->
@@ -205,9 +237,12 @@ suspend fun loadDynamicPriceInterstitial(
 
 **[iOS](samples/ios/Sources/AdManagerInterstitialAd.swift)**
 ```swift
+// The AppEventDelegate conformance on the AdManagerInterstitialAd extension demonstrates the
+// required usage of `handleEventForNimbus`. The object that implements the AppEventDelegate must be
+// strongly retained through the lifecycle of the InterstitialAd.
 extension AdManagerInterstitialAd: @retroactive AppEventDelegate {
     public func adView(_ interstitialAd: InterstitialAd, didReceiveAppEvent name: String, with info: String?) {
-        handleEventForNimbus(name: name, info: info)
+        interstitialAd.handleEventForNimbus(name: name, info: info)
     }
 }
 
