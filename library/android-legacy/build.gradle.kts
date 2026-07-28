@@ -23,18 +23,18 @@ val dokkaHtmlJar = tasks.register<Jar>("dokkaHtmlJar") {
 
 kotlin {
     android {
-        namespace = "com.adsbynimbus.google"
+        namespace = "$group.legacy"
         compileSdk = 36
         minSdk = 23
 
         compilations.configureEach {
             compileTaskProvider.configure {
-                compilerOptions.jvmTarget = JvmTarget.JVM_17
+                compilerOptions.jvmTarget = JvmTarget.JVM_11
             }
         }
 
         aarMetadata {
-            minCompileSdk = 35
+            minCompileSdk = 36
             minAgpVersion = "8.5.0" // Min Required for Kotlin 2.0
         }
 
@@ -56,7 +56,16 @@ kotlin {
             implementation(libs.bundles.test.unit)
         }
         androidMain.dependencies {
-            implementation(libs.ads.google)
+            implementation(libs.ads.google.legacy.flatMap{ library ->
+                providers.provider {
+                    library.copy().apply {
+                        version {
+                            require("[24.9.0,)")
+                            library.version?.let { prefer(it) }
+                        }
+                    }
+                }
+            })
             implementation(libs.ads.nimbus)
         }
     }

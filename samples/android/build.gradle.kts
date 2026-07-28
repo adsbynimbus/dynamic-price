@@ -70,7 +70,7 @@ kotlin {
 
 dependencies {
     "legacyImplementation"(projects.androidLegacy)
-    "legacyImplementation"(libs.ads.google)
+    "legacyImplementation"(libs.ads.google.legacy)
     "nextgenImplementation"(projects.androidLibrary)
     "nextgenImplementation"(libs.ads.google.nextgen)
     implementation(platform(libs.androidx.compose))
