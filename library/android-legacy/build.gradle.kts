@@ -29,12 +29,12 @@ kotlin {
 
         compilations.configureEach {
             compileTaskProvider.configure {
-                compilerOptions.jvmTarget = JvmTarget.JVM_17
+                compilerOptions.jvmTarget = JvmTarget.JVM_11
             }
         }
 
         aarMetadata {
-            minCompileSdk = 35
+            minCompileSdk = 36
             minAgpVersion = "8.5.0" // Min Required for Kotlin 2.0
         }
 
