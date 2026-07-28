@@ -1,4 +1,7 @@
 [![Build](https://github.com/adsbynimbus/dynamic-price/actions/workflows/build.yml/badge.svg)](https://github.com/adsbynimbus/dynamic-price/actions/workflows/build.yml)
+![GitHub Release](https://img.shields.io/github/v/release/adsbynimbus/dynamic-price?sort=semver&filter=Android*&display_name=release)
+![GitHub Release](https://img.shields.io/github/v/release/adsbynimbus/dynamic-price?sort=semver&filter=Android%20Legacy*&display_name=release)
+![GitHub Release](https://img.shields.io/github/v/release/adsbynimbus/dynamic-price?sort=semver&filter=iOS*&display_name=release)
 # Dynamic Price
 
 Dynamic Price integrates with the Google Mobile Ads SDK by appending key-value parameters from a
