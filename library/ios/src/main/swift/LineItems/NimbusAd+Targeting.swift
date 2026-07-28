@@ -37,10 +37,6 @@ extension NimbusAd {
 
         if auctionType == .video {
             bidKey = "na_bid_video"
-
-            if let duration {
-                request.customTargeting?["na_duration"] = String(duration)
-            }
         } else {
             bidKey = "na_bid"
         }
