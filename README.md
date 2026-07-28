@@ -38,7 +38,7 @@ dependencies {
     implementation("com.adsbynimbus.dynamicprice:dynamicprice:1.0.1")
 
     // For use with the Google Mobile Ads (Legacy) SDK
-    implementation("com.adsbynimbus.dynamicprice:dynamicprice-legacy:1.0.0-beta")
+    implementation("com.adsbynimbus.dynamicprice:dynamicprice-legacy:1.0.0")
 }
 ```
 
@@ -49,7 +49,7 @@ Add the following dependency to your `Package.swift`:
 ```swift
 let package = Package(
     dependencies: [
-        .package(url: "https://github.com/adsbynimbus/dynamic-price", from: "1.0.0-beta")
+        .package(url: "https://github.com/adsbynimbus/dynamic-price", from: "1.0.0")
     ],
     targets: [
         .target(
