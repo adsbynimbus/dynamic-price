@@ -23,7 +23,7 @@ val dokkaHtmlJar = tasks.register<Jar>("dokkaHtmlJar") {
 
 kotlin {
     android {
-        namespace = "com.adsbynimbus.google"
+        namespace = "$group.legacy"
         compileSdk = 36
         minSdk = 23
 
