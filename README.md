@@ -1,4 +1,7 @@
 [![Build](https://github.com/adsbynimbus/dynamic-price/actions/workflows/build.yml/badge.svg)](https://github.com/adsbynimbus/dynamic-price/actions/workflows/build.yml)
+![GitHub Release](https://img.shields.io/github/v/release/adsbynimbus/dynamic-price?sort=semver&filter=Android*&display_name=release)
+![GitHub Release](https://img.shields.io/github/v/release/adsbynimbus/dynamic-price?sort=semver&filter=Android%20Legacy*&display_name=release)
+![GitHub Release](https://img.shields.io/github/v/release/adsbynimbus/dynamic-price?sort=semver&filter=iOS*&display_name=release)
 # Dynamic Price
 
 Dynamic Price integrates with the Google Mobile Ads SDK by appending key-value parameters from a
@@ -38,7 +41,7 @@ dependencies {
     implementation("com.adsbynimbus.dynamicprice:dynamicprice:1.0.1")
 
     // For use with the Google Mobile Ads (Legacy) SDK
-    implementation("com.adsbynimbus.dynamicprice:dynamicprice-legacy:1.0.0-beta")
+    implementation("com.adsbynimbus.dynamicprice:dynamicprice-legacy:1.0.0")
 }
 ```
 
@@ -49,7 +52,7 @@ Add the following dependency to your `Package.swift`:
 ```swift
 let package = Package(
     dependencies: [
-        .package(url: "https://github.com/adsbynimbus/dynamic-price", from: "1.0.0-beta")
+        .package(url: "https://github.com/adsbynimbus/dynamic-price", from: "1.0.0")
     ],
     targets: [
         .target(
