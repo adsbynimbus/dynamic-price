@@ -33,7 +33,6 @@ import Testing
         )
         #expect(request.customTargeting?["na_type"] as? String == NimbusAuctionType.static.rawValue)
         #expect(request.customTargeting?["na_bid_video"] == nil)
-        #expect(request.customTargeting?["na_duration"] == nil)
     }
 
     @Test("keywords present video")
@@ -48,8 +47,8 @@ import Testing
         #expect(request.customTargeting?["na_network"] as? String == ad.network)
         #expect(request.customTargeting?["na_size"] as? String == "0x0")
         #expect(request.customTargeting?["na_bid_video"] as? String == mapping.getKeywords(ad: ad))
-        #expect(request.customTargeting?["na_duration"] as? String == String(ad.duration!))
         #expect(request.customTargeting?["na_type"] as? String == NimbusAuctionType.video.rawValue)
+        #expect(request.customTargeting?["na_render"] as? String == "video")
     }
 
     @Test("keywords present existing keywords")
@@ -69,8 +68,8 @@ import Testing
                 == "\(ad.adDimensions!.width)x\(ad.adDimensions!.height)"
         )
         #expect(request.customTargeting?["na_bid"] as? String == "200")
-        #expect(request.customTargeting?["na_duration"] == nil)
         #expect(request.customTargeting?["na_type"] as? String == NimbusAuctionType.static.rawValue)
+        #expect(request.customTargeting?["na_render"] as? String == "static")
         #expect(request.customTargeting?["test_key"] as? String == "test_value")
     }
 

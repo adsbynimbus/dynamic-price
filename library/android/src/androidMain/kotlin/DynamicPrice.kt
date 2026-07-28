@@ -3,6 +3,7 @@ package com.adsbynimbus.dynamicprice
 import android.app.Activity
 import androidx.core.os.BundleCompat.getSerializable
 import androidx.core.view.*
+import com.adsbynimbus.Nimbus
 import com.adsbynimbus.NimbusAd
 import com.adsbynimbus.dynamicprice.internal.*
 import com.adsbynimbus.internal.Platform
@@ -20,12 +21,19 @@ import kotlinx.coroutines.*
 import java.lang.ref.WeakReference
 
 /** Appends Nimbus Key Values to the Ad Manager request and caches the ad for rendering. */
-public fun <T : BaseAdRequestBuilder<T>> BaseAdRequestBuilder<T>.applyDynamicPrice(
+fun <T : BaseAdRequestBuilder<T>> BaseAdRequestBuilder<T>.applyDynamicPrice(
     nimbusAd: NimbusResponse,
     mapping: Mapping,
 ) {
     DynamicPriceRenderer.adCache.put(nimbusAd.auctionId, nimbusAd)
-    nimbusAd.targetingMap(mapping).forEach { putCustomTargeting(it.key, it.value) }
+    val isVideo = nimbusAd.bid.type == "video"
+    putCustomTargeting("na_id", nimbusAd.bid.auction_id)
+    putCustomTargeting("na_bid" + if (isVideo) "_video" else "",
+        if (Nimbus.testMode) "0" else mapping.getTarget(nimbusAd))
+    putCustomTargeting("na_network", nimbusAd.bid.network)
+    putCustomTargeting("na_render", if (isVideo) "video" else "static")
+    putCustomTargeting("na_size", "${nimbusAd.bid.width}x${nimbusAd.bid.height}")
+    putCustomTargeting("na_type", if (isVideo) "video" else "static")
 }
 
 /**
@@ -37,7 +45,7 @@ public fun <T : BaseAdRequestBuilder<T>> BaseAdRequestBuilder<T>.applyDynamicPri
  * @param activity optional context the ad is loaded in; current activity used as the default.
  * @return a NimbusResponse object if Nimbus won the auction or null otherwise
  */
-public fun BannerAd.handleEventForNimbus(
+fun BannerAd.handleEventForNimbus(
     name: String,
     data: String?,
     listener: AdController.Listener? = null,
@@ -80,7 +88,7 @@ public fun BannerAd.handleEventForNimbus(
  * @param activity optional context the ad is loaded in; current activity used as the default.
  * @return a NimbusResponse object if Nimbus won the auction or null otherwise
  */
-public fun InterstitialAd.handleEventForNimbus(
+fun InterstitialAd.handleEventForNimbus(
     name: String,
     data: String?,
     listener: AdController.Listener? = null,
@@ -109,7 +117,7 @@ public fun InterstitialAd.handleEventForNimbus(
 }
 
 /** Loads a RewardedAd and conditionally wraps the response if a Nimbus bid is present */
-public suspend fun RewardedAd.Companion.loadDynamicPrice(
+suspend fun RewardedAd.Companion.loadDynamicPrice(
     request: AdRequest,
     nimbusListener: AdController.Listener? = null,
 ): AdLoadResult<RewardedAd> = RewardedAd.load(request).run {
@@ -136,7 +144,7 @@ public suspend fun RewardedAd.Companion.loadDynamicPrice(
 }
 
 /** Loads a RewardedAd and conditionally wraps the response if a Nimbus bid is present */
-public fun RewardedAd.Companion.loadDynamicPrice(
+fun RewardedAd.Companion.loadDynamicPrice(
     adRequest: AdRequest,
     adLoadCallback: AdLoadCallback<RewardedAd>,
     nimbusListener: AdController.Listener? = null,
@@ -158,7 +166,7 @@ public fun RewardedAd.Companion.loadDynamicPrice(
  * @param nimbusAd The Nimbus bid if one was present
  * @param nimbusListener Optional Nimbus AdController listener
  */
-public class DynamicPriceRewardedCallback(
+class DynamicPriceRewardedCallback(
     internal val callback: AdLoadCallback<RewardedAd>,
     internal val nimbusAd: NimbusResponse?,
     internal val nimbusListener: AdController.Listener? = null,
@@ -170,7 +178,7 @@ public class DynamicPriceRewardedCallback(
      * @param adRequest The AdRequest passed to `RewardedAd.load`
      * @param nimbusListener Optional Nimbus AdController listener
      */
-    public constructor(
+    constructor(
         callback: AdLoadCallback<RewardedAd>,
         adRequest: AdRequest,
         nimbusListener: AdController.Listener? = null,
@@ -211,9 +219,9 @@ public class DynamicPriceRewardedCallback(
  * @see dynamicPriceAd
  */
 @JvmInline
-public value class DynamicPriceAd(public val adController: AdController) : java.io.Serializable {
+value class DynamicPriceAd(val adController: AdController) : java.io.Serializable {
     /** Destroys the associated [AdController]. */
-    public fun destroy(): Unit = adController.destroy()
+    fun destroy(): Unit = adController.destroy()
 }
 
 /**
@@ -226,7 +234,7 @@ public value class DynamicPriceAd(public val adController: AdController) : java.
  * bannerAd?.dynamicPriceAd?.destroy()
  * ```
  */
-public inline var Ad.dynamicPriceAd: DynamicPriceAd?
+inline var Ad.dynamicPriceAd: DynamicPriceAd?
     get() = getSerializable(getResponseInfo().responseExtras, "na_render", DynamicPriceAd::class.java)
     internal set(value) {
         getResponseInfo().responseExtras.apply {
@@ -235,9 +243,9 @@ public inline var Ad.dynamicPriceAd: DynamicPriceAd?
     }
 
 /** Returns true if Nimbus will render the Rewarded ad */
-public inline val RewardedAd.isNimbusWin: Boolean
+inline val RewardedAd.isNimbusWin: Boolean
     get() = getAdMetadata().getString("AdSystem").equals("Nimbus", ignoreCase = true)
 
 /** Returns the NimbusResponse associated with the RewardedAd */
-public val RewardedAd.nimbusAd: NimbusResponse?
+val RewardedAd.nimbusAd: NimbusResponse?
     get() = (this as? DynamicPriceRewardedAd)?.takeIf { it.isNimbusWin }?.nimbusAd

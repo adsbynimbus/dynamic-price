@@ -49,8 +49,6 @@ kotlin {
         languageVersion = KotlinVersion.KOTLIN_2_0
     }
 
-    explicitApi()
-
     sourceSets {
         removeIf { it.name == "commonTest" } // Fixes Unused Kotlin Source Sets warning
         androidMain.dependencies {
