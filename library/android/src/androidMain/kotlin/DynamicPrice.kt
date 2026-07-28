@@ -3,6 +3,7 @@ package com.adsbynimbus.dynamicprice
 import android.app.Activity
 import androidx.core.os.BundleCompat.getSerializable
 import androidx.core.view.*
+import com.adsbynimbus.Nimbus
 import com.adsbynimbus.NimbusAd
 import com.adsbynimbus.dynamicprice.internal.*
 import com.adsbynimbus.internal.Platform
@@ -25,7 +26,13 @@ fun <T : BaseAdRequestBuilder<T>> BaseAdRequestBuilder<T>.applyDynamicPrice(
     mapping: Mapping,
 ) {
     DynamicPriceRenderer.adCache.put(nimbusAd.auctionId, nimbusAd)
-    nimbusAd.targetingMap(mapping).forEach { putCustomTargeting(it.key, it.value) }
+    val isVideo = nimbusAd.bid.type == "video"
+    putCustomTargeting("na_id", nimbusAd.bid.auction_id)
+    putCustomTargeting("na_size", "${nimbusAd.bid.width}x${nimbusAd.bid.height}")
+    putCustomTargeting("na_type", if (isVideo) "video" else "static")
+    putCustomTargeting("na_network", nimbusAd.bid.network)
+    putCustomTargeting("na_bid" + if (isVideo) "_video" else "",
+        if (Nimbus.testMode) "0" else mapping.getTarget(nimbusAd))
 }
 
 /**

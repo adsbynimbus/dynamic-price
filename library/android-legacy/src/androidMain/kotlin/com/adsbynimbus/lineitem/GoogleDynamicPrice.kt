@@ -1,9 +1,9 @@
 @file:JvmName("GoogleDynamicPrice")
 package com.adsbynimbus.lineitem
 
+import com.adsbynimbus.dynamicprice.applyTargeting
 import com.adsbynimbus.google.dynamicPriceAdCache
 import com.adsbynimbus.request.NimbusResponse
-import com.google.android.gms.ads.AbstractAdRequestBuilder
 import com.google.android.gms.ads.admanager.AdManagerAdRequest
 
 /**
@@ -18,7 +18,7 @@ fun AdManagerAdRequest.Builder.applyDynamicPrice(
     mapping: Mapping = ad.defaultMapping,
 ) = apply {
     dynamicPriceAdCache.put(ad.auctionId, ad)
-    ad.targetingMap(mapping).forEach { (this as AbstractAdRequestBuilder<*>).addCustomTargeting(it.key, it.value) }
+    applyTargeting(ad, mapping)
 }
 
 /**
@@ -33,5 +33,5 @@ fun NimbusResponse.applyDynamicPrice(
     mapping: Mapping = defaultMapping,
 ) {
     dynamicPriceAdCache.put(auctionId, this)
-    targetingMap(mapping).forEach { (request as AbstractAdRequestBuilder<*>).addCustomTargeting(it.key, it.value) }
+    request.applyTargeting(this, mapping)
 }
