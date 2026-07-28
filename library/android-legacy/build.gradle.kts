@@ -56,7 +56,16 @@ kotlin {
             implementation(libs.bundles.test.unit)
         }
         androidMain.dependencies {
-            implementation(libs.ads.google)
+            implementation(libs.ads.google.legacy.flatMap{ library ->
+                providers.provider {
+                    library.copy().apply {
+                        version {
+                            require("[24.9.0,)")
+                            library.version?.let { prefer(it) }
+                        }
+                    }
+                }
+            })
             implementation(libs.ads.nimbus)
         }
     }

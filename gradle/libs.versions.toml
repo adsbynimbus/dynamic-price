@@ -3,7 +3,7 @@ android = "9.3.1"
 dokka = "2.2.0"
 kotlin = "2.4.10"
 
-ads-google = "25.4.0"
+ads-google-legacy = "25.4.0"
 ads-google-nextgen = "1.3.0"
 ads-nimbus = "2.37.0"
 
@@ -30,7 +30,7 @@ kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref 
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
 [libraries]
-ads-google = { module = "com.google.android.gms:play-services-ads", version.ref = "ads-google" }
+ads-google-legacy = { module = "com.google.android.gms:play-services-ads", version.ref = "ads-google-legacy" }
 ads-google-nextgen = { module = "com.google.android.libraries.ads.mobile.sdk:ads-mobile-sdk", version.ref = "ads-google-nextgen" }
 ads-nimbus = { module = "com.adsbynimbus.android:nimbus", version.ref = "ads-nimbus" }
 androidx-compose = { module = "androidx.compose:compose-bom", version.ref = "androidx-compose" }
