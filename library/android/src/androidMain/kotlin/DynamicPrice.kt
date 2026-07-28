@@ -28,11 +28,11 @@ fun <T : BaseAdRequestBuilder<T>> BaseAdRequestBuilder<T>.applyDynamicPrice(
     DynamicPriceRenderer.adCache.put(nimbusAd.auctionId, nimbusAd)
     val isVideo = nimbusAd.bid.type == "video"
     putCustomTargeting("na_id", nimbusAd.bid.auction_id)
-    putCustomTargeting("na_size", "${nimbusAd.bid.width}x${nimbusAd.bid.height}")
-    putCustomTargeting("na_type", if (isVideo) "video" else "static")
-    putCustomTargeting("na_network", nimbusAd.bid.network)
     putCustomTargeting("na_bid" + if (isVideo) "_video" else "",
         if (Nimbus.testMode) "0" else mapping.getTarget(nimbusAd))
+    putCustomTargeting("na_network", nimbusAd.bid.network)
+    putCustomTargeting("na_size", "${nimbusAd.bid.width}x${nimbusAd.bid.height}")
+    putCustomTargeting("na_type", if (isVideo) "video" else "static")
 }
 
 /**

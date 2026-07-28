@@ -28,11 +28,11 @@ extension NimbusAd {
             request.customTargeting = [:]
         }
         let isVideo = auctionType == .video
-        let bidKey = isVideo ? "na_bid_video" : "na_bid"
         request.customTargeting?["na_id"] = auctionId
-        request.customTargeting?["na_size"] = "\(adDimensions?.width ?? 0)x\(adDimensions?.height ?? 0)"
+        request.customTargeting?[isVideo ? "na_bid_video" : "na_bid"] =
+            Nimbus.shared.testMode ? "0" : keywords
         request.customTargeting?["na_network"] = network
+        request.customTargeting?["na_size"] = "\(adDimensions?.width ?? 0)x\(adDimensions?.height ?? 0)"
         request.customTargeting?["na_type"] = isVideo ? "video" : "static"
-        request.customTargeting?[bidKey] = Nimbus.shared.testMode ? "0" : keywords
     }
 }
