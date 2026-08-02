@@ -1,8 +1,9 @@
 //
 //  DynamicPriceRendererTests.swift
-//  
+//  DynamicPriceTests
 //
-//  Created by Jason Sznol on 7/22/26.
+//  Created on 7/22/26.
+//  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
 @testable import DynamicPrice
@@ -14,15 +15,10 @@ import Testing
 @Suite
 struct DynamicPriceRendererTests {
 
-    /// A simple thread‑safety check for `NimbusDynamicPriceHelper.adCache`.
+    /// A simple thread‑safety check for ``DynamicPriceRenderer/adCache``.
     ///
-    /// The test launches a large number of concurrent tasks that
-    /// repeatedly write to and read from the cache. If any race condition
-    /// exists, the test will crash or fail with an assertion.
-    ///
-    /// The testCount of 10 runs concurrently with requests that occur during app startup;
-    /// using a higher value may evict some of the AdLoader entries from the adCache
-    /// and cause failures in the final step.
+    /// The test launches a large number of concurrent tasks that  repeatedly write to and read from the cache. If any race
+    /// conditions exists, the test will crash or fail with an assertion.
     @Test("Dynamic Price adCache is accessed safely from multiple threads")
     func concurrentAccess() async throws {
         let testCount = 10
