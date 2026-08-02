@@ -16,7 +16,7 @@ androidx-startup = "1.2.0"
 kotlinx-coroutines = "1.11.0"
 leakcanary = "3.0-alpha-9"
 mockk = "1.14.11"
-okio = "3.18.0"
+okio = "3.18.1"
 #noinspection NewerVersionAvailable
 protobuf = "3.25.9"
 
