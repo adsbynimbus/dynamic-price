@@ -4,6 +4,7 @@
 //
 //  Created on 5/20/26.
 //  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
+//
 
 import DynamicPrice
 import GoogleMobileAds
