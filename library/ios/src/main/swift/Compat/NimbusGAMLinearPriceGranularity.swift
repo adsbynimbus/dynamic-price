@@ -12,17 +12,26 @@ import NimbusKit
  * A mapping using a linear step function to generate the keywords
  * By default, this class will map to a keyword of "nimbus{width}_{height}:{bucket}" i.e nimbus320_50:500 for a bid at 5 dollars.
  */
+@available(*, deprecated, message: "Use LinearPriceGranularity instead")
 public struct NimbusGAMLinearPriceGranularity: NimbusDynamicPriceMapping, Comparable, Equatable {
-    
+
+    internal let granularity: LinearPriceGranularity
+
     /// The minimum bid in cents
-    public let min: Int
-    
+    public var min: Int {
+        granularity.min
+    }
+
     /// The maximum bid in cents
-    public let max: Int
-    
+    public var max: Int {
+        granularity.max
+    }
+
     /// The step size for each line item mapping. Default: 20
-    public let step: Int
-    
+    public var step: Int {
+        granularity.step
+    }
+
     /**
      Constructs a new `NimbusGAMLinearPriceGranularity`
      
@@ -32,9 +41,7 @@ public struct NimbusGAMLinearPriceGranularity: NimbusDynamicPriceMapping, Compar
      - step: The step size for each line item mapping. Default: 20
      */
     public init(min: Int, max: Int, step: Int = 20) {
-        self.min = min
-        self.max = max
-        self.step = step
+        granularity = .init(min: min, max: max, step: step)
     }
     
     /**
@@ -57,7 +64,7 @@ public struct NimbusGAMLinearPriceGranularity: NimbusDynamicPriceMapping, Compar
      - Returns: The keywords to set on the GAM view
      */
     public func getKeywords(ad: NimbusAd) -> String? {
-        String((ad.bidInCents - (ad.bidInCents % step)).nimbusClamped(to: min...max))
+        "\(Swift.min(Swift.max(ad.bidInCents - ad.bidInCents % step, min), max))"
     }
     
     /// :nodoc:

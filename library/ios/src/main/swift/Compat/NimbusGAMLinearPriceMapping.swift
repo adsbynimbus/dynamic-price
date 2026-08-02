@@ -9,20 +9,31 @@
 import Foundation
 import NimbusKit
 
+public extension LinearPriceMapping {
+    @available(*, deprecated, message: "Remove granularities: parameter name")
+    init(granularities: [LinearPriceGranularity]) {
+        self.init(granularities)
+    }
+}
+
 /// A mapping composed of multiple LinearPriceGranularities in ascending order
+@available(*, deprecated, message: "Use LinearPriceMapping instead")
 public struct NimbusGAMLinearPriceMapping: NimbusDynamicPriceMapping {
     
     /// The granularities used in this mapping
     let granularities: [NimbusGAMLinearPriceGranularity]
-    
+
+    internal let mapping: LinearPriceMapping
+
     /**
-     Constructs a new `LinearPriceMapping`
-     
+     Constructs a new `NimbusGAMLinearPriceMapping`
+
      - Parameters:
      -  granularities: the granularities to use
      */
     public init(granularities: [NimbusGAMLinearPriceGranularity]) {
         self.granularities = granularities.sorted()
+        self.mapping = .init(granularities.map(\.granularity))
     }
     
     /**
@@ -34,12 +45,7 @@ public struct NimbusGAMLinearPriceMapping: NimbusDynamicPriceMapping {
      - Returns: The keywords to set
      */
     public func getKeywords(ad: NimbusAd) -> String? {
-        for granularity in granularities {
-            if ad.bidInCents < granularity.max {
-                return granularity.getKeywords(ad: ad)
-            }
-        }
-        return granularities.last?.getKeywords(ad: ad)
+        mapping.getTarget(price: ad.bidRaw)
     }
     
     /**

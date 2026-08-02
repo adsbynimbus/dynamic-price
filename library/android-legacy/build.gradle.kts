@@ -21,6 +21,8 @@ val dokkaHtmlJar = tasks.register<Jar>("dokkaHtmlJar") {
     from(tasks.dokkaGeneratePublicationHtml.flatMap { it.outputDirectory })
 }
 
+val sharedSources = layout.projectDirectory.dir("../android/src/androidShared/kotlin")
+
 kotlin {
     android {
         namespace = "$group.legacy"
@@ -43,30 +45,34 @@ kotlin {
             artifact(dokkaHtmlJar)
         }
 
-        compilerOptions {
-            apiVersion = KotlinVersion.KOTLIN_2_0
-            languageVersion = KotlinVersion.KOTLIN_2_0
-        }
-
         withHostTest { }
     }
 
+    compilerOptions {
+        apiVersion = KotlinVersion.KOTLIN_2_0
+        languageVersion = KotlinVersion.KOTLIN_2_0
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
+
     sourceSets {
-        commonTest.dependencies {
-            implementation(libs.bundles.test.unit)
-        }
-        androidMain.dependencies {
-            implementation(libs.ads.google.legacy.flatMap{ library ->
-                providers.provider {
-                    library.copy().apply {
-                        version {
-                            require("[24.9.0,)")
-                            library.version?.let { prefer(it) }
+        androidMain {
+            kotlin.srcDir(sharedSources)
+            dependencies {
+                implementation(libs.ads.google.legacy.flatMap{ library ->
+                    providers.provider {
+                        library.copy().apply {
+                            version {
+                                require("[24.9.0,)")
+                                library.version?.let { prefer(it) }
+                            }
                         }
                     }
-                }
-            })
-            implementation(libs.ads.nimbus)
+                })
+                implementation(libs.ads.nimbus)
+            }
+        }
+        named("androidHostTest").dependencies {
+            implementation(libs.bundles.test.unit)
         }
     }
 }
@@ -104,7 +110,7 @@ dokka {
 }
 
 publishing {
-    // Rename root publication to nextgen and android publication to nextgen-android
+    // Rename root publication to dynamicprice-legacy and android publication to dynamicprice-legacy-android
     publications.withType<MavenPublication>().configureEach {
         artifactId = "dynamicprice-legacy" + if (name != "kotlinMultiplatform") "-$name" else ""
     }

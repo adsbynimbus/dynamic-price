@@ -51,9 +51,12 @@ kotlin {
 
     sourceSets {
         removeIf { it.name == "commonTest" } // Fixes Unused Kotlin Source Sets warning
-        androidMain.dependencies {
-            implementation(libs.ads.nimbus)
-            implementation(libs.ads.google.nextgen)
+        androidMain {
+            kotlin.srcDir(layout.projectDirectory.dir("src/androidShared/kotlin"))
+            dependencies {
+                implementation(libs.ads.nimbus)
+                implementation(libs.ads.google.nextgen)
+            }
         }
     }
 }
@@ -87,7 +90,7 @@ dokka {
 }
 
 publishing {
-    // Rename root publication to nextgen and android publication to nextgen-android
+    // Rename root publication to dynamicprice and android publication to dynamicprice-android
     publications.withType<MavenPublication>().configureEach {
         artifactId = "dynamicprice" + if (name != "kotlinMultiplatform") "-$name" else ""
     }

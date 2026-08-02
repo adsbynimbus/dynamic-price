@@ -12,6 +12,8 @@ import com.google.android.gms.ads.admanager.AdManagerAdRequest
  * @param ad a winning bid from Nimbus to use for Dynamic Price
  * @param mapping the mapping from the bid price to a line item bucket
  */
+@Deprecated("applyDynamicPrice moved to com.adsbynimbus.dynamicprice",
+    ReplaceWith("", imports = ["com.adsbynimbus.dynamicprice"]))
 @JvmOverloads
 fun AdManagerAdRequest.Builder.applyDynamicPrice(
     ad: NimbusResponse,
@@ -27,6 +29,7 @@ fun AdManagerAdRequest.Builder.applyDynamicPrice(
  * @param request the target request for the Dynamic Price bid
  * @param mapping the mapping from the bid price to a line item bucket
  */
+@Deprecated("Use AdManagerAdRequest.Builder.applyDynamicPrice instead", ReplaceWith(""))
 @JvmOverloads
 fun NimbusResponse.applyDynamicPrice(
     request: AdManagerAdRequest.Builder,

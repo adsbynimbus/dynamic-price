@@ -7,7 +7,6 @@ import com.adsbynimbus.Nimbus
 import com.adsbynimbus.NimbusAd
 import com.adsbynimbus.dynamicprice.internal.*
 import com.adsbynimbus.internal.Platform
-import com.adsbynimbus.lineitem.*
 import com.adsbynimbus.render.*
 import com.adsbynimbus.render.Renderer.Companion.loadBlockingAd
 import com.adsbynimbus.request.NimbusResponse
@@ -19,22 +18,6 @@ import com.google.android.libraries.ads.mobile.sdk.interstitial.InterstitialAd
 import com.google.android.libraries.ads.mobile.sdk.rewarded.RewardedAd
 import kotlinx.coroutines.*
 import java.lang.ref.WeakReference
-
-/** Appends Nimbus Key Values to the Ad Manager request and caches the ad for rendering. */
-fun <T : BaseAdRequestBuilder<T>> BaseAdRequestBuilder<T>.applyDynamicPrice(
-    nimbusAd: NimbusResponse,
-    mapping: Mapping,
-) {
-    DynamicPriceRenderer.adCache.put(nimbusAd.auctionId, nimbusAd)
-    val isVideo = nimbusAd.bid.type == "video"
-    putCustomTargeting("na_id", nimbusAd.bid.auction_id)
-    putCustomTargeting("na_bid" + if (isVideo) "_video" else "",
-        if (Nimbus.testMode) "0" else mapping.getTarget(nimbusAd))
-    putCustomTargeting("na_network", nimbusAd.bid.network)
-    putCustomTargeting("na_render", if (isVideo) "video" else "static")
-    putCustomTargeting("na_size", "${nimbusAd.bid.width}x${nimbusAd.bid.height}")
-    putCustomTargeting("na_type", if (isVideo) "video" else "static")
-}
 
 /**
  * Renders a [NimbusAd] when the `na_render` app event is called.
