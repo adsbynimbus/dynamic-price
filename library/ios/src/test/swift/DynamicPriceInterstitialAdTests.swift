@@ -18,15 +18,13 @@ import Testing
         DynamicPriceRenderer["interstitialAuction1"] = .init(createNimbusAd())
     }
 
-    @Test("handle app event not na render")
-    func handle_app_event_not_na_render() {
+    @Test func `InterstitailAd.handleEventForNimbus returns false when name is not na_render`() {
         let interstitialAd = InterstitialAd()
 
         #expect(interstitialAd.handleEventForNimbus(name: "nonsense", info: nil) == false)
     }
 
-    @Test("handle app event with invalid info")
-    func handle_app_event_with_invalid_info() {
+    @Test func `InterstitialAd.handleEventForNimbus returns true when name is na_render`() {
         let interstitial = InterstitialAd()
 
         var handled = interstitial.handleEventForNimbus(
@@ -43,8 +41,7 @@ import Testing
         #expect(handled == true)
     }
 
-    @Test("click event should fire google click delegate message")
-    func click_event_should_fire_google_click_delegate_message() async throws {
+    @Test func `Click event should call InterstitialAd.delegate click callback`() async throws {
         let delegate = MockFullScreenContentDelegate()
         let interstitialAd = AdManagerInterstitialAd()
         interstitialAd.fullScreenContentDelegate = delegate

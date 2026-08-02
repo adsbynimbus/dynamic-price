@@ -12,15 +12,13 @@ import NimbusKit
 
 import Testing
 
-@Suite
-struct DynamicPriceRendererTests {
+@Suite struct DynamicPriceRendererTests {
 
     /// A simple thread‑safety check for ``DynamicPriceRenderer/adCache``.
     ///
     /// The test launches a large number of concurrent tasks that  repeatedly write to and read from the cache. If any race
     /// conditions exists, the test will crash or fail with an assertion.
-    @Test("Dynamic Price adCache is accessed safely from multiple threads")
-    func concurrentAccess() async throws {
+    @Test func `DynamicPriceRenderer.adCache is threadsafe`() async throws {
         let testCount = 10
 
         let requests = (0..<testCount).map { _ in AdManagerRequest() }

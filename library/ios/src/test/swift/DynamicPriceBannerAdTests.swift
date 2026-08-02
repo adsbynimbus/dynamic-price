@@ -12,8 +12,7 @@ import Testing
 
 @testable import DynamicPrice
 
-@Suite @MainActor
-struct DynamicPriceBannerAdTests {
+@Suite @MainActor struct DynamicPriceBannerAdTests {
 
     let rootVC = UIViewController()
 
@@ -22,8 +21,7 @@ struct DynamicPriceBannerAdTests {
         DynamicPriceRenderer["abc"] = .init(createNimbusAd())
     }
 
-    @Test("adview destroy at deinit")
-    func adview_destroy_at_deinit() async throws {
+    @Test func `AdView destroy at deinit`() async throws {
         let bannerView = AdManagerBannerView()
         bannerView.rootViewController = rootVC
 
@@ -38,8 +36,7 @@ struct DynamicPriceBannerAdTests {
         #expect((bannerView.subviews.last is NimbusAdView) == false)
     }
 
-    @Test("attach adview at app event")
-    func attach_adview_at_app_event() async throws {
+    @Test func `Attach AdView at app event`() async throws {
         let bannerView = AdManagerBannerView()
         bannerView.rootViewController = rootVC
 
@@ -52,8 +49,7 @@ struct DynamicPriceBannerAdTests {
         #expect(targetView.subviews.last is NimbusAdView)
     }
 
-    @Test("click event should fire google click delegate message")
-    func click_event_should_fire_google_click_delegate_message() async throws {
+    @Test func `Click event should call BannerView.delegate click callback`() async throws {
         let clientDelegate = MockBannerDelegate()
         let bannerView = AdManagerBannerView()
         bannerView.delegate = clientDelegate
@@ -77,8 +73,7 @@ struct DynamicPriceBannerAdTests {
         }
     }
 
-    @Test("adview gets destroyed at nimbus error")
-    func adview_gets_destroyed_at_nimbus_error() async throws {
+    @Test func `AdView gets destroyed on Nimbus error`() async throws {
         let bannerView = AdManagerBannerView()
         bannerView.rootViewController = rootVC
 

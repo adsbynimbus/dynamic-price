@@ -18,8 +18,7 @@ import Testing
         granularities: [NimbusGAMLinearPriceGranularity(min: 0, max: 300, step: 1)]
     )
 
-    @Test("keywords present static")
-    func keywordsPresent_static() {
+    @Test func `applyDynamicPrice sets customTargeting for static ads`() {
         let ad = createNimbusAd(type: .static)
         let request = AdManagerRequest()
         ad.applyDynamicPrice(into: request)
@@ -35,8 +34,7 @@ import Testing
         #expect(request.customTargeting?["na_bid_video"] == nil)
     }
 
-    @Test("keywords present video")
-    func keywordsPresent_video() {
+    @Test func `applyDynamicPrice sets customTargeting for video ads`() {
         let ad = createNimbusAd(type: .video, dimensPresent: false)
         let request = AdManagerRequest()
 
@@ -51,8 +49,7 @@ import Testing
         #expect(request.customTargeting?["na_render"] as? String == "video")
     }
 
-    @Test("keywords present existing keywords")
-    func keywordsPresent_existingKeywords() {
+    @Test func `applyDynamicPrice does not modify other customTargeting values`() {
         let ad = createNimbusAd(type: .static)
         let request = AdManagerRequest()
         request.customTargeting = [:]
@@ -73,8 +70,7 @@ import Testing
         #expect(request.customTargeting?["test_key"] as? String == "test_value")
     }
 
-    @Test("static ad keywords override in test mode")
-    func static_ad_keywords_override_in_test_mode() {
+    @Test func `applyDynamicPrice uses na_bid=0 when Nimbus.shared.testMode = true`() {
         Nimbus.shared.testMode = true
         let ad = createNimbusAd(type: .static)
         let request = AdManagerRequest()
@@ -89,8 +85,7 @@ import Testing
         Nimbus.shared.testMode = false
     }
 
-    @Test("video ad keywords override in test mode")
-    func video_ad_keywords_override_in_test_mode() {
+    @Test func `applyDynamicPrice uses na_bid_video=0 when Nimbus.shared.testMode = true`() {
         Nimbus.shared.testMode = true
         let ad = createNimbusAd(type: .video)
         let request = AdManagerRequest()
