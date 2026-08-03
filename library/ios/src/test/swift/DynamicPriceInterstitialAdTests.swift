@@ -19,13 +19,13 @@ import Testing
         DynamicPriceRenderer["interstitialAuction1"] = .init(createNimbusAd())
     }
 
-    @Test func `InterstitailAd.handleEventForNimbus returns false when name is not na_render`() {
+    @Test func `InterstitailAd.handleEventForNimbus returns false when name != na_render`() async {
         let interstitialAd = InterstitialAd()
 
         #expect(interstitialAd.handleEventForNimbus(name: "nonsense", info: nil) == false)
     }
 
-    @Test func `InterstitialAd.handleEventForNimbus returns true when name is na_render`() {
+    @Test func `InterstitialAd.handleEventForNimbus returns true when name == na_render`() async {
         let interstitial = InterstitialAd()
 
         var handled = interstitial.handleEventForNimbus(

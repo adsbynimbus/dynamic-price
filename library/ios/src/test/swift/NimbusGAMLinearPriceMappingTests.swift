@@ -12,14 +12,14 @@ import Testing
 
 @Suite struct NimbusGAMLinearPriceMappingTests {
 
-    @Test func `NimbusGAMLinearPriceGranularity initializes correctly`() {
+    @Test func `NimbusGAMLinearPriceGranularity initializes correctly`() async {
         let linearPriceGran = NimbusGAMLinearPriceGranularity(min: 10, max: 200)
         #expect(linearPriceGran.min == 10)
         #expect(linearPriceGran.max == 200)
         #expect(linearPriceGran.step == 20)
     }
 
-    @Test func `NimbusGAMLinearPriceGranularity implements Comparable`() {
+    @Test func `NimbusGAMLinearPriceGranularity implements Comparable`() async {
         var linearPriceGran1 = NimbusGAMLinearPriceGranularity(min: 10, max: 200)
         var linearPriceGran2 = NimbusGAMLinearPriceGranularity(min: 20, max: 100)
         #expect(linearPriceGran1 < linearPriceGran2)
@@ -33,7 +33,7 @@ import Testing
         #expect(linearPriceGran1 > linearPriceGran2)
     }
 
-    @Test func `NimbusGAMLinearPriceMapping has banner mapping`() {
+    @Test func `NimbusGAMLinearPriceMapping has banner mapping`() async {
         let mapping = NimbusGAMLinearPriceMapping.banner()
         #expect(mapping.granularities.count == 4)
         #expect(
@@ -54,7 +54,7 @@ import Testing
         )
     }
 
-    @Test func `NimbusGAMLinearPriceMapping has fullscreen mapping`() {
+    @Test func `NimbusGAMLinearPriceMapping has fullscreen mapping`() async {
         let mapping = NimbusGAMLinearPriceMapping.fullscreen()
         #expect(mapping.granularities.count == 2)
         #expect(

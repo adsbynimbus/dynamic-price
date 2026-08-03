@@ -18,7 +18,7 @@ import Testing
         granularities: [NimbusGAMLinearPriceGranularity(min: 0, max: 300, step: 1)]
     )
 
-    @Test func `applyDynamicPrice sets customTargeting for static ads`() {
+    @Test func `applyDynamicPrice sets customTargeting for static ads`() async {
         let ad = createNimbusAd(type: .static)
         let request = AdManagerRequest()
         ad.applyDynamicPrice(into: request)
@@ -34,7 +34,7 @@ import Testing
         #expect(request.customTargeting?["na_bid_video"] == nil)
     }
 
-    @Test func `applyDynamicPrice sets customTargeting for video ads`() {
+    @Test func `applyDynamicPrice sets customTargeting for video ads`() async {
         let ad = createNimbusAd(type: .video, dimensPresent: false)
         let request = AdManagerRequest()
 
@@ -49,7 +49,7 @@ import Testing
         #expect(request.customTargeting?["na_render"] as? String == "video")
     }
 
-    @Test func `applyDynamicPrice does not modify other customTargeting values`() {
+    @Test func `applyDynamicPrice does not modify other customTargeting values`() async {
         let ad = createNimbusAd(type: .static)
         let request = AdManagerRequest()
         request.customTargeting = [:]
@@ -70,7 +70,7 @@ import Testing
         #expect(request.customTargeting?["test_key"] as? String == "test_value")
     }
 
-    @Test func `applyDynamicPrice uses na_bid=0 when Nimbus.shared.testMode = true`() {
+    @Test func `applyDynamicPrice uses na_bid=0 when Nimbus.shared.testMode = true`() async {
         Nimbus.shared.testMode = true
         let ad = createNimbusAd(type: .static)
         let request = AdManagerRequest()
@@ -85,7 +85,7 @@ import Testing
         Nimbus.shared.testMode = false
     }
 
-    @Test func `applyDynamicPrice uses na_bid_video=0 when Nimbus.shared.testMode = true`() {
+    @Test func `applyDynamicPrice uses na_bid_video=0 when Nimbus.shared.testMode = true`() async {
         Nimbus.shared.testMode = true
         let ad = createNimbusAd(type: .video)
         let request = AdManagerRequest()
