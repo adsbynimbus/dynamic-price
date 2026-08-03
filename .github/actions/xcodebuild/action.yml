@@ -12,7 +12,7 @@ inputs:
   version:
     description: 'xcode version'
     required: false
-    default: '26.5'
+    default: '26.6'
 runs:
   using: "composite"
   steps:

@@ -15,18 +15,17 @@ import Testing
 @Suite struct DynamicPriceInterstitialAdTests {
 
     init() async throws {
+        await NimbusTestEnvironment.shared.initIfNeeded()
         DynamicPriceRenderer["interstitialAuction1"] = .init(createNimbusAd())
     }
 
-    @Test("handle app event not na render")
-    func handle_app_event_not_na_render() {
+    @Test func `InterstitailAd.handleEventForNimbus returns false when name != na_render`() async {
         let interstitialAd = InterstitialAd()
 
         #expect(interstitialAd.handleEventForNimbus(name: "nonsense", info: nil) == false)
     }
 
-    @Test("handle app event with invalid info")
-    func handle_app_event_with_invalid_info() {
+    @Test func `InterstitialAd.handleEventForNimbus returns true when name == na_render`() async {
         let interstitial = InterstitialAd()
 
         var handled = interstitial.handleEventForNimbus(
@@ -43,8 +42,7 @@ import Testing
         #expect(handled == true)
     }
 
-    @Test("click event should fire google click delegate message")
-    func click_event_should_fire_google_click_delegate_message() async throws {
+    @Test func `Click event should call InterstitialAd.delegate click callback`() async throws {
         let delegate = MockFullScreenContentDelegate()
         let interstitialAd = AdManagerInterstitialAd()
         interstitialAd.fullScreenContentDelegate = delegate
@@ -63,7 +61,6 @@ import Testing
                 #expect(interstitial === interstitialAd)
                 confirmation.confirm()
             }
-
 
             interstitialAd.dynamicPriceAd?.didReceiveNimbusEvent(
                 controller: interstitialAd.dynamicPriceAd!.controller!,
