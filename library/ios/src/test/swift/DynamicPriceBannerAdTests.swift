@@ -17,7 +17,7 @@ import Testing
     let rootVC = UIViewController()
 
     init() async throws {
-        Nimbus.shared.initialize(publisher: "wee", apiKey: "woo")
+        await NimbusTestEnvironment.shared.initIfNeeded()
         DynamicPriceRenderer["abc"] = .init(createNimbusAd())
     }
 

@@ -8,6 +8,19 @@
 
 import DynamicPrice
 import GoogleMobileAds
+import NimbusKit
+
+actor NimbusTestEnvironment {
+    static let shared = NimbusTestEnvironment()
+
+    private var isInitialized = false
+
+    func initIfNeeded() async {
+        guard !isInitialized else { return }
+        Nimbus.shared.initialize(publisher: "wee", apiKey: "woo")
+        isInitialized = true
+    }
+}
 
 func createNimbusAd(
     index: Int = 0,

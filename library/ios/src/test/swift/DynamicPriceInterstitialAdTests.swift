@@ -15,6 +15,7 @@ import Testing
 @Suite struct DynamicPriceInterstitialAdTests {
 
     init() async throws {
+        await NimbusTestEnvironment.shared.initIfNeeded()
         DynamicPriceRenderer["interstitialAuction1"] = .init(createNimbusAd())
     }
 
@@ -60,7 +61,6 @@ import Testing
                 #expect(interstitial === interstitialAd)
                 confirmation.confirm()
             }
-
 
             interstitialAd.dynamicPriceAd?.didReceiveNimbusEvent(
                 controller: interstitialAd.dynamicPriceAd!.controller!,
