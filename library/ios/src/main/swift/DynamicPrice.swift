@@ -25,29 +25,39 @@ extension BannerView {
         info: String?,
         viewController: UIViewController? = nil,
     ) -> Bool {
-        guard name == "na_render" else { return false }
-        DynamicPriceRenderer.render(data: info) { nimbusAd, clickTracker in
-            guard let vc =  self.rootViewController ?? viewController ??
-                    Nimbus.detectedRootViewController else {
-                self.delegate?.bannerView?(self, didFailToReceiveAdWithError:
-                    NimbusRenderError.adRenderingFailed(message: "No UIViewController detected"))
-                return
+        switch name {
+        case "na_render":
+            DynamicPriceRenderer.render(data: info) { nimbusAd, clickTracker in
+                guard let vc =  self.rootViewController ?? viewController ??
+                        Nimbus.detectedRootViewController else {
+                    self.delegate?.bannerView?(self, didFailToReceiveAdWithError:
+                        NimbusRenderError.adRenderingFailed(message: "No UIViewController detected"))
+                    return
+                }
+                let targetView = self.targetView
+                let eventHandler = DynamicPriceEventHandler(
+                    cachedAd: nimbusAd,
+                    googleClickTracker: clickTracker,
+                    adView: self,
+                )
+                eventHandler.controller = Nimbus.load(
+                    ad: nimbusAd.value,
+                    container: targetView,
+                    adPresentingViewController: vc,
+                    delegate: eventHandler,
+                )
+                targetView.dynamicPriceAd = eventHandler
             }
+            return true
+        case "na_show":
             let targetView = self.targetView
-            let eventHandler = DynamicPriceEventHandler(
-                cachedAd: nimbusAd,
-                googleClickTracker: clickTracker,
-                adView: self,
-            )
-            eventHandler.controller = Nimbus.load(
-                ad: nimbusAd.value,
-                container: targetView,
-                adPresentingViewController: vc,
-                delegate: eventHandler,
-            )
-            targetView.dynamicPriceAd = eventHandler
+            if let adView = targetView.dynamicPriceAd?.adView {
+                targetView.bringSubviewToFront(adView)
+            }
+        default:
+            break;
         }
-        return true
+        return false
     }
 }
 
