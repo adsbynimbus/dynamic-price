@@ -74,10 +74,12 @@ updated to include the new `na_show` event for displaying interstitials, which i
 compatible with all existing inventory running Dynamic Price with Nimbus Rendering.
 
 ```html
+<script src="mraid.js"></script>
 <script type="text/javascript" src="https://www.gstatic.com/afma/api/v1/google_mobile_app_ads.js" ></script>
 <script type="text/javascript">
-  admob.events.dispatchAppEvent("na_render", '{"na_id": "%%PATTERN:na_id%%", "ga_click": "%%CLICK_URL_UNESC%%"}');
-  admob.events.addEventListener("onshow", () => admob.events.dispatchAppEvent("na_show", "na_show"));
+admob.events.dispatchAppEvent("na_render", '{"na_id": "%%PATTERN:na_id%%", "ga_click": "%%CLICK_URL_UNESC%%"}');
+admob.events.addEventListener("onshow", () => admob.events.dispatchAppEvent("na_show", "na_show"));
+mraid.addEventListener("viewableChange", v => v && admob.events.dispatchAppEvent("na_show", 'na_show'));
 </script>
 ```
 
