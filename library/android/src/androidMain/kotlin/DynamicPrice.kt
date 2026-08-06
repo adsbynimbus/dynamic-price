@@ -76,6 +76,11 @@ fun BannerAd.handleEventForNimbus(
             }
         }
     }
+    "na_show" -> null.also {
+        DynamicPriceRenderer.renderScope.launch(Dispatchers.Main) {
+            dynamicPriceAd?.adController?.view?.bringToFront()
+        }
+    }
     else -> null
 }
 
