@@ -9,6 +9,12 @@ plugins {
     `maven-publish`
 }
 
+buildscript {
+    dependencies {
+        classpath(platform(libs.jackson.bom)) // Fixes CWE-918 (SSRF)
+    }
+}
+
 val dokkaJavadocJar = tasks.register<Jar>("dokkaJavadocJar") {
     archiveClassifier = "javadoc"
     description = "Creates a javadoc jar for bundling with an Android Library"
