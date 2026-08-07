@@ -1,5 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
+enableFeaturePreview("ENHANCED_GRAPH_ORDERING")
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
@@ -45,13 +46,11 @@ dependencyResolutionManagement {
     }
 }
 
+
 gradle.beforeProject {
-    buildscript.configurations.configureEach {
-        resolutionStrategy.eachDependency {
-            if (requested.group == "com.fasterxml.jackson.core") {
-                useVersion(if (requested.module.name == "jackson-annotations") "2.22" else "2.22.1")
-                because("Fixes CWE-918 (SSRF)")
-            }
+    buildscript {
+        dependencies {
+            classpath(platform("com.fasterxml.jackson:jackson-bom:2.22.1")) //Fixes CWE-918 (SSRF)
         }
     }
 }
