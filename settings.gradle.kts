@@ -47,20 +47,26 @@ dependencyResolutionManagement {
     }
 }
 
-fun enforceJacksonVersion(configurations: ConfigurationContainer) {
+fun updateVulnerableTransitiveDependencies(configurations: ConfigurationContainer) {
     configurations.configureEach {
         resolutionStrategy.eachDependency {
-            if (requested.module.name == "jackson-bom") {
-                useVersion("2.22.1")
-                because("Fixes CWE-918 (SSRF)")
+            when (requested.module.name) {
+                "jackson-bom" -> {
+                    useVersion("2.22.1")
+                    because("Fixes CWE-918 (SSRF)")
+                }
+                "jsoup" -> {
+                    useVersion("1.23.1")
+                    because("Fixes CWE-79")
+                }
             }
         }
     }
 }
 
 gradle.beforeProject {
-    enforceJacksonVersion(buildscript.configurations)
-    enforceJacksonVersion(configurations)
+    updateVulnerableTransitiveDependencies(buildscript.configurations)
+    updateVulnerableTransitiveDependencies(configurations)
 }
 
 rootProject.name = "dynamic-price"
