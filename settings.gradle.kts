@@ -18,6 +18,7 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     repositories {
         exclusiveContent {
@@ -46,13 +47,20 @@ dependencyResolutionManagement {
     }
 }
 
-
-gradle.beforeProject {
-    buildscript {
-        dependencies {
-            classpath(platform("com.fasterxml.jackson:jackson-bom:2.22.1")) //Fixes CWE-918 (SSRF)
+fun enforceJacksonVersion(configurations: ConfigurationContainer) {
+    configurations.configureEach {
+        resolutionStrategy.eachDependency {
+            if (requested.module.name == "jackson-bom") {
+                useVersion("2.22.1")
+                because("Fixes CWE-918 (SSRF)")
+            }
         }
     }
+}
+
+gradle.beforeProject {
+    enforceJacksonVersion(buildscript.configurations)
+    enforceJacksonVersion(configurations)
 }
 
 rootProject.name = "dynamic-price"
