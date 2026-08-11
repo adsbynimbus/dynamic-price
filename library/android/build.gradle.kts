@@ -58,12 +58,15 @@ kotlin {
     }
 }
 
-dependencies.constraints {
-    androidMainImplementation(libs.androidx.core) {
-        version {
-            require("[1.13.0,)")
-            because("BundleCompat.getSerializable added in 1.13.0")
+dependencies {
+    constraints {
+        androidMainImplementation(libs.androidx.core) {
+            version {
+                require("[1.13.0,)")
+                because("BundleCompat.getSerializable added in 1.13.0")
+            }
         }
+        androidMainImplementation(libs.bundles.androidx.media3)
     }
 }
 
