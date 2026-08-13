@@ -8,9 +8,10 @@ ads-google-nextgen = "1.3.1"
 ads-nimbus = "2.37.1"
 
 androidx-activity = "1.13.0"
-androidx-compose = "2026.06.01"
+androidx-compose = "2026.08.00"
 androidx-core = "1.19.0"
 androidx-lifecycle = "2.11.0"
+androidx-media3 = "1.11.0"
 androidx-navigation = "2.9.8"
 androidx-startup = "1.2.0"
 kotlinx-coroutines = "1.11.0"
@@ -43,6 +44,8 @@ androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-core = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
 androidx-lifecycle = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
+androidx-media3-core = { module = "androidx.media3:media3-exoplayer", version.ref = "androidx-media3" }
+androidx-media3-hls = { module = "androidx.media3:media3-exoplayer-hls", version.ref = "androidx-media3" }
 androidx-startup = { module = "androidx.startup:startup-runtime", version.ref = "androidx-startup" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
@@ -60,6 +63,10 @@ androidx-compose = [
     "androidx-compose-ui",
     "androidx-compose-ui-tooling",
     "androidx-compose-ui-tooling-preview",
+]
+androidx-media3 = [
+    "androidx-media3-core",
+    "androidx-media3-hls",
 ]
 test-unit = [
     "kotlin-test",

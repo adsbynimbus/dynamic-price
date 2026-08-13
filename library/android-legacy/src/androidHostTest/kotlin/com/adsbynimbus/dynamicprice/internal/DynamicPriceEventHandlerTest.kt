@@ -115,7 +115,7 @@ class DynamicPriceEventHandlerTest {
         handler.onAdEvent(AdEvent.DESTROYED)
         advanceUntilIdle()
 
-        assertEquals("na", exception.captured.message,)
+        assertEquals("na", exception.captured.message)
         verify {
             mockJob.cancel(eq(exception.captured))
             view.removeOnAttachStateChangeListener(eq(handler))

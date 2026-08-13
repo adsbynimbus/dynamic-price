@@ -18,6 +18,7 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     repositories {
         exclusiveContent {
@@ -46,11 +47,27 @@ dependencyResolutionManagement {
     }
 }
 
-
-gradle.beforeProject {
-    buildscript {
-        dependencies {
-            classpath(platform("com.fasterxml.jackson:jackson-bom:2.22.1")) //Fixes CWE-918 (SSRF)
+gradle.lifecycle.afterProject {
+    val kotlinVersion = project.buildscript.configurations
+        .getByName("classpath")
+        .dependencies.first { it.name.startsWith("org.jetbrains.kotlin") }.version!!
+    arrayOf(buildscript.configurations, configurations).forEach {
+        it.configureEach {
+            resolutionStrategy.eachDependency {
+                when (requested.module.name) {
+                    "jackson-bom" -> {
+                        useVersion("2.22.1")
+                        because("Fixes CWE-918 (SSRF)")
+                    }
+                    "jsoup" -> {
+                        useVersion("1.23.1")
+                        because("Fixes CWE-79")
+                    }
+                }
+                when (requested.module.group) {
+                    "org.jetbrains.kotlin" -> useVersion(kotlinVersion)
+                }
+            }
         }
     }
 }
