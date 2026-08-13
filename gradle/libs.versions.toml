@@ -11,7 +11,7 @@ androidx-activity = "1.13.0"
 androidx-compose = "2026.08.00"
 androidx-core = "1.19.0"
 androidx-lifecycle = "2.11.0"
-androidx-media3 = { require = "[1.6.0, )", prefer = "1.11.0" }
+androidx-media3 = "1.11.0"
 androidx-navigation = "2.9.8"
 androidx-startup = "1.2.0"
 kotlinx-coroutines = "1.11.0"

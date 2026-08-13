@@ -66,7 +66,12 @@ dependencies {
                 because("BundleCompat.getSerializable added in 1.13.0")
             }
         }
-        androidMainImplementation(libs.bundles.androidx.media3)
+        androidMainImplementation(libs.bundles.androidx.media3) {
+            version {
+                prefer(requiredVersion)
+                require("[1.6.0, )")
+            }
+        }
     }
 }
 
