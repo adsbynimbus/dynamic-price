@@ -22,7 +22,7 @@ actor NimbusTestEnvironment {
     }
 
     static let mapping: Mapping = LinearPriceMapping(
-        granularities: [LinearPriceGranularity(min: 0, max: 300, step: 1)]
+        LinearPriceGranularity(min: 0, max: 300, step: 1)
     )
 }
 

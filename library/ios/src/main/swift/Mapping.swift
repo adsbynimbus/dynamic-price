@@ -60,6 +60,11 @@ public struct LinearPriceMapping: Mapping {
         self.granularities = granularities.sorted()
     }
 
+    /// Constructs a new `LinearPriceMapping`
+    public init(_ granularities: LinearPriceGranularity...) {
+        self.init(granularities: granularities)
+    }
+
     /**
      Linearly searches the granularity mappings and returns the keywords to be inserted
 
