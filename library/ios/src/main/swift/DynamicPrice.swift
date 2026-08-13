@@ -9,6 +9,13 @@
 import GoogleMobileAds
 import NimbusKit
 
+public extension NimbusAd {
+    func applyDynamicPrice(_ request: AdManagerRequest, mapping: Mapping) {
+        DynamicPriceRenderer[auctionId] = .init(self)
+        applyTargeting(request, mapping.getTarget(self))
+    }
+}
+
 extension BannerView {
 
     /// Call this method when you receive a AppEventDelegate message of
@@ -86,5 +93,21 @@ public extension InterstitialAd {
         default: break
         }
         return false
+    }
+}
+
+extension NimbusAd {
+    func applyTargeting(_ request: AdManagerRequest, _ target: String?) {
+        if request.customTargeting == nil {
+            request.customTargeting = [:]
+        }
+        let isVideo = auctionType == .video
+        request.customTargeting?["na_id"] = auctionId
+        request.customTargeting?[isVideo ? "na_bid_video" : "na_bid"] =
+            Nimbus.shared.testMode ? "0" : target
+        request.customTargeting?["na_network"] = network
+        request.customTargeting?["na_render"] = isVideo ? "video" : "static"
+        request.customTargeting?["na_size"] = "\(adDimensions?.width ?? 0)x\(adDimensions?.height ?? 0)"
+        request.customTargeting?["na_type"] = isVideo ? "video" : "static"
     }
 }

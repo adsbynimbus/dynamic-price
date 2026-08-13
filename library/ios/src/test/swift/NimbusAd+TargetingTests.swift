@@ -10,21 +10,19 @@ import GoogleMobileAds
 import NimbusKit
 import Testing
 
-@testable import DynamicPrice
+import DynamicPrice
 
 @Suite(.serialized) struct NimbusAdTargetingTests {
 
-    let mapping = NimbusGAMLinearPriceMapping(
-        granularities: [NimbusGAMLinearPriceGranularity(min: 0, max: 300, step: 1)]
-    )
+    let mapping = NimbusTestEnvironment.mapping
 
     @Test func `applyDynamicPrice sets customTargeting for static ads`() async {
         let ad = createNimbusAd(type: .static)
         let request = AdManagerRequest()
-        ad.applyDynamicPrice(into: request)
+        ad.applyDynamicPrice(request, mapping: mapping)
 
         #expect(request.customTargeting?["na_id"] as? String == ad.auctionId)
-        #expect(request.customTargeting?["na_bid"] as? String == mapping.getKeywords(ad: ad))
+        #expect(request.customTargeting?["na_bid"] as? String == mapping.getTarget(ad))
         #expect(request.customTargeting?["na_network"] as? String == ad.network)
         #expect(
             request.customTargeting?["na_size"] as? String
@@ -38,13 +36,12 @@ import Testing
         let ad = createNimbusAd(type: .video, dimensPresent: false)
         let request = AdManagerRequest()
 
-        let mapping = NimbusGAMLinearPriceMapping.banner()
-        ad.applyDynamicPrice(into: request, mapping: mapping)
+        ad.applyDynamicPrice(request, mapping: mapping)
 
         #expect(request.customTargeting?["na_id"] as? String == ad.auctionId)
         #expect(request.customTargeting?["na_network"] as? String == ad.network)
         #expect(request.customTargeting?["na_size"] as? String == "0x0")
-        #expect(request.customTargeting?["na_bid_video"] as? String == mapping.getKeywords(ad: ad))
+        #expect(request.customTargeting?["na_bid_video"] as? String == mapping.getTarget(ad))
         #expect(request.customTargeting?["na_type"] as? String == NimbusAuctionType.video.rawValue)
         #expect(request.customTargeting?["na_render"] as? String == "video")
     }
@@ -55,8 +52,7 @@ import Testing
         request.customTargeting = [:]
         request.customTargeting?["test_key"] = "test_value"
 
-        let mapping = NimbusGAMLinearPriceMapping.banner()
-        ad.applyDynamicPrice(into: request, mapping: mapping)
+        ad.applyDynamicPrice(request, mapping: mapping)
 
         #expect(request.customTargeting?["na_id"] as? String == ad.auctionId)
         #expect(request.customTargeting?["na_network"] as? String == ad.network)
@@ -76,8 +72,7 @@ import Testing
         let request = AdManagerRequest()
         request.customTargeting = [:]
 
-        let mapping = NimbusGAMLinearPriceMapping.banner()
-        ad.applyDynamicPrice(into: request, mapping: mapping)
+        ad.applyDynamicPrice(request, mapping: mapping)
 
         #expect(request.customTargeting?["na_bid"] as? String == "0")
         #expect(request.customTargeting?["na_bid_video"] == nil)
@@ -91,8 +86,7 @@ import Testing
         let request = AdManagerRequest()
         request.customTargeting = [:]
 
-        let mapping = NimbusGAMLinearPriceMapping.banner()
-        ad.applyDynamicPrice(into: request, mapping: mapping)
+        ad.applyDynamicPrice(request, mapping: mapping)
 
         #expect(request.customTargeting?["na_bid_video"] as? String == "0")
         #expect(request.customTargeting?["na_bid"] == nil)

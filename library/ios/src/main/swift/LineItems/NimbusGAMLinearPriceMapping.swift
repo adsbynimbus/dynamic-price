@@ -10,6 +10,7 @@ import Foundation
 import NimbusKit
 
 /// A mapping composed of multiple LinearPriceGranularities in ascending order
+@available(*, deprecated, message: "Renamed to LinearPriceMapping")
 public struct NimbusGAMLinearPriceMapping: NimbusDynamicPriceMapping {
     
     /// The granularities used in this mapping

@@ -1,4 +1,5 @@
 import DynamicPrice
+import NimbusKit
 import SwiftUI
 
 @main
