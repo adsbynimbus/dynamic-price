@@ -13,13 +13,42 @@ public protocol Mapping {
 }
 
 /// A mapping using a linear step function to generate the target dynamic price value
-public typealias LinearPriceGranularity = LinearPriceMapping.Granularity
+public struct LinearPriceGranularity: Comparable {
+
+    /// The minimum bid in cents
+    public let min: Int
+
+    /// The maximum bid in cents
+    public let max: Int
+
+    /// The step size for each line item mapping
+    public let step: Int
+
+    /**
+     Constructs a new `LinearPriceGranularity`
+
+     - Parameters:
+     - min:The minimum bid in cents
+     - max: The maximum bid in cents
+     - step: The step size for each line item mapping
+     */
+    public init(min: Int, max: Int, step: Int) {
+        self.min = min
+        self.max = max
+        self.step = step
+    }
+
+    /// :nodoc:
+    public static func < (lhs: LinearPriceGranularity, rhs: LinearPriceGranularity) -> Bool {
+        lhs.min < rhs.min
+    }
+}
 
 /// A mapping composed of multiple LinearPriceGranularities in ascending order
 public struct LinearPriceMapping: Mapping {
 
     /// The granularities used in this mapping
-    let granularities: [Granularity]
+    let granularities: [LinearPriceGranularity]
 
     /**
      Constructs a new `LinearPriceMapping`
@@ -27,7 +56,7 @@ public struct LinearPriceMapping: Mapping {
      - Parameters:
      -  granularities: the granularities to use
      */
-    public init(granularities: [Granularity]) {
+    public init(granularities: [LinearPriceGranularity]) {
         self.granularities = granularities.sorted()
     }
 
@@ -42,37 +71,5 @@ public struct LinearPriceMapping: Mapping {
     public func getTarget(_ ad: NimbusAd) -> String {
         let range = granularities.first { ad.bidInCents < $0.max } ?? granularities.last!
         return String(min(max(ad.bidInCents - (ad.bidInCents % range.step), range.min), range.max))
-    }
-
-    /// A mapping using a linear step function to generate the target dynamic price value
-    public struct Granularity: Comparable {
-
-        /// The minimum bid in cents
-        public let min: Int
-
-        /// The maximum bid in cents
-        public let max: Int
-
-        /// The step size for each line item mapping
-        public let step: Int
-
-        /**
-         Constructs a new `Granularity`
-
-         - Parameters:
-         - min:The minimum bid in cents
-         - max: The maximum bid in cents
-         - step: The step size for each line item mapping
-         */
-        public init(min: Int, max: Int, step: Int) {
-            self.min = min
-            self.max = max
-            self.step = step
-        }
-
-        /// :nodoc:
-        public static func < (lhs: Granularity, rhs: Granularity) -> Bool {
-            lhs.min < rhs.min
-        }
     }
 }
