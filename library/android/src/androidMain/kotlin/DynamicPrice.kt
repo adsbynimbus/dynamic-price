@@ -7,7 +7,6 @@ import com.adsbynimbus.Nimbus
 import com.adsbynimbus.NimbusAd
 import com.adsbynimbus.dynamicprice.internal.*
 import com.adsbynimbus.internal.Platform
-import com.adsbynimbus.lineitem.*
 import com.adsbynimbus.render.*
 import com.adsbynimbus.render.Renderer.Companion.loadBlockingAd
 import com.adsbynimbus.request.NimbusResponse
@@ -21,19 +20,20 @@ import kotlinx.coroutines.*
 import java.lang.ref.WeakReference
 
 /** Appends Nimbus Key Values to the Ad Manager request and caches the ad for rendering. */
+@Deprecated("Use NimbusResponse.applyDynamicPrice instead",
+    ReplaceWith("", imports = ["com.adsbynimbus.dynamicprice"]))
 fun <T : BaseAdRequestBuilder<T>> BaseAdRequestBuilder<T>.applyDynamicPrice(
     nimbusAd: NimbusResponse,
-    mapping: Mapping,
+    mapping: com.adsbynimbus.lineitem.Mapping,
 ) {
     DynamicPriceRenderer.adCache.put(nimbusAd.auctionId, nimbusAd)
-    val isVideo = nimbusAd.bid.type == "video"
-    putCustomTargeting("na_id", nimbusAd.bid.auction_id)
-    putCustomTargeting("na_bid" + if (isVideo) "_video" else "",
-        if (Nimbus.testMode) "0" else mapping.getTarget(nimbusAd))
-    putCustomTargeting("na_network", nimbusAd.bid.network)
-    putCustomTargeting("na_render", if (isVideo) "video" else "static")
-    putCustomTargeting("na_size", "${nimbusAd.bid.width}x${nimbusAd.bid.height}")
-    putCustomTargeting("na_type", if (isVideo) "video" else "static")
+    applyTargeting(nimbusAd, mapping.getTarget(nimbusAd))
+}
+
+/** Appends Nimbus Key Values to the Ad Manager request and caches the ad for rendering. */
+fun <T : BaseAdRequestBuilder<T>> NimbusResponse.applyDynamicPrice(request: T, mapping: Mapping) {
+    DynamicPriceRenderer.adCache.put(auctionId, this)
+    request.applyTargeting(this, mapping.getTarget(this))
 }
 
 /**
@@ -249,3 +249,14 @@ inline val RewardedAd.isNimbusWin: Boolean
 /** Returns the NimbusResponse associated with the RewardedAd */
 val RewardedAd.nimbusAd: NimbusResponse?
     get() = (this as? DynamicPriceRewardedAd)?.takeIf { it.isNimbusWin }?.nimbusAd
+
+internal fun BaseAdRequestBuilder<*>.applyTargeting(nimbusAd: NimbusResponse, target: String) {
+    val isVideo = nimbusAd.bid.type == "video"
+    putCustomTargeting("na_id", nimbusAd.bid.auction_id)
+    putCustomTargeting("na_bid" + if (isVideo) "_video" else "",
+        if (Nimbus.testMode) "0" else target)
+    putCustomTargeting("na_network", nimbusAd.bid.network)
+    putCustomTargeting("na_render", if (isVideo) "video" else "static")
+    putCustomTargeting("na_size", "${nimbusAd.bid.width}x${nimbusAd.bid.height}")
+    putCustomTargeting("na_type", if (isVideo) "video" else "static")
+}
