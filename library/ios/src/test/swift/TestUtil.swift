@@ -22,14 +22,13 @@ actor NimbusTestEnvironment {
     }
 
     static let mapping: Mapping = LinearPriceMapping(
-        LinearPriceGranularity(min: 0, max: 300, step: 1)
+        LinearPriceGranularity(min: 0, max: 300, step: 1),
     )
 }
 
 func createNimbusAd(
     index: Int = 0,
     type: NimbusAuctionType = .static,
-    dimensPresent: Bool = true,
     network: String = "network"
 ) -> NimbusAd {
     NimbusAd(
@@ -44,10 +43,10 @@ func createNimbusAd(
         isInterstitial: true,
         placementId: "",
         duration: type == .video ? 1 : nil,
-        adDimensions: dimensPresent ? NimbusAdDimensions(width: 320, height: 50) : nil,
+        adDimensions: type == .static ? NimbusAdDimensions(width: 320, height: 50) : nil,
         trackers: nil,
         isMraid: true,
-        extensions: nil
+        extensions: nil,
     )
 }
 

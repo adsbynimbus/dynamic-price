@@ -39,12 +39,10 @@ import Testing
                 {
                     applyGroup.addTask(priority: .background) {
                         #expect(request.customTargeting!["na_type"] as? String == "static")
-                        #expect(
-                            request.customTargeting!["na_id"] as? String == "auctionId-\(index)")
-                        #expect(
-                            request.customTargeting!["na_bid"] as? String
-                                == "\(Nimbus.shared.testMode ? 0 : 200)"
-                        )
+                        #expect(request.customTargeting!["na_id"] as? String ==
+                                "auctionId-\(index)")
+                        #expect(request.customTargeting!["na_bid"] as? String ==
+                                "\(Nimbus.shared.testMode ? 0 : 200)")
                     }
 
                     for index in (0..<testCount) {

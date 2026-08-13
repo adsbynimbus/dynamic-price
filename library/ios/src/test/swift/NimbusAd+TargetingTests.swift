@@ -24,16 +24,15 @@ import DynamicPrice
         #expect(request.customTargeting?["na_id"] as? String == ad.auctionId)
         #expect(request.customTargeting?["na_bid"] as? String == mapping.getTarget(ad))
         #expect(request.customTargeting?["na_network"] as? String == ad.network)
-        #expect(
-            request.customTargeting?["na_size"] as? String
-                == "\(ad.adDimensions!.width)x\(ad.adDimensions!.height)"
-        )
-        #expect(request.customTargeting?["na_type"] as? String == NimbusAuctionType.static.rawValue)
+        #expect(request.customTargeting?["na_size"] as? String ==
+                "\(ad.adDimensions!.width)x\(ad.adDimensions!.height)")
+        #expect(request.customTargeting?["na_type"] as? String == "static")
+        #expect(request.customTargeting?["na_render"] as? String == "static")
         #expect(request.customTargeting?["na_bid_video"] == nil)
     }
 
     @Test func `applyDynamicPrice sets customTargeting for video ads`() async {
-        let ad = createNimbusAd(type: .video, dimensPresent: false)
+        let ad = createNimbusAd(type: .video)
         let request = AdManagerRequest()
 
         ad.applyDynamicPrice(request, mapping: mapping)
@@ -42,7 +41,7 @@ import DynamicPrice
         #expect(request.customTargeting?["na_network"] as? String == ad.network)
         #expect(request.customTargeting?["na_size"] as? String == "0x0")
         #expect(request.customTargeting?["na_bid_video"] as? String == mapping.getTarget(ad))
-        #expect(request.customTargeting?["na_type"] as? String == NimbusAuctionType.video.rawValue)
+        #expect(request.customTargeting?["na_type"] as? String == "video")
         #expect(request.customTargeting?["na_render"] as? String == "video")
     }
 
@@ -56,12 +55,10 @@ import DynamicPrice
 
         #expect(request.customTargeting?["na_id"] as? String == ad.auctionId)
         #expect(request.customTargeting?["na_network"] as? String == ad.network)
-        #expect(
-            request.customTargeting?["na_size"] as? String
-                == "\(ad.adDimensions!.width)x\(ad.adDimensions!.height)"
-        )
+        #expect(request.customTargeting?["na_size"] as? String ==
+                "\(ad.adDimensions!.width)x\(ad.adDimensions!.height)")
         #expect(request.customTargeting?["na_bid"] as? String == "200")
-        #expect(request.customTargeting?["na_type"] as? String == NimbusAuctionType.static.rawValue)
+        #expect(request.customTargeting?["na_type"] as? String == "static")
         #expect(request.customTargeting?["na_render"] as? String == "static")
         #expect(request.customTargeting?["test_key"] as? String == "test_value")
     }
