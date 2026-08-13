@@ -19,7 +19,7 @@ class GoogleAuctionData(val ad: NimbusResponse) : OnPaidEventListener {
 }
 
 @Deprecated("notifyNoFill is longer used and will be removed in the next feature release", ReplaceWith(""))
-fun <T : RequestManager> T.notifyNoFill(auctionData: GoogleAuctionData) = Unit
+fun <T : RequestManager> T.notifyNoFill(@Suppress("Deprecation") auctionData: GoogleAuctionData) = Unit
 
 @Deprecated("notifyImpression is longer used and will be removed in the next feature release", ReplaceWith(""))
-fun <T : RequestManager> T.notifyImpression(auctionData: GoogleAuctionData, responseInfo: ResponseInfo?) = Unit
+fun <T : RequestManager> T.notifyImpression(@Suppress("Deprecation") auctionData: GoogleAuctionData, responseInfo: ResponseInfo?) = Unit

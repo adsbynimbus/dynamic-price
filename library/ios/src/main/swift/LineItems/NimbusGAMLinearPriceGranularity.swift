@@ -12,7 +12,7 @@ import NimbusKit
  * A mapping using a linear step function to generate the keywords
  * By default, this class will map to a keyword of "nimbus{width}_{height}:{bucket}" i.e nimbus320_50:500 for a bid at 5 dollars.
  */
-@available(*, deprecated, message: "Renamed to LinearPriceMapping.Granularity")
+@available(*, deprecated, renamed: "LinearPriceGranularity")
 public struct NimbusGAMLinearPriceGranularity: NimbusDynamicPriceMapping, Comparable, Equatable {
     
     /// The minimum bid in cents
