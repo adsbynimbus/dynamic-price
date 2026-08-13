@@ -47,7 +47,10 @@ dependencyResolutionManagement {
     }
 }
 
-gradle.lifecycle.beforeProject {
+gradle.lifecycle.afterProject {
+    val kotlinVersion = project.buildscript.configurations
+        .getByName("classpath")
+        .dependencies.first { it.name.startsWith("org.jetbrains.kotlin") }.version!!
     arrayOf(buildscript.configurations, configurations).forEach {
         it.configureEach {
             resolutionStrategy.eachDependency {
@@ -60,6 +63,9 @@ gradle.lifecycle.beforeProject {
                         useVersion("1.23.1")
                         because("Fixes CWE-79")
                     }
+                }
+                when (requested.module.group) {
+                    "org.jetbrains.kotlin" -> useVersion(kotlinVersion)
                 }
             }
         }
