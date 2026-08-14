@@ -43,10 +43,14 @@ internal class DynamicPriceRenderer(
         inline fun render(
             data: String,
             crossinline render: suspend (NimbusResponse, String) -> Unit,
-        ) = runCatching { jsonSerializer.decodeFromString(serializer(), data) }.onSuccess {
-            renderScope.launch(Dispatchers.Main) {
-                runCatching {
-                    render(adCache[it.auctionId]!!, it.clickTracker)
+        ): NimbusResponse? {
+            val event = runCatching { jsonSerializer.decodeFromString(serializer(), data) }
+                .getOrNull() ?: return null
+            return adCache[event.auctionId]?.also { response ->
+                renderScope.launch(Dispatchers.Main) {
+                    runCatching {
+                        render(response, event.clickTracker)
+                    }
                 }
             }
         }

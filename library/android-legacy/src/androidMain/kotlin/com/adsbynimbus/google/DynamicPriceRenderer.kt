@@ -4,17 +4,10 @@ package com.adsbynimbus.google
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Bundle
-import androidx.core.view.doOnLayout
-import androidx.core.view.updateLayoutParams
 import com.adsbynimbus.*
-import com.adsbynimbus.dynamicprice.DynamicPriceAd
 import com.adsbynimbus.dynamicprice.dynamicPriceAd
-import com.adsbynimbus.dynamicprice.internal.DynamicPriceEventHandler
+import com.adsbynimbus.dynamicprice.handleEventForNimbus
 import com.adsbynimbus.dynamicprice.internal.DynamicPriceRenderer
-import com.adsbynimbus.dynamicprice.internal.maybeClearInterstitial
-import com.adsbynimbus.dynamicprice.internal.renderInline
-import com.adsbynimbus.dynamicprice.internal.targetView
-import com.adsbynimbus.internal.*
 import com.adsbynimbus.render.*
 import com.adsbynimbus.render.Renderer.Companion.loadBlockingAd
 import com.adsbynimbus.request.NimbusResponse
@@ -24,8 +17,6 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.rewarded.RewardItem
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd
-import kotlinx.coroutines.*
-import java.lang.ref.WeakReference
 
 /**
  * App Event handler for the Nimbus SDK for [com.google.android.gms.ads.admanager.AdManagerAdView] and
@@ -38,9 +29,9 @@ import java.lang.ref.WeakReference
  * ```
  * AdManagerAdView(context).apply {
  *     setAppEventListener { s, s2 ->
- *         if (handleEventForNimbus(name = s, info = s2)) return@setAppEventListener
+ *         val nimbusWin = handleEventForNimbus(name = s, info = s2)
  *
- *         TODO("Event was not meant for Nimbus")
+ *         TODO("Run other app event code after handleEventForNimbus")
  *     }
  * }
  * ```
@@ -49,32 +40,10 @@ import java.lang.ref.WeakReference
  * @param info the event payload
  * @return true if the event was for the Nimbus SDK.
  */
-fun AdManagerAdView.handleEventForNimbus(name: String, info: String): Boolean = when(name) {
-    "na_render" -> true.also {
-        DynamicPriceRenderer.render(info) { nimbusAd, clickEvent ->
-            val container = targetView
-            nimbusAd.renderInline(container).apply {
-                listeners.add(
-                    DynamicPriceEventHandler(
-                        controller = this,
-                        googleClickTracker = clickEvent,
-                        adViewRef = WeakReference(this@handleEventForNimbus),
-                    ),
-                )
-                if (nimbusAd.type() == "video") {
-                    container.getChildAt(0)?.doOnLayout { webView ->
-                        view?.updateLayoutParams {
-                            height = webView.height
-                            width = webView.width
-                        }
-                    }
-                }
-                dynamicPriceAd = DynamicPriceAd(this)
-            }
-        }
-    }
-    else -> false
-}
+@Deprecated("Use com.adsbynimbus.dynamicprice.handleEventForNimbus instead",
+    ReplaceWith("", imports = ["com.adsbynimbus.dynamicprice.handleEventForNimbus"]))
+fun AdManagerAdView.handleEventForNimbus(name: String, info: String): Boolean =
+    handleEventForNimbus(name, info, listener = null) != null
 
 /**
  * App Event handler for the Nimbus SDK for [com.google.android.gms.ads.admanager.AdManagerInterstitialAd] and
@@ -89,9 +58,9 @@ fun AdManagerAdView.handleEventForNimbus(name: String, info: String): Boolean = 
  *     object : AdManagerInterstitialAdLoadCallback() {
  *         override fun onAdLoaded(interstitialAd: AdManagerInterstitialAd) {
  *             interstitialAd.setAppEventListener { s, s2 ->
- *                 if (handleEventForNimbus(name = s, info = s2)) return@setAppEventListener
+ *                 val nimbusWin = handleEventForNimbus(name = s, info = s2)
  *
- *                 TODO("Event was not meant for Nimbus")
+ *                 TODO("Run other app event code after handleEventForNimbus")
  *             }
  *             interstitialAd.show(activity)
  *         }
@@ -105,33 +74,10 @@ fun AdManagerAdView.handleEventForNimbus(name: String, info: String): Boolean = 
  * @param info the event payload
  * @return true if the event was for the Nimbus SDK.
  */
-fun <T : InterstitialAd> T.handleEventForNimbus(name: String, info: String): Boolean = when (name) {
-    "na_render" -> true.also {
-        DynamicPriceRenderer.render(info) { nimbusAd, clickEvent ->
-            Platform.currentActivity.get()!!.application.loadBlockingAd(nimbusAd)!!.apply {
-                listeners.add(
-                    DynamicPriceEventHandler(
-                        controller = this,
-                        googleClickTracker = clickEvent,
-                        interstitialRef = WeakReference(this@handleEventForNimbus),
-                    ),
-                )
-                dynamicPriceAd = DynamicPriceAd(this)
-            }
-        }
-    }
-    "na_show" -> false.also {
-        DynamicPriceRenderer.renderScope.launch(Dispatchers.Main.immediate) {
-            dynamicPriceAd?.adController?.start() ?: run {
-                fullScreenContentCallback?.onAdFailedToShowFullScreenContent(
-                    AdError(-6, "Nimbus Interstitial failed to show", Nimbus.sdkName)
-                )
-                maybeClearInterstitial()
-            }
-        }
-    }
-    else -> false
-}
+@Deprecated("Use com.adsbynimbus.dynamicprice.handleEventForNimbus instead",
+    ReplaceWith("", imports = ["com.adsbynimbus.dynamicprice.handleEventForNimbus"]))
+fun <T : InterstitialAd> T.handleEventForNimbus(name: String, info: String): Boolean =
+    handleEventForNimbus(name, info, listener = null) != null
 
 /**
  * An event handler for the Nimbus SDK for [com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd].
