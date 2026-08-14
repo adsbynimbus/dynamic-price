@@ -20,7 +20,7 @@ suspend fun loadDynamicPriceRewardedVideo(
 ): AdLoadResult<RewardedAd> {
     DynamicPriceHelper.runCatching {
         val nimbusResponse = requestManager.makeRequest(context, nimbusRequest)
-        adRequest.applyDynamicPrice(nimbusResponse, mapping = mapping)
+        nimbusResponse.applyDynamicPrice(adRequest, mapping = mapping)
     }
     return RewardedAd.loadDynamicPrice(adRequest.build())
 }

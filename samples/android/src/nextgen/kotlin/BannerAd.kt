@@ -11,7 +11,8 @@ import androidx.compose.ui.platform.*
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.*
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.adsbynimbus.dynamicprice.*
+import com.adsbynimbus.dynamicprice.applyDynamicPrice
+import com.adsbynimbus.dynamicprice.handleEventForNimbus
 import com.adsbynimbus.dynamicprice.sample.AdTypes.*
 import com.adsbynimbus.openrtb.request.Format.Companion.BANNER_320_50
 import com.adsbynimbus.openrtb.request.Format.Companion.MREC
@@ -39,7 +40,7 @@ suspend fun AdView.loadDynamicPrice(
 ): BannerAd {
     DynamicPriceHelper.runCatching {
         val nimbusResponse = requestManager.makeRequest(context, nimbusRequest)
-        adRequest.applyDynamicPrice(nimbusResponse, mapping = mapping)
+        nimbusResponse.applyDynamicPrice(adRequest, mapping = mapping)
     }
     return suspendCancellableCoroutine {
         val callback = object : AdLoadCallback<BannerAd> {

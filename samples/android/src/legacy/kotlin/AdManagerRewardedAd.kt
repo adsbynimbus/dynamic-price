@@ -7,9 +7,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import com.adsbynimbus.*
+import com.adsbynimbus.dynamicprice.applyDynamicPrice
 import com.adsbynimbus.dynamicprice.sample.AdTypes.RewardedVideo
 import com.adsbynimbus.google.*
-import com.adsbynimbus.lineitem.*
 import com.adsbynimbus.request.*
 import com.adsbynimbus.request.NimbusRequest.Companion.forRewardedVideo
 import com.google.android.gms.ads.LoadAdError
