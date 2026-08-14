@@ -12,7 +12,7 @@ import Testing
 
 import DynamicPrice
 
-@Suite(.serialized) struct NimbusAdTargetingTests {
+@Suite(.serialized) struct ApplyDynamicPriceTests {
 
     @Test func `applyDynamicPrice sets customTargeting for static ads`() async {
         let ad = createNimbusAd(type: .static)
