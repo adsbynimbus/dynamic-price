@@ -42,8 +42,10 @@ import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd
  */
 @Deprecated("Use com.adsbynimbus.dynamicprice.handleEventForNimbus instead",
     ReplaceWith("", imports = ["com.adsbynimbus.dynamicprice.handleEventForNimbus"]))
-fun AdManagerAdView.handleEventForNimbus(name: String, info: String): Boolean =
-    handleEventForNimbus(name, info, listener = null) != null
+fun AdManagerAdView.handleEventForNimbus(name: String, info: String): Boolean {
+    handleEventForNimbus(name, info, listener = null)
+    return name == "na_render"
+}
 
 /**
  * App Event handler for the Nimbus SDK for [com.google.android.gms.ads.admanager.AdManagerInterstitialAd] and
@@ -76,8 +78,10 @@ fun AdManagerAdView.handleEventForNimbus(name: String, info: String): Boolean =
  */
 @Deprecated("Use com.adsbynimbus.dynamicprice.handleEventForNimbus instead",
     ReplaceWith("", imports = ["com.adsbynimbus.dynamicprice.handleEventForNimbus"]))
-fun <T : InterstitialAd> T.handleEventForNimbus(name: String, info: String): Boolean =
-    handleEventForNimbus(name, info, listener = null) != null
+fun <T : InterstitialAd> T.handleEventForNimbus(name: String, info: String): Boolean {
+    handleEventForNimbus(name, info, listener = null)
+    return name == "na_render"
+}
 
 /**
  * An event handler for the Nimbus SDK for [com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd].
