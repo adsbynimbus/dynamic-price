@@ -47,6 +47,25 @@ dependencyResolutionManagement {
     }
 }
 
+gradle.lifecycle.beforeProject {
+    arrayOf(buildscript.configurations, configurations).forEach {
+        it.configureEach {
+            resolutionStrategy.eachDependency {
+                when (requested.module.group) {
+                    "org.jsoup" -> {
+                        useVersion("1.23.1")
+                        because("Fixes CWE-79")
+                    }
+                    "com.fasterxml.jackson", "com.fasterxml.jackson.core" -> {
+                        useVersion(if (requested.module.name == "jackson-annotations") "2.22" else "2.22.1")
+                        because("Fixes CWE-918 (SSRF)")
+                    }
+                }
+            }
+        }
+    }
+}
+
 gradle.lifecycle.afterProject {
     val kotlinVersion = project.buildscript.configurations
         .getByName("classpath")
@@ -54,16 +73,6 @@ gradle.lifecycle.afterProject {
     arrayOf(buildscript.configurations, configurations).forEach {
         it.configureEach {
             resolutionStrategy.eachDependency {
-                when (requested.module.name) {
-                    "jackson-bom" -> {
-                        useVersion("2.22.1")
-                        because("Fixes CWE-918 (SSRF)")
-                    }
-                    "jsoup" -> {
-                        useVersion("1.23.1")
-                        because("Fixes CWE-79")
-                    }
-                }
                 when (requested.module.group) {
                     "org.jetbrains.kotlin" -> useVersion(kotlinVersion)
                 }
