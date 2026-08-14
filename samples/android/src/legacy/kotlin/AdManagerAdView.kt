@@ -13,8 +13,8 @@ import androidx.lifecycle.*
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.adsbynimbus.dynamicprice.applyDynamicPrice
+import com.adsbynimbus.dynamicprice.handleEventForNimbus
 import com.adsbynimbus.dynamicprice.sample.AdTypes.AdViewBanner
-import com.adsbynimbus.google.*
 import com.adsbynimbus.openrtb.request.Format.Companion.BANNER_320_50
 import com.adsbynimbus.openrtb.request.Format.Companion.MREC
 import com.adsbynimbus.openrtb.request.Video

@@ -7,8 +7,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import com.adsbynimbus.dynamicprice.applyDynamicPrice
 import com.adsbynimbus.dynamicprice.dynamicPriceAd
+import com.adsbynimbus.dynamicprice.handleEventForNimbus
 import com.adsbynimbus.dynamicprice.sample.AdTypes.Interstitial
-import com.adsbynimbus.google.handleEventForNimbus
 import com.adsbynimbus.request.NimbusRequest
 import com.adsbynimbus.request.NimbusRequest.Companion.forInterstitialAd
 import com.google.android.gms.ads.LoadAdError
