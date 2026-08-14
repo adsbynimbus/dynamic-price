@@ -13,7 +13,7 @@ func loadDynamicPriceInterstitialAd(
     let nimbusRequestManager = NimbusRequestManager()
     let nimbusResponse = try? await nimbusRequestManager.makeRequest(nimbusRequest)
     // Apply Key-Values to AdManagerRequest
-    nimbusResponse?.applyDynamicPrice(into: adRequest, mapping: DynamicPriceApp.mapping)
+    nimbusResponse?.applyDynamicPrice(adRequest, mapping: DynamicPriceApp.mapping)
 
     let interstitialAd = try await AdManagerInterstitialAd.load(with: adUnitId, request: adRequest)
     interstitialAd.appEventDelegate = interstitialAd
