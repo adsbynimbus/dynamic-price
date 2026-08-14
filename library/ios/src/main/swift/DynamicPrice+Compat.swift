@@ -9,6 +9,19 @@
 import GoogleMobileAds
 import NimbusKit
 
+public extension NimbusAd {
+
+    /// Add keywords for custom targeting from Nimbus ad to AdManagerRequest
+    /// - Parameters:
+    ///   - request: AdManagerRequest to add keywords to
+    ///   - mapping: A mapping composed of multiple LinearPriceGranularities in ascending order. Default: NimbusGAMLinearPriceMapping.banner()
+    @available(*, deprecated, message: "Replace with nimbusAd?.applyDynamicPrice(adManagerRequest)")
+    func applyDynamicPrice(into request: AdManagerRequest, mapping: NimbusGAMLinearPriceMapping = .banner()) {
+        DynamicPriceRenderer[auctionId] = .init(self)
+        applyTargeting(request, mapping.getKeywords(ad: self))
+    }
+}
+
 public extension AdLoader {
     /// This method applies dynamic price targeting and calls `AdLoader.load()`.
     /// - Parameters:

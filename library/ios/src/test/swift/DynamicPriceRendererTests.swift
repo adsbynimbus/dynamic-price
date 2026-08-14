@@ -27,7 +27,8 @@ import Testing
             requestGroup in
             for request in requests.enumerated() {
                 requestGroup.addTask(priority: .userInitiated) {
-                    createNimbusAd(index: request.offset).applyDynamicPrice(into: request.element)
+                    createNimbusAd(index: request.offset)
+                        .applyDynamicPrice(request.element, mapping: mapping)
                     return request
                 }
             }
@@ -38,12 +39,10 @@ import Testing
                 {
                     applyGroup.addTask(priority: .background) {
                         #expect(request.customTargeting!["na_type"] as? String == "static")
-                        #expect(
-                            request.customTargeting!["na_id"] as? String == "auctionId-\(index)")
-                        #expect(
-                            request.customTargeting!["na_bid"] as? String
-                                == "\(Nimbus.shared.testMode ? 0 : 200)"
-                        )
+                        #expect(request.customTargeting!["na_id"] as? String ==
+                                "auctionId-\(index)")
+                        #expect(request.customTargeting!["na_bid"] as? String ==
+                                "\(Nimbus.shared.testMode ? 0 : 200)")
                     }
 
                     for index in (0..<testCount) {

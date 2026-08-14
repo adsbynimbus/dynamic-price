@@ -1,5 +1,6 @@
 import GoogleMobileAds
 @preconcurrency import DynamicPrice
+@preconcurrency import NimbusKit
 import SwiftUI
 
 func loadDynamicPriceRewardedVideo(
@@ -10,7 +11,7 @@ func loadDynamicPriceRewardedVideo(
     let nimbusRequestManager = NimbusRequestManager()
     let nimbusResponse = try? await nimbusRequestManager.makeRequest(nimbusRequest)
     // Apply Key-Values to AdManagerRequest
-    nimbusResponse?.applyDynamicPrice(into: adRequest, mapping: DynamicPriceApp.mapping)
+    nimbusResponse?.applyDynamicPrice(adRequest, mapping: DynamicPriceApp.mapping)
     return (try await RewardedAd.load(with: adUnitId, request: adRequest), nimbusResponse)
 }
 

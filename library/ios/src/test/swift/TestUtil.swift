@@ -24,15 +24,15 @@ actor NimbusTestEnvironment {
 
 func createNimbusAd(
     index: Int = 0,
+    bidInCents: Int = 200,
     type: NimbusAuctionType = .static,
-    dimensPresent: Bool = true,
     network: String = "network"
 ) -> NimbusAd {
     NimbusAd(
         position: "position-\(index)",
         auctionType: type,
-        bidRaw: 0,
-        bidInCents: 200,
+        bidRaw: Double(bidInCents) / 100,
+        bidInCents: bidInCents,
         contentType: "",
         auctionId: "auctionId-\(index)",
         network: network,
@@ -40,10 +40,10 @@ func createNimbusAd(
         isInterstitial: true,
         placementId: "",
         duration: type == .video ? 1 : nil,
-        adDimensions: dimensPresent ? NimbusAdDimensions(width: 320, height: 50) : nil,
+        adDimensions: type == .static ? NimbusAdDimensions(width: 320, height: 50) : nil,
         trackers: nil,
         isMraid: true,
-        extensions: nil
+        extensions: nil,
     )
 }
 

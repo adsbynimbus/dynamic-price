@@ -1,5 +1,6 @@
 import GoogleMobileAds
 @preconcurrency import DynamicPrice
+@preconcurrency import NimbusKit
 import SwiftUI
 
 extension AdManagerBannerView: @retroactive AppEventDelegate {
@@ -12,7 +13,7 @@ extension AdManagerBannerView: @retroactive AppEventDelegate {
             let nimbusRequestManager = NimbusRequestManager()
             let nimbusResponse = try? await nimbusRequestManager.makeRequest(nimbusRequest)
             // Apply Key-Values to AdManagerRequest
-            nimbusResponse?.applyDynamicPrice(into: adRequest, mapping: DynamicPriceApp.mapping)
+            nimbusResponse?.applyDynamicPrice(adRequest, mapping: DynamicPriceApp.mapping)
 
             load(adRequest)
         }

@@ -12,13 +12,15 @@ import com.google.android.gms.ads.admanager.AdManagerAdRequest
  * @param ad a winning bid from Nimbus to use for Dynamic Price
  * @param mapping the mapping from the bid price to a line item bucket
  */
+@Deprecated("Use NimbusResponse.applyDynamicPrice instead",
+    ReplaceWith("", imports = ["com.adsbynimbus.dynamicprice"]))
 @JvmOverloads
 fun AdManagerAdRequest.Builder.applyDynamicPrice(
     ad: NimbusResponse,
     mapping: Mapping = ad.defaultMapping,
 ) = apply {
     dynamicPriceAdCache.put(ad.auctionId, ad)
-    applyTargeting(ad, mapping)
+    applyTargeting(ad, mapping.getTarget(ad))
 }
 
 /**
@@ -27,11 +29,13 @@ fun AdManagerAdRequest.Builder.applyDynamicPrice(
  * @param request the target request for the Dynamic Price bid
  * @param mapping the mapping from the bid price to a line item bucket
  */
+@Deprecated("applyDynamicPrice moved to com.adsbynimbus.dynamicprice",
+    ReplaceWith("", imports = ["com.adsbynimbus.dynamicprice"]))
 @JvmOverloads
 fun NimbusResponse.applyDynamicPrice(
     request: AdManagerAdRequest.Builder,
     mapping: Mapping = defaultMapping,
 ) {
     dynamicPriceAdCache.put(auctionId, this)
-    request.applyTargeting(this, mapping)
+    request.applyTargeting(this, mapping.getTarget(this))
 }

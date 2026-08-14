@@ -2,9 +2,28 @@ package com.adsbynimbus.dynamicprice
 
 import android.os.Bundle
 import androidx.core.os.BundleCompat.getSerializable
+import com.adsbynimbus.Nimbus
+import com.adsbynimbus.dynamicprice.internal.DynamicPriceRenderer
 import com.adsbynimbus.render.AdController
+import com.adsbynimbus.request.NimbusResponse
+import com.google.android.gms.ads.AbstractAdRequestBuilder
 import com.google.android.gms.ads.BaseAdView
+import com.google.android.gms.ads.admanager.AdManagerAdRequest
 import com.google.android.gms.ads.interstitial.InterstitialAd
+
+/**
+ * Applies Dynamic Price targeting to an AdManagerAdRequest.
+ *
+ * @param request the target request for the Dynamic Price bid
+ * @param mapping the mapping from the bid price to a line item bucket
+ */
+fun NimbusResponse.applyDynamicPrice(
+    request: AdManagerAdRequest.Builder,
+    mapping: Mapping,
+) {
+    DynamicPriceRenderer.adCache.put(auctionId, this)
+    request.applyTargeting(this, mapping.getTarget(this))
+}
 
 /**
  * Wrapper for a Nimbus [AdController] to store in the Google responseInfo bundle
@@ -51,3 +70,14 @@ internal inline var Bundle.dynamicPriceAd: DynamicPriceAd?
     set(value) {
         if (value == null) remove("na_render") else putSerializable("na_render", value)
     }
+
+internal fun AbstractAdRequestBuilder<*>.applyTargeting(nimbusAd: NimbusResponse, target: String) {
+    val isVideo = nimbusAd.bid.type == "video"
+    addCustomTargeting("na_id", nimbusAd.bid.auction_id)
+    addCustomTargeting("na_bid" + if (isVideo) "_video" else "",
+        if (Nimbus.testMode) "0" else target)
+    addCustomTargeting("na_network", nimbusAd.bid.network)
+    addCustomTargeting("na_render", if (isVideo) "video" else "static")
+    addCustomTargeting("na_size", "${nimbusAd.bid.width}x${nimbusAd.bid.height}")
+    addCustomTargeting("na_type", if (isVideo) "video" else "static")
+}

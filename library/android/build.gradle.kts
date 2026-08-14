@@ -42,6 +42,8 @@ kotlin {
             artifact(dokkaJavadocJar)
             artifact(dokkaHtmlJar)
         }
+
+        withHostTest { }
     }
 
     compilerOptions {
@@ -50,12 +52,18 @@ kotlin {
     }
 
     sourceSets {
-        removeIf { it.name == "commonTest" } // Fixes Unused Kotlin Source Sets warning
+        commonTest.dependencies {
+            implementation(libs.bundles.test.unit)
+        }
         androidMain.dependencies {
             implementation(libs.ads.nimbus)
             implementation(libs.ads.google.nextgen)
         }
     }
+}
+
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
 }
 
 dependencies {
