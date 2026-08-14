@@ -48,7 +48,7 @@ public struct LinearPriceGranularity: Comparable {
 public struct LinearPriceMapping: Mapping {
 
     /// The granularities used in this mapping
-    let granularities: [LinearPriceGranularity]
+    public let granularities: [LinearPriceGranularity]
 
     /**
      Constructs a new `LinearPriceMapping`

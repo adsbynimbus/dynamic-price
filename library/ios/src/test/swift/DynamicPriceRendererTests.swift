@@ -28,7 +28,7 @@ import Testing
             for request in requests.enumerated() {
                 requestGroup.addTask(priority: .userInitiated) {
                     createNimbusAd(index: request.offset)
-                        .applyDynamicPrice(request.element, mapping: NimbusTestEnvironment.mapping)
+                        .applyDynamicPrice(request.element, mapping: mapping)
                     return request
                 }
             }

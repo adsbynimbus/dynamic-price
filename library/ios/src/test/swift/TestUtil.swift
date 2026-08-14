@@ -20,22 +20,19 @@ actor NimbusTestEnvironment {
         Nimbus.shared.initialize(publisher: "wee", apiKey: "woo")
         isInitialized = true
     }
-
-    static let mapping: Mapping = LinearPriceMapping(
-        LinearPriceGranularity(min: 0, max: 300, step: 1),
-    )
 }
 
 func createNimbusAd(
     index: Int = 0,
+    bidInCents: Int = 200,
     type: NimbusAuctionType = .static,
     network: String = "network"
 ) -> NimbusAd {
     NimbusAd(
         position: "position-\(index)",
         auctionType: type,
-        bidRaw: 0,
-        bidInCents: 200,
+        bidRaw: Double(bidInCents) / 100,
+        bidInCents: bidInCents,
         contentType: "",
         auctionId: "auctionId-\(index)",
         network: network,
