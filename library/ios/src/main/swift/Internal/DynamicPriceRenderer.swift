@@ -27,13 +27,15 @@ internal struct DynamicPriceRenderer: Codable {
     }()
     static let jsonDecoder = JSONDecoder()
 
-    static func render(data: String?, block: @escaping (CachedAd, URL) -> Void) {
+    static func render(data: String?, block: @escaping (CachedAd, URL) -> Void) -> NimbusAd? {
         guard let renderer = DynamicPriceRenderer(info: data),
               let nimbusAd = DynamicPriceRenderer[renderer.auctionId] else {
-            return
+            return nil
         }
         
         block(nimbusAd, renderer.googleClickTracker)
+
+        return nimbusAd.value
     }
 
     let auctionId: String

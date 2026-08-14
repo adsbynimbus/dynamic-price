@@ -47,7 +47,7 @@ import Testing
 
                     for index in (0..<testCount) {
                         applyGroup.addTask {
-                            DynamicPriceRenderer.render(
+                            let _ = DynamicPriceRenderer.render(
                                 data: "{\"na_id\":\"auctionId-\(index)\",\"ga_click\":\"https://click\(index)\"}"
                             ) { nimbusAd, clickTracker in
                                 #expect(nimbusAd.value.auctionId == "auctionId-\(index)")
