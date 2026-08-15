@@ -14,6 +14,8 @@ import Testing
 
 @Suite struct DynamicPriceInterstitialAdTests {
 
+    let vc = UIViewController()
+
     init() async throws {
         await NimbusTestEnvironment.shared.initIfNeeded()
         DynamicPriceRenderer["interstitialAuction1"] = .init(createNimbusAd())
@@ -42,6 +44,45 @@ import Testing
         #expect(handled == true)
     }
 
+    @Test func `Client listener receives Nimbus events`() async throws {
+        let clientListener = MockAdControllerDelegate()
+        let interstitialAd = AdManagerInterstitialAd()
+
+        interstitialAd.handleEventForNimbus(
+            name: "na_render",
+            info: renderInfo.json,
+            listener: clientListener,
+        )
+
+        #expect(interstitialAd.dynamicPriceAd?.listener === clientListener)
+
+        _ = await MainActor.run {
+            interstitialAd.handleEventForNimbus(name: "na_show", info: nil, viewController: vc)
+        }
+
+        await confirmation { confirmation in
+            clientListener.onDidReceiveNimbusEvent = { controller, event in
+                confirmation.confirm()
+            }
+
+            interstitialAd.dynamicPriceAd!.didReceiveNimbusEvent(
+                controller: interstitialAd.dynamicPriceAd!.controller!,
+                event: .clicked,
+            )
+        }
+
+        await confirmation { confirmation in
+            clientListener.onDidReceiveNimbusError = { controller, event in
+                confirmation.confirm()
+            }
+
+            interstitialAd.dynamicPriceAd!.didReceiveNimbusError(
+                controller: interstitialAd.dynamicPriceAd!.controller!,
+                error: NimbusRenderError.alreadyDestroyed,
+            )
+        }
+    }
+
     @Test func `Click event should call InterstitialAd.delegate click callback`() async throws {
         let delegate = MockFullScreenContentDelegate()
         let interstitialAd = AdManagerInterstitialAd()
@@ -52,7 +93,7 @@ import Testing
         #expect(interstitialAd.dynamicPriceAd != nil)
 
         _ = await MainActor.run {
-            interstitialAd.handleEventForNimbus(name: "na_show", info: nil, viewController: UIViewController())
+            interstitialAd.handleEventForNimbus(name: "na_show", info: nil, viewController: vc)
         }
 
         // Test that it fires click on NimbusEvent.clicked

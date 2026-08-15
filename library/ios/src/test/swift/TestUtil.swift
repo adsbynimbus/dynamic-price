@@ -47,6 +47,18 @@ func createNimbusAd(
     )
 }
 
+final class MockAdControllerDelegate: AdControllerDelegate {
+    var onDidReceiveNimbusEvent: ((any AdController, NimbusEvent) -> Void)?
+    func didReceiveNimbusEvent(controller: any AdController, event: NimbusEvent) {
+        onDidReceiveNimbusEvent?(controller, event)
+    }
+
+    var onDidReceiveNimbusError: ((any AdController, any NimbusError) -> Void)?
+    func didReceiveNimbusError(controller: any AdController, error: any NimbusError) {
+    onDidReceiveNimbusError?(controller, error)
+    }
+}
+
 final class MockBannerDelegate: NSObject, BannerViewDelegate {
     var onDidFailToReceiveAd: ((BannerView, Error) -> Void)?
     func bannerView(_ bannerView: BannerView, didFailToReceiveAdWithError error: Error) {

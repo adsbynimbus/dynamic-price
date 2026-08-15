@@ -19,17 +19,20 @@ internal class DynamicPriceEventHandler: NSObject, AdControllerDelegate {
     weak var interstitial: InterstitialAd?
     weak var presentingController: UIViewController?
     weak var controller: AdController?
+    weak var listener: AdControllerDelegate?
 
     private let logger = Nimbus.shared.logger
 
     init(
         cachedAd: DynamicPriceRenderer.CachedAd,
         googleClickTracker: URL,
+        listener: AdControllerDelegate?,
         adView: BannerView? = nil,
         interstitial: InterstitialAd? = nil,
     ) {
         self.cachedAd = cachedAd
         self.googleClickTracker = googleClickTracker
+        self.listener = listener
         self.adView = adView
         self.interstitial = interstitial
         self.isInterstitial = interstitial != nil
@@ -78,6 +81,7 @@ internal class DynamicPriceEventHandler: NSObject, AdControllerDelegate {
                 }
             }
         }
+        listener?.didReceiveNimbusEvent(controller: controller, event: event)
     }
 
     func didReceiveNimbusError(controller: AdController, error: NimbusError) {
@@ -90,6 +94,7 @@ internal class DynamicPriceEventHandler: NSObject, AdControllerDelegate {
                 .ad?(interstitial, didFailToPresentFullScreenContentWithError: error)
         }
 
+        listener?.didReceiveNimbusError(controller: controller, error: error)
         controller.destroy()
     }
 

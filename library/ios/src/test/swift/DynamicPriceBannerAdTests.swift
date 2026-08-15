@@ -49,6 +49,44 @@ import Testing
         #expect(targetView.subviews.last is NimbusAdView)
     }
 
+    @Test func `Client listener receives Nimbus events`() async throws {
+        let clientListener = MockAdControllerDelegate()
+        let bannerView = AdManagerBannerView()
+        bannerView.rootViewController = rootVC
+
+        let targetView = bannerView.targetView
+
+        bannerView.handleEventForNimbus(
+            name: "na_render",
+            info: renderInfo.json,
+            listener: clientListener,
+        )
+
+        #expect(bannerView.dynamicPriceAd?.listener === clientListener)
+
+        await confirmation { confirmation in
+            clientListener.onDidReceiveNimbusEvent = { controller, event in
+                confirmation.confirm()
+            }
+
+            targetView.dynamicPriceAd?.didReceiveNimbusEvent(
+                controller: targetView.dynamicPriceAd!.controller!,
+                event: .clicked,
+            )
+        }
+
+        await confirmation { confirmation in
+            clientListener.onDidReceiveNimbusError = { controller, event in
+                confirmation.confirm()
+            }
+
+            targetView.dynamicPriceAd?.didReceiveNimbusError(
+                controller: targetView.dynamicPriceAd!.controller!,
+                error: NimbusRenderError.alreadyDestroyed,
+            )
+        }
+    }
+
     @Test func `Click event should call BannerView.delegate click callback`() async throws {
         let clientDelegate = MockBannerDelegate()
         let bannerView = AdManagerBannerView()
@@ -93,6 +131,8 @@ import Testing
 
         #expect((targetView.subviews.last is NimbusAdView) == false)
     }
+
+
 
     private var renderInfo: DynamicPriceRenderer {
         DynamicPriceRenderer(
