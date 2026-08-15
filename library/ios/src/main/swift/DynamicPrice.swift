@@ -46,6 +46,7 @@ extension BannerView {
             let eventHandler = DynamicPriceEventHandler(
                 cachedAd: nimbusAd,
                 googleClickTracker: clickTracker,
+                listener: listener,
                 adView: self,
             )
             eventHandler.controller = Nimbus.load(
@@ -101,6 +102,7 @@ public extension InterstitialAd {
                 self.dynamicPriceAd = DynamicPriceEventHandler(
                     cachedAd: nimbusAd,
                     googleClickTracker: clickTracker,
+                    listener: listener,
                     interstitial: self,
                 )
             }
