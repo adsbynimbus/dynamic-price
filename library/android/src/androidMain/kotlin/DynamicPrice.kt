@@ -108,7 +108,7 @@ fun InterstitialAd.handleEventForNimbus(
                         mediationAdError = null,
                     ),
                 )
-                DynamicPriceRenderer.maybeClearInterstitial(activity)
+                maybeClearInterstitial(activity)
             }
         }
         null

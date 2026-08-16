@@ -106,25 +106,6 @@ internal class DynamicPriceRenderer(
             }
         })
 
-        fun maybeClearInterstitial(activity: Activity? = currentActivity) {
-            if (activity is AdActivity) activity.finishWithoutAnimation() else {
-                (activity?.application ?: application).doOnNextActivity {
-                    if (it is AdActivity) it.finishWithoutAnimation()
-                }
-            }
-        }
-
-        fun Activity.finishWithoutAnimation() {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, 0, 0)
-                finish()
-            } else {
-                finish()
-                @Suppress("DEPRECATION")
-                overridePendingTransition(0, 0)
-            }
-        }
-
         val adCache = LruCache<String, NimbusResponse>(10)
 
         val jsonSerializer = Json {
@@ -154,6 +135,25 @@ internal inline fun Application.doOnNextActivity(crossinline block: (Activity) -
             override fun onActivityDestroyed(activity: Activity) = Unit
         },
     )
+}
+
+internal fun maybeClearInterstitial(activity: Activity? = currentActivity) {
+    if (activity is AdActivity) activity.finishWithoutAnimation() else {
+        (activity?.application ?: application).doOnNextActivity {
+            if (it is AdActivity) it.finishWithoutAnimation()
+        }
+    }
+}
+
+internal fun Activity.finishWithoutAnimation() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, 0, 0)
+        finish()
+    } else {
+        finish()
+        @Suppress("DEPRECATION")
+        overridePendingTransition(0, 0)
+    }
 }
 
 @JvmInline @WorkerThread
