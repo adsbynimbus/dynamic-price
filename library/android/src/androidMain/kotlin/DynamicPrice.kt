@@ -52,7 +52,7 @@ fun BannerAd.handleEventForNimbus(
     activity: Activity? = null,
 ): NimbusResponse? = when(name) {
     "na_render" -> DynamicPriceRenderer.render(this, data, listener) { nimbusAd ->
-        val context = (activity?.takeUnless { it.isDestroyed } ?: Platform.currentActivity.get())
+        val context = (activity?.takeUnless { it.isDestroyed } ?: currentActivity)
         @Suppress("Deprecation") // Revisit this on next SDK update
         val root = getView(context!!)
         val container = root.targetView
@@ -95,7 +95,7 @@ fun InterstitialAd.handleEventForNimbus(
     activity: Activity? = null,
 ): NimbusResponse? = when (name) {
     "na_render" -> DynamicPriceRenderer.render(this, data, listener) { nimbusAd ->
-        val context = (activity?.takeUnless { it.isDestroyed } ?: Platform.currentActivity.get())
+        val context = (activity?.takeUnless { it.isDestroyed } ?: currentActivity)
         context!!.loadBlockingAd(nimbusAd)!!
     }
     "na_show" -> with(DynamicPriceRenderer) {

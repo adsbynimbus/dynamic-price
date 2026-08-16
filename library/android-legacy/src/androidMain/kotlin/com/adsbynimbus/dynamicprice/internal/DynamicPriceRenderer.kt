@@ -4,7 +4,9 @@ package com.adsbynimbus.dynamicprice.internal
 
 import android.app.Activity
 import android.app.Activity.OVERRIDE_TRANSITION_CLOSE
+import android.app.Application
 import android.os.Build
+import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.webkit.WebView
@@ -17,7 +19,8 @@ import androidx.core.view.isEmpty
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.adsbynimbus.*
-import com.adsbynimbus.internal.*
+import com.adsbynimbus.internal.Platform
+import com.adsbynimbus.internal.application
 import com.adsbynimbus.render.*
 import com.adsbynimbus.request.NimbusResponse
 import com.google.android.gms.ads.AdActivity
@@ -67,9 +70,28 @@ internal class DynamicPriceRenderer(
     }
 }
 
-fun maybeClearInterstitial(activity: Activity? = Platform.currentActivity.get()) {
+internal inline val currentActivity: Activity? get() = Platform.currentActivity.get()
+
+internal inline fun Application.doOnNextActivity(crossinline block: (Activity) -> Unit) {
+    registerActivityLifecycleCallbacks(
+        object : Application.ActivityLifecycleCallbacks {
+            override fun onActivityResumed(activity: Activity) {
+                unregisterActivityLifecycleCallbacks(this)
+                block(activity)
+            }
+            override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
+            override fun onActivityStarted(activity: Activity) = Unit
+            override fun onActivityPaused(activity: Activity) = Unit
+            override fun onActivityStopped(activity: Activity) = Unit
+            override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
+            override fun onActivityDestroyed(activity: Activity) = Unit
+        },
+    )
+}
+
+fun maybeClearInterstitial(activity: Activity? = currentActivity) {
     if (activity is AdActivity) activity.finishWithoutAnimation() else {
-        Platform.doOnNextActivity {
+        (activity?.application ?: application).doOnNextActivity {
             if (it is AdActivity) it.finishWithoutAnimation()
         }
     }
