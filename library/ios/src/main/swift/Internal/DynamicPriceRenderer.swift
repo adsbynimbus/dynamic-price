@@ -73,3 +73,21 @@ internal struct DynamicPriceRenderer: Codable {
         }
     }
 }
+
+extension UIWindow {
+   static var detectedRootViewController: UIViewController? {
+       (UIApplication.shared.connectedScenes.first {
+           $0.activationState == .foregroundActive
+       } as? UIWindowScene)?.keyWindow?.rootViewController?.topMostViewController
+   }
+}
+
+private extension UIViewController {
+    var topMostViewController: UIViewController {
+        if let presented = self.presentedViewController {
+            return presented.topMostViewController
+        }
+
+        return self
+    }
+}
