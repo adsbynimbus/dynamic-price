@@ -148,8 +148,8 @@ internal class DynamicPriceEventHandler(
             AdEvent.CLICKED -> {
                 coroutineScope.launch(Dispatchers.IO) {
                     when (OneShotConnection(googleClickTracker).use { it.responseCode }) {
-                        in 200..399 -> log(Log.VERBOSE, "Fired Google click tracker")
-                        else -> log(Log.WARN, "Error firing Google click tracker")
+                        in 200..399 -> debugLog { "Fired Google click tracker" }
+                        else -> warningLog { "Error firing Google click tracker" }
                     }
                 }
                 adViewRef.get()?.adListener?.onAdClicked()
@@ -165,11 +165,11 @@ internal class DynamicPriceEventHandler(
 
     override fun onError(error: NimbusError) {
         controller.destroy()
-        val errorMessage = "Error Rendering Dynamic Price Nimbus Ad [${error.message}]"
+        val errorMessage = { "Error Rendering Dynamic Price Nimbus Ad [${error.message}]" }
         interstitialRef.get()?.fullScreenContentCallback?.onAdFailedToShowFullScreenContent(
-            AdError(-7, errorMessage, Nimbus.sdkName)
+            AdError(-7, errorMessage(), Nimbus.sdkName)
         )
-        log(Log.WARN, errorMessage)
+        warningLog(errorMessage)
     }
 }
 
@@ -194,3 +194,6 @@ internal suspend inline fun NimbusAd.renderInline(container: ViewGroup): AdContr
             },
         )
     }
+
+internal fun debugLog(block: () -> String) = Log.d("DynamicPrice", block())
+internal fun warningLog(block: () -> String) = Log.w("DynamicPrice", block())

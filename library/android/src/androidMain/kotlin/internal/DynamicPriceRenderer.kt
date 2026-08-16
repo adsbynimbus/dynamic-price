@@ -84,8 +84,8 @@ internal class DynamicPriceRenderer(
                     AdEvent.CLICKED -> {
                         coroutineScope.launch(Dispatchers.IO) {
                             when (OneShotConnection(googleClickTracker).use { it.responseCode }) {
-                                in 200..399 -> log(Log.VERBOSE, "Fired Google click tracker")
-                                else -> log(Log.WARN, "Error firing Google click tracker")
+                                in 200..399 -> debugLog { "Fired Google click tracker" }
+                                else -> warningLog { "Error firing Google click tracker" }
                             }
                         }
                         adEventCallback?.onAdClicked()
@@ -185,3 +185,6 @@ internal class AdControllerCleanupListener(
 
     override fun onViewAttachedToWindow(v: View) { /* no-op */ }
 }
+
+internal fun debugLog(block: () -> String) = Log.d("DynamicPrice", block())
+internal fun warningLog(block: () -> String) = Log.w("DynamicPrice", block())
