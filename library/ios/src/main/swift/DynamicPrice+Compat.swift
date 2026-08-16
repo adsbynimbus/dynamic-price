@@ -117,7 +117,7 @@ extension InterstitialAd {
     @available(*, deprecated, message: "presentDynamicPrice is no longer used and will be removed in the next feature release. Use InterstitialAd.present instead")
     public func presentDynamicPrice(fromRootViewController: UIViewController?) {
         guard let controller = fromRootViewController ?? UIWindow.detectedRootViewController else {
-            Nimbus.shared.logger.log("\(#function) did not receive a rootViewController and it failed to detect rootViewController on its own", level: .error)
+            logger.error("\(#function): No UIViewController detected")
             return
         }
         present(from: controller)

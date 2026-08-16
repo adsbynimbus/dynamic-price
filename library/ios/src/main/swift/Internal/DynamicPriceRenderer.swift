@@ -8,6 +8,7 @@
 
 import Foundation
 import NimbusKit
+import os
 
 /// :nodoc:
 internal struct DynamicPriceRenderer: Codable {
@@ -73,6 +74,8 @@ internal struct DynamicPriceRenderer: Codable {
         }
     }
 }
+
+internal let logger = Logger(subsystem: "DynamicPrice", category: "rendering")
 
 extension UIWindow {
    static var detectedRootViewController: UIViewController? {

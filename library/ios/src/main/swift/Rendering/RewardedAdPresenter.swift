@@ -78,10 +78,7 @@ public final class NimbusRewardedAdPresenter {
             
             delegate?.didPresentAd()
         } catch {
-            Nimbus.shared.logger.log(
-                "DynamicPriceRenderer: Third-party demand rewarded error: \(error.localizedDescription)",
-                level: .error
-            )
+            logger.error("Rendering error: \(error.localizedDescription)")
         }
     }
     

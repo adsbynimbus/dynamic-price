@@ -21,8 +21,6 @@ internal class DynamicPriceEventHandler: NSObject, AdControllerDelegate {
     weak var controller: AdController?
     weak var listener: AdControllerDelegate?
 
-    private let logger = Nimbus.shared.logger
-
     init(
         cachedAd: DynamicPriceRenderer.CachedAd,
         googleClickTracker: URL,
@@ -64,7 +62,7 @@ internal class DynamicPriceEventHandler: NSObject, AdControllerDelegate {
 
     func didReceiveNimbusEvent(controller: AdController, event: NimbusEvent) {
         if event == .clicked {
-            Self.trackClick(url: googleClickTracker, logger: logger)
+            Self.trackClick(url: googleClickTracker)
             if let adView {
                 adView.delegate?.bannerViewDidRecordClick?(adView)
             }
@@ -98,18 +96,11 @@ internal class DynamicPriceEventHandler: NSObject, AdControllerDelegate {
         controller.destroy()
     }
 
-    static func trackClick(url: URL, logger: Logger) {
+    static func trackClick(url: URL) {
         URLSession.shared.dataTask(
             with: URLRequest(url: url).with(userAgent: Nimbus.shared.userAgentString)
         ) { _, _, error in
-            if let error {
-                logger.log(
-                    "Error firing Google click tracker: \(error.localizedDescription)",
-                    level: .debug
-                )
-            } else {
-                logger.log("Google click tracker fired successfully",level: .debug)
-            }
+            logger.debug("Google click tracker: \(error?.localizedDescription ?? "fired successfully")")
         }.resume()
     }
 }
