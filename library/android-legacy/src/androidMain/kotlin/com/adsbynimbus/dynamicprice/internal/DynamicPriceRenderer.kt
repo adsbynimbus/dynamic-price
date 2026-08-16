@@ -19,8 +19,6 @@ import androidx.core.view.isEmpty
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.adsbynimbus.*
-import com.adsbynimbus.internal.Platform
-import com.adsbynimbus.internal.application
 import com.adsbynimbus.render.*
 import com.adsbynimbus.request.NimbusResponse
 import com.google.android.gms.ads.AdActivity
@@ -70,7 +68,11 @@ internal class DynamicPriceRenderer(
     }
 }
 
-internal inline val currentActivity: Activity? get() = Platform.currentActivity.get()
+internal inline val application: Application
+    get() = com.adsbynimbus.internal.application
+
+internal inline val currentActivity: Activity?
+    get() = com.adsbynimbus.internal.Platform.currentActivity.get()
 
 internal inline fun Application.doOnNextActivity(crossinline block: (Activity) -> Unit) {
     registerActivityLifecycleCallbacks(
@@ -91,7 +93,7 @@ internal inline fun Application.doOnNextActivity(crossinline block: (Activity) -
 
 fun maybeClearInterstitial(activity: Activity? = currentActivity) {
     if (activity is AdActivity) activity.finishWithoutAnimation() else {
-        (activity?.application ?: application).doOnNextActivity {
+        application.doOnNextActivity {
             if (it is AdActivity) it.finishWithoutAnimation()
         }
     }

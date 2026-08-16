@@ -124,7 +124,7 @@ fun <T : InterstitialAd> T.handleEventForNimbus(
     listener: AdController.Listener? = null,
 ): NimbusResponse? = when (name) {
     "na_render" -> DynamicPriceRenderer.render(info) { nimbusAd, clickEvent ->
-        currentActivity!!.application.loadBlockingAd(nimbusAd)!!.apply {
+        application.loadBlockingAd(nimbusAd)!!.apply {
             listeners.add(
                 DynamicPriceEventHandler(
                     controller = this,

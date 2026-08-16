@@ -6,7 +6,6 @@ import androidx.core.view.*
 import com.adsbynimbus.Nimbus
 import com.adsbynimbus.NimbusAd
 import com.adsbynimbus.dynamicprice.internal.*
-import com.adsbynimbus.internal.Platform
 import com.adsbynimbus.render.*
 import com.adsbynimbus.render.Renderer.Companion.loadBlockingAd
 import com.adsbynimbus.request.NimbusResponse
