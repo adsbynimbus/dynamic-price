@@ -13,7 +13,7 @@ public protocol Mapping {
 }
 
 /// A mapping using a linear step function to generate the target dynamic price value
-public struct LinearPriceGranularity: Comparable {
+public struct LinearPriceGranularity: Comparable, Sendable {
 
     /// The minimum bid in cents
     public let min: Int
@@ -45,7 +45,7 @@ public struct LinearPriceGranularity: Comparable {
 }
 
 /// A mapping composed of multiple LinearPriceGranularities in ascending order
-public struct LinearPriceMapping: Mapping {
+public struct LinearPriceMapping: Mapping, Sendable {
 
     /// The granularities used in this mapping
     public let granularities: [LinearPriceGranularity]

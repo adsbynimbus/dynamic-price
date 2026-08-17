@@ -1,4 +1,4 @@
-@preconcurrency import DynamicPrice
+import DynamicPrice
 @preconcurrency import NimbusKit
 import SwiftUI
 

@@ -1,5 +1,5 @@
-@preconcurrency import GoogleMobileAds
-@preconcurrency import DynamicPrice
+import GoogleMobileAds
+import DynamicPrice
 @preconcurrency import NimbusKit
 import SwiftUI
 
