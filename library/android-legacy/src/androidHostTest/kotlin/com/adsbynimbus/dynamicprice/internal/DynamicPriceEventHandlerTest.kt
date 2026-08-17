@@ -2,10 +2,13 @@
 
 package com.adsbynimbus.dynamicprice.internal
 
+import android.app.Application
 import android.os.SystemClock
+import android.util.Log
 import android.view.View
 import com.adsbynimbus.NimbusError
 import com.adsbynimbus.internal.Platform
+import com.adsbynimbus.internal.application
 import com.adsbynimbus.render.AdController
 import com.adsbynimbus.render.AdEvent
 import com.google.android.gms.ads.BaseAdView
@@ -19,6 +22,8 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 import java.lang.ref.WeakReference
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -40,6 +45,26 @@ class DynamicPriceEventHandlerTest {
     var interstitialAd: InterstitialAd = mockk(relaxed = true)
     val testDispatcher = StandardTestDispatcher()
     val testScope = TestScope(testDispatcher)
+
+    companion object {
+        val testApplication: Application = mockk(relaxed = true)
+
+        @BeforeAll @JvmStatic fun beforeSuite() {
+            mockkStatic(Log::println, SystemClock::elapsedRealtime)
+            every { Log.println(any(), any(), any()) } returns 0
+            every { SystemClock.elapsedRealtime() } returns 0
+            mockkStatic(::application)
+            every { application } returns testApplication
+            mockkObject(Platform)
+            every { Platform.currentActivity } returns WeakReference(mockk(relaxed = true))
+        }
+
+        @AfterAll @JvmStatic fun afterSuite() {
+            unmockkStatic(Log::println, SystemClock::elapsedRealtime)
+            unmockkStatic(::application)
+            unmockkObject(Platform)
+        }
+    }
 
     @BeforeTest
     fun setUp() {
@@ -83,14 +108,9 @@ class DynamicPriceEventHandlerTest {
             coroutineScope = this,
         )
 
-        mockkStatic(::maybeClearInterstitial, SystemClock::elapsedRealtime) {
-            every { SystemClock.elapsedRealtime() } returns 0
-            every { maybeClearInterstitial(any()) } just runs
-            mockkObject(Platform) {
-                every { Platform.currentActivity } returns WeakReference(mockk(relaxed = true))
-                handler.onAdEvent(AdEvent.DESTROYED)
-                advanceUntilIdle()
-            }
+        mockkStatic(::maybeClearInterstitial) {
+            handler.onAdEvent(AdEvent.DESTROYED)
+            advanceUntilIdle()
             verify { maybeClearInterstitial(any()) }
         }
 

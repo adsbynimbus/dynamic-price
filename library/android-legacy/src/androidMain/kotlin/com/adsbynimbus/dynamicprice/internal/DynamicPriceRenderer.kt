@@ -219,5 +219,5 @@ internal suspend inline fun NimbusAd.renderInline(container: ViewGroup): AdContr
         )
     }
 
-internal fun debugLog(block: () -> String) = Log.d("DynamicPrice", block())
-internal fun warningLog(block: () -> String) = Log.w("DynamicPrice", block())
+internal fun debugLog(block: () -> String) { Log.println(Log.DEBUG, "DynamicPrice", block()) }
+internal fun warningLog(block: () -> String) { Log.println(Log.WARN, "DynamicPrice", block()) }

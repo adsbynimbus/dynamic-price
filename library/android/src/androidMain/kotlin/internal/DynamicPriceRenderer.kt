@@ -210,5 +210,5 @@ internal class AdControllerCleanupListener(
     override fun onViewAttachedToWindow(v: View) { /* no-op */ }
 }
 
-internal fun debugLog(block: () -> String) = Log.d("DynamicPrice", block())
-internal fun warningLog(block: () -> String) = Log.w("DynamicPrice", block())
+internal fun debugLog(block: () -> String) { Log.println(Log.DEBUG, "DynamicPrice", block()) }
+internal fun warningLog(block: () -> String) { Log.println(Log.WARN, "DynamicPrice", block()) }
