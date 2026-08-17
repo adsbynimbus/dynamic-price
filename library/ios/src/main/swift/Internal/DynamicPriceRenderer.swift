@@ -8,6 +8,7 @@
 
 import Foundation
 import NimbusKit
+import os
 
 /// :nodoc:
 internal struct DynamicPriceRenderer: Codable {
@@ -71,5 +72,25 @@ internal struct DynamicPriceRenderer: Codable {
                 Self.adCache.removeObject(forKey: id as NSString)
             }
         }
+    }
+}
+
+internal let logger = Logger(subsystem: "DynamicPrice", category: "rendering")
+
+extension UIWindow {
+   static var detectedRootViewController: UIViewController? {
+       (UIApplication.shared.connectedScenes.first {
+           $0.activationState == .foregroundActive
+       } as? UIWindowScene)?.keyWindow?.rootViewController?.topMostViewController
+   }
+}
+
+private extension UIViewController {
+    var topMostViewController: UIViewController {
+        if let presented = self.presentedViewController {
+            return presented.topMostViewController
+        }
+
+        return self
     }
 }

@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import com.adsbynimbus.NimbusError
 import com.adsbynimbus.dynamicprice.*
-import com.adsbynimbus.internal.*
 import com.adsbynimbus.render.*
 import com.adsbynimbus.render.Renderer.Companion.loadBlockingAd
 import com.adsbynimbus.request.NimbusResponse
@@ -36,13 +35,7 @@ internal class DynamicPriceRewardedAd(
             (googleAd.dynamicPriceAd?.adController ?: activity.createController())?.run {
                 rewardListener = onUserEarnedRewardListener
                 start()
-            } ?: googleAd.adEventCallback?.onAdFailedToShowFullScreenContent(
-                FullScreenContentError(
-                    code = MEDIATION_SHOW_ERROR,
-                    message = "Nimbus controller failed to show",
-                    mediationAdError = null,
-                )
-            )
+            } ?: googleAd.adEventCallback?.onAdFailedToShowFullScreenContent(failToShowError)
         }
     }
 

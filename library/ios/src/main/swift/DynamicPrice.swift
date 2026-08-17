@@ -37,7 +37,7 @@ extension BannerView {
         guard name == "na_render" else { return nil }
         return DynamicPriceRenderer.render(data: info) { nimbusAd, clickTracker in
             guard let vc =  self.rootViewController ?? viewController ??
-                    Nimbus.detectedRootViewController else {
+                    UIWindow.detectedRootViewController else {
                 self.delegate?.bannerView?(self, didFailToReceiveAdWithError:
                     NimbusRenderError.adRenderingFailed(message: "No UIViewController detected"))
                 return
@@ -107,7 +107,7 @@ public extension InterstitialAd {
                 )
             }
         case "na_show":
-            guard let viewController = viewController ?? Nimbus.detectedRootViewController else {
+            guard let viewController = viewController ?? UIWindow.detectedRootViewController else {
                 fullScreenContentDelegate?.ad?(self, didFailToPresentFullScreenContentWithError:
                     NimbusRenderError.adRenderingFailed(message: "No UIViewController detected"))
                 break

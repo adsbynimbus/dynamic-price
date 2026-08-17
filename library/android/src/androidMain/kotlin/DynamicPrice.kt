@@ -6,7 +6,6 @@ import androidx.core.view.*
 import com.adsbynimbus.Nimbus
 import com.adsbynimbus.NimbusAd
 import com.adsbynimbus.dynamicprice.internal.*
-import com.adsbynimbus.internal.Platform
 import com.adsbynimbus.render.*
 import com.adsbynimbus.render.Renderer.Companion.loadBlockingAd
 import com.adsbynimbus.request.NimbusResponse
@@ -52,7 +51,7 @@ fun BannerAd.handleEventForNimbus(
     activity: Activity? = null,
 ): NimbusResponse? = when(name) {
     "na_render" -> DynamicPriceRenderer.render(this, data, listener) { nimbusAd ->
-        val context = (activity?.takeUnless { it.isDestroyed } ?: Platform.currentActivity.get())
+        val context = (activity?.takeUnless { it.isDestroyed } ?: currentActivity)
         @Suppress("Deprecation") // Revisit this on next SDK update
         val root = getView(context!!)
         val container = root.targetView
@@ -95,20 +94,14 @@ fun InterstitialAd.handleEventForNimbus(
     activity: Activity? = null,
 ): NimbusResponse? = when (name) {
     "na_render" -> DynamicPriceRenderer.render(this, data, listener) { nimbusAd ->
-        val context = (activity?.takeUnless { it.isDestroyed } ?: Platform.currentActivity.get())
+        val context = (activity?.takeUnless { it.isDestroyed } ?: currentActivity)
         context!!.loadBlockingAd(nimbusAd)!!
     }
     "na_show" -> with(DynamicPriceRenderer) {
         renderScope.launch(Dispatchers.Main) {
             dynamicPriceAd?.adController?.start() ?: run {
-                adEventCallback?.onAdFailedToShowFullScreenContent(
-                    FullScreenContentError(
-                        code = MEDIATION_SHOW_ERROR,
-                        message = "Nimbus controller failed to show",
-                        mediationAdError = null,
-                    ),
-                )
-                DynamicPriceRenderer.maybeClearInterstitial(activity)
+                adEventCallback?.onAdFailedToShowFullScreenContent(failToShowError)
+                maybeClearInterstitial(activity)
             }
         }
         null
@@ -260,3 +253,9 @@ internal fun BaseAdRequestBuilder<*>.applyTargeting(nimbusAd: NimbusResponse, ta
     putCustomTargeting("na_size", "${nimbusAd.bid.width}x${nimbusAd.bid.height}")
     putCustomTargeting("na_type", if (isVideo) "video" else "static")
 }
+
+internal inline val failToShowError get() = FullScreenContentError(
+    code = MEDIATION_SHOW_ERROR,
+    message = "${Nimbus.sdkName} controller failed to show",
+    mediationAdError = null,
+)

@@ -11,12 +11,10 @@ import com.adsbynimbus.internal.Platform
 import com.adsbynimbus.internal.application
 import com.adsbynimbus.render.AdController
 import com.adsbynimbus.render.AdEvent
-import com.google.android.gms.ads.BaseAdView
-import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.libraries.ads.mobile.sdk.banner.BannerAd
+import com.google.android.libraries.ads.mobile.sdk.interstitial.InterstitialAd
 import io.mockk.*
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -28,7 +26,6 @@ import java.lang.ref.WeakReference
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 /**
  * Unit tests for [DynamicPriceEventHandler].
@@ -40,9 +37,9 @@ import kotlin.test.assertEquals
 class DynamicPriceEventHandlerTest {
 
     var controller: AdController = mockk(relaxed = true)
+    val bannerAd: BannerAd = mockk(relaxed = true)
+    val interstitialAd: InterstitialAd = mockk(relaxed = true)
     var view: View = mockk(relaxed = true)
-    var adView: BaseAdView = mockk(relaxed = true)
-    var interstitialAd: InterstitialAd = mockk(relaxed = true)
     val testDispatcher = StandardTestDispatcher()
     val testScope = TestScope(testDispatcher)
 
@@ -68,7 +65,7 @@ class DynamicPriceEventHandlerTest {
 
     @BeforeTest
     fun setUp() {
-        clearMocks(controller, view, adView, interstitialAd)
+        clearMocks(controller, view, bannerAd, interstitialAd)
 
         every { controller.view } returns view
         every { view.post(any()) } answers {
@@ -84,27 +81,32 @@ class DynamicPriceEventHandlerTest {
 
     @Test
     fun `onAdEvent CLICKED should trigger click tracker and callbacks`() = testScope.runTest {
-        val handler = DynamicPriceEventHandler(
-            controller = controller,
+        arrayOf(DynamicPriceEventHandler(
+            googleAd = bannerAd,
             googleClickTracker = "https://test.com/click",
-            adViewRef = WeakReference(adView),
-            interstitialRef = WeakReference(interstitialAd),
+            nimbusAd = controller,
             coroutineScope = this,
-        )
+        ), DynamicPriceEventHandler(
+            googleAd = interstitialAd,
+            googleClickTracker = "https://test.com/click",
+            nimbusAd = controller,
+            coroutineScope = this,
+        )).forEach {
+            it.onAdEvent(AdEvent.CLICKED)
+        }
 
-        handler.onAdEvent(AdEvent.CLICKED)
         advanceUntilIdle()
 
-        verify { adView.adListener.onAdClicked() }
-        verify { interstitialAd.fullScreenContentCallback?.onAdClicked() }
+        verify { bannerAd.adEventCallback?.onAdClicked() }
+        verify { interstitialAd.adEventCallback?.onAdClicked() }
     }
 
     @Test
     fun `onAdEvent DESTROYED for interstitial should NOT destroy controller`() = testScope.runTest {
         val handler = DynamicPriceEventHandler(
-            controller = controller,
+            googleAd = interstitialAd,
             googleClickTracker = "",
-            interstitialRef = WeakReference(interstitialAd),
+            nimbusAd = controller,
             coroutineScope = this,
         )
 
@@ -118,37 +120,11 @@ class DynamicPriceEventHandlerTest {
     }
 
     @Test
-    fun `onAdEvent DESTROYED for inline ads should cancel job and remove listener`() = testScope.runTest {
-        val handler = DynamicPriceEventHandler(
-            controller = controller,
-            googleClickTracker = "",
-            adViewRef = WeakReference(adView),
-            coroutineScope = this,
-        )
-
-        val exception = slot<CancellationException>()
-        val mockJob = mockk<Job>(relaxed = true) {
-            every { cancel(capture(exception)) } just runs
-        }
-        handler.lifecycleJob = mockJob
-
-        handler.onAdEvent(AdEvent.DESTROYED)
-        advanceUntilIdle()
-
-        assertEquals("na", exception.captured.message)
-        verify {
-            mockJob.cancel(eq(exception.captured))
-            view.removeOnAttachStateChangeListener(eq(handler))
-        }
-        verify(exactly = 0) { controller.destroy() }
-    }
-
-    @Test
     fun `onError should destroy controller and call fail callback on interstitial`() = testScope.runTest {
         val handler = DynamicPriceEventHandler(
-            controller = controller,
+            googleAd = interstitialAd,
             googleClickTracker = "",
-            interstitialRef = WeakReference(interstitialAd),
+            nimbusAd = controller,
             coroutineScope = this,
         )
 
@@ -156,7 +132,7 @@ class DynamicPriceEventHandlerTest {
 
         verify {
             controller.destroy()
-            interstitialAd.fullScreenContentCallback?.onAdFailedToShowFullScreenContent(any())
+            interstitialAd.adEventCallback?.onAdFailedToShowFullScreenContent(any())
         }
     }
 }

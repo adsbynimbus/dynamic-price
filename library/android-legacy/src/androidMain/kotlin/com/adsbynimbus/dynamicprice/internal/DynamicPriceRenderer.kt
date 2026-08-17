@@ -4,7 +4,9 @@ package com.adsbynimbus.dynamicprice.internal
 
 import android.app.Activity
 import android.app.Activity.OVERRIDE_TRANSITION_CLOSE
+import android.app.Application
 import android.os.Build
+import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.webkit.WebView
@@ -17,7 +19,6 @@ import androidx.core.view.isEmpty
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.adsbynimbus.*
-import com.adsbynimbus.internal.*
 import com.adsbynimbus.render.*
 import com.adsbynimbus.request.NimbusResponse
 import com.google.android.gms.ads.AdActivity
@@ -67,9 +68,32 @@ internal class DynamicPriceRenderer(
     }
 }
 
-fun maybeClearInterstitial(activity: Activity? = Platform.currentActivity.get()) {
+internal inline val application: Application
+    get() = com.adsbynimbus.internal.application
+
+internal inline val currentActivity: Activity?
+    get() = com.adsbynimbus.internal.Platform.currentActivity.get()
+
+internal inline fun Application.doOnNextActivity(crossinline block: (Activity) -> Unit) {
+    registerActivityLifecycleCallbacks(
+        object : Application.ActivityLifecycleCallbacks {
+            override fun onActivityResumed(activity: Activity) {
+                unregisterActivityLifecycleCallbacks(this)
+                block(activity)
+            }
+            override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
+            override fun onActivityStarted(activity: Activity) = Unit
+            override fun onActivityPaused(activity: Activity) = Unit
+            override fun onActivityStopped(activity: Activity) = Unit
+            override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
+            override fun onActivityDestroyed(activity: Activity) = Unit
+        },
+    )
+}
+
+fun maybeClearInterstitial(activity: Activity? = currentActivity) {
     if (activity is AdActivity) activity.finishWithoutAnimation() else {
-        Platform.doOnNextActivity {
+        application.doOnNextActivity {
             if (it is AdActivity) it.finishWithoutAnimation()
         }
     }
@@ -148,8 +172,8 @@ internal class DynamicPriceEventHandler(
             AdEvent.CLICKED -> {
                 coroutineScope.launch(Dispatchers.IO) {
                     when (OneShotConnection(googleClickTracker).use { it.responseCode }) {
-                        in 200..399 -> log(Log.VERBOSE, "Fired Google click tracker")
-                        else -> log(Log.WARN, "Error firing Google click tracker")
+                        in 200..399 -> debugLog { "Fired Google click tracker" }
+                        else -> warningLog { "Error firing Google click tracker" }
                     }
                 }
                 adViewRef.get()?.adListener?.onAdClicked()
@@ -165,11 +189,11 @@ internal class DynamicPriceEventHandler(
 
     override fun onError(error: NimbusError) {
         controller.destroy()
-        val errorMessage = "Error Rendering Dynamic Price Nimbus Ad [${error.message}]"
+        val errorMessage = { "Error Rendering Dynamic Price Nimbus Ad [${error.message}]" }
         interstitialRef.get()?.fullScreenContentCallback?.onAdFailedToShowFullScreenContent(
-            AdError(-7, errorMessage, Nimbus.sdkName)
+            AdError(-7, errorMessage(), Nimbus.sdkName)
         )
-        log(Log.WARN, errorMessage)
+        warningLog(errorMessage)
     }
 }
 
@@ -194,3 +218,6 @@ internal suspend inline fun NimbusAd.renderInline(container: ViewGroup): AdContr
             },
         )
     }
+
+internal fun debugLog(block: () -> String) { Log.println(Log.DEBUG, "DynamicPrice", block()) }
+internal fun warningLog(block: () -> String) { Log.println(Log.WARN, "DynamicPrice", block()) }

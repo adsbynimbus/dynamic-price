@@ -5,12 +5,7 @@ import androidx.core.os.BundleCompat.getSerializable
 import androidx.core.view.doOnLayout
 import androidx.core.view.updateLayoutParams
 import com.adsbynimbus.Nimbus
-import com.adsbynimbus.dynamicprice.internal.DynamicPriceEventHandler
-import com.adsbynimbus.dynamicprice.internal.DynamicPriceRenderer
-import com.adsbynimbus.dynamicprice.internal.maybeClearInterstitial
-import com.adsbynimbus.dynamicprice.internal.renderInline
-import com.adsbynimbus.dynamicprice.internal.targetView
-import com.adsbynimbus.internal.Platform
+import com.adsbynimbus.dynamicprice.internal.*
 import com.adsbynimbus.render.AdController
 import com.adsbynimbus.render.Renderer.Companion.loadBlockingAd
 import com.adsbynimbus.request.NimbusResponse
@@ -106,7 +101,7 @@ fun AdManagerAdView.handleEventForNimbus(
  *         override fun onAdLoaded(interstitialAd: AdManagerInterstitialAd) {
  *             interstitialAd.setAppEventListener { s, s2 ->
  *                 handleEventForNimbus(name = s, info = s2)?.let { winningNimbusResponse {
- *            
+ *
  *                 }
  *                 TODO("Run other app event code after handleEventForNimbus")
  *             }
@@ -129,7 +124,7 @@ fun <T : InterstitialAd> T.handleEventForNimbus(
     listener: AdController.Listener? = null,
 ): NimbusResponse? = when (name) {
     "na_render" -> DynamicPriceRenderer.render(info) { nimbusAd, clickEvent ->
-        Platform.currentActivity.get()!!.application.loadBlockingAd(nimbusAd)!!.apply {
+        application.loadBlockingAd(nimbusAd)!!.apply {
             listeners.add(
                 DynamicPriceEventHandler(
                     controller = this,
