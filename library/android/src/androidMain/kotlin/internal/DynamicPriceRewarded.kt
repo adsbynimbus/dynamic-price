@@ -35,13 +35,7 @@ internal class DynamicPriceRewardedAd(
             (googleAd.dynamicPriceAd?.adController ?: activity.createController())?.run {
                 rewardListener = onUserEarnedRewardListener
                 start()
-            } ?: googleAd.adEventCallback?.onAdFailedToShowFullScreenContent(
-                FullScreenContentError(
-                    code = MEDIATION_SHOW_ERROR,
-                    message = "Nimbus controller failed to show",
-                    mediationAdError = null,
-                )
-            )
+            } ?: googleAd.adEventCallback?.onAdFailedToShowFullScreenContent(failToShowError)
         }
     }
 

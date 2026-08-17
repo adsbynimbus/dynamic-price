@@ -31,6 +31,7 @@ import java.net.*
 import kotlin.coroutines.*
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+import kotlin.use
 
 @Serializable
 internal class DynamicPriceRenderer(
@@ -50,7 +51,11 @@ internal class DynamicPriceRenderer(
                 renderScope.launch(Dispatchers.Main) {
                     runCatching {
                         val controller = render(response).apply {
-                            attachDynamicPriceListener(ad, event.clickTracker, renderScope)
+                            listeners.add(DynamicPriceEventHandler(
+                                googleAd = ad,
+                                googleClickTracker = event.clickTracker,
+                                nimbusAd = this,
+                            ))
                             publisherListener?.let { listeners.add(it) }
                         }
                         ad.dynamicPriceAd = DynamicPriceAd(controller)
@@ -66,43 +71,6 @@ internal class DynamicPriceRenderer(
                 }
             }
         }
-
-        fun AdController.attachDynamicPriceListener(
-            googleAd: Ad,
-            googleClickTracker: String,
-            coroutineScope: CoroutineScope,
-        ) = listeners.add(object : AdController.Listener {
-
-            val adEventCallback: AdEventCallback?
-                get() = when(googleAd) {
-                    is BannerAd -> googleAd.adEventCallback
-                    is InterstitialAd -> googleAd.adEventCallback
-                    else -> null
-                }
-
-            override fun onAdEvent(adEvent: AdEvent) {
-                when (adEvent) {
-                    AdEvent.CLICKED -> {
-                        coroutineScope.launch(Dispatchers.IO) {
-                            when (OneShotConnection(googleClickTracker).use { it.responseCode }) {
-                                in 200..399 -> debugLog { "Fired Google click tracker" }
-                                else -> warningLog { "Error firing Google click tracker" }
-                            }
-                        }
-                        adEventCallback?.onAdClicked()
-                    }
-                    AdEvent.DESTROYED -> {
-                        googleAd.dynamicPriceAd = null
-                        if (googleAd is InterstitialAd) maybeClearInterstitial()
-                    }
-                    else -> return
-                }
-            }
-
-            override fun onError(error: NimbusError) {
-                destroy()
-            }
-        })
 
         val adCache = LruCache<String, NimbusResponse>(10)
 
@@ -169,6 +137,48 @@ internal value class OneShotConnection(val connection: HttpURLConnection): AutoC
     override fun close() { connection.disconnect() }
 
     inline val responseCode: Int get() = runCatching { connection.responseCode }.getOrDefault(-1)
+}
+
+internal class DynamicPriceEventHandler(
+    googleAd: Ad,
+    val googleClickTracker: String,
+    val nimbusAd: AdController,
+    val coroutineScope: CoroutineScope = DynamicPriceRenderer.renderScope,
+) : AdController.Listener {
+
+    val isInterstitial = googleAd is InterstitialAd
+    val googleAdRef = WeakReference(googleAd)
+
+    val adEventCallback: AdEventCallback?
+        get() = when(val ad = googleAdRef.get()) {
+            is BannerAd -> ad.adEventCallback
+            is InterstitialAd -> ad.adEventCallback
+            else -> null
+        }
+
+    override fun onAdEvent(adEvent: AdEvent) {
+        when (adEvent) {
+            AdEvent.CLICKED -> {
+                coroutineScope.launch(Dispatchers.IO) {
+                    when (OneShotConnection(googleClickTracker).use { it.responseCode }) {
+                        in 200..399 -> debugLog { "Fired Google click tracker" }
+                        else -> warningLog { "Error firing Google click tracker" }
+                    }
+                }
+                adEventCallback?.onAdClicked()
+            }
+            AdEvent.DESTROYED -> {
+                googleAdRef.get()?.dynamicPriceAd = null
+                if (isInterstitial) maybeClearInterstitial()
+            }
+            else -> return
+        }
+    }
+
+    override fun onError(error: NimbusError) {
+        nimbusAd.destroy()
+        if (isInterstitial) adEventCallback?.onAdFailedToShowFullScreenContent(failToShowError)
+    }
 }
 
 internal inline val View.targetView: ViewGroup
