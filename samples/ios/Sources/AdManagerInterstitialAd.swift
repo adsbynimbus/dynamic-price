@@ -1,6 +1,6 @@
-@preconcurrency import GoogleMobileAds
-@preconcurrency import DynamicPrice
-@preconcurrency import NimbusKit
+import GoogleMobileAds
+import DynamicPrice
+import NimbusKit
 import SwiftUI
 
 @MainActor
@@ -8,10 +8,9 @@ func loadDynamicPriceInterstitialAd(
     adUnitId: String,
     adRequest: AdManagerRequest,
     delegate: FullScreenContentDelegate,
-    nimbusRequest: NimbusRequest,
-) async throws -> InterstitialAd {
-    let nimbusRequestManager = NimbusRequestManager()
-    let nimbusResponse = try? await nimbusRequestManager.makeRequest(nimbusRequest)
+    nimbusRequest: NimbusKit.InterstitialAd,
+) async throws -> GoogleMobileAds.InterstitialAd {
+    let nimbusResponse = try? await nimbusRequest.fetch().response
     // Apply Key-Values to AdManagerRequest
     nimbusResponse?.applyDynamicPrice(adRequest, mapping: DynamicPriceApp.mapping)
 
@@ -22,7 +21,11 @@ func loadDynamicPriceInterstitialAd(
 }
 
 extension AdManagerInterstitialAd: @retroactive AppEventDelegate {
-    public func adView(_ interstitialAd: InterstitialAd, didReceiveAppEvent name: String, with info: String?) {
+    public func adView(
+        _ interstitialAd: GoogleMobileAds.InterstitialAd,
+        didReceiveAppEvent name: String,
+        with info: String?,
+    ) {
         handleEventForNimbus(name: name, info: info)
     }
 }
@@ -33,7 +36,7 @@ final class InterstitialAdViewModel: NSObject, FullScreenContentDelegate {
     var isLoading = false
     var didShow = false
     
-    private var interstitialAd: InterstitialAd?
+    private var interstitialAd: GoogleMobileAds.InterstitialAd?
 
     @MainActor
     func load() async {
@@ -43,7 +46,7 @@ final class InterstitialAdViewModel: NSObject, FullScreenContentDelegate {
             adUnitId: DynamicPriceApp.adUnitId,
             adRequest: AdManagerRequest(),
             delegate: self,
-            nimbusRequest: .forInterstitialAd(position: adType.id),
+            nimbusRequest: Nimbus.interstitialAd(position: adType.id),
         )
         isLoading = false 
     }

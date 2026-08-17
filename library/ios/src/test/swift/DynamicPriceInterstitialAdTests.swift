@@ -14,72 +14,53 @@ import Testing
 
 @Suite struct DynamicPriceInterstitialAdTests {
 
-    let vc = UIViewController()
+    let vc: UIViewController
 
+    @MainActor
     init() async throws {
         await NimbusTestEnvironment.shared.initIfNeeded()
         DynamicPriceRenderer["interstitialAuction1"] = .init(createNimbusAd())
+        vc = .init()
     }
 
     @Test func `InterstitailAd.handleEventForNimbus returns false when name != na_render`() async {
         let interstitialAd = InterstitialAd()
 
-        #expect(interstitialAd.handleEventForNimbus(name: "nonsense", info: nil) == false)
+        #expect(interstitialAd.handleEventForNimbus(name: "nonsense", info: nil) == nil)
     }
 
     @Test func `InterstitialAd.handleEventForNimbus returns true when name == na_render`() async {
         let interstitial = InterstitialAd()
 
-        var handled = interstitial.handleEventForNimbus(
+        let handled = interstitial.handleEventForNimbus(
             name: "na_render",
-            info: "{\"ga_click\": \"https://adsbynimbus.com/lkjl32423\"}"
+            info: renderInfo.json
         )
-
-        #expect(handled == true)
-
-        handled = interstitial.handleEventForNimbus(
-            name: "na_render",
-            info: "{\"na_id\": \"asdjfkl23-234dsf\"}"
-        )
-        #expect(handled == true)
+        #expect(handled != nil)
     }
 
     @Test func `Client listener receives Nimbus events`() async throws {
-        let clientListener = MockAdControllerDelegate()
+        var onEventListener: ((AdEvent) -> Void)?
         let interstitialAd = AdManagerInterstitialAd()
 
         interstitialAd.handleEventForNimbus(
             name: "na_render",
             info: renderInfo.json,
-            listener: clientListener,
+            onEvent: {
+                onEventListener?($0)
+            }
         )
-
-        #expect(interstitialAd.dynamicPriceAd?.listener === clientListener)
 
         _ = await MainActor.run {
             interstitialAd.handleEventForNimbus(name: "na_show", info: nil, viewController: vc)
         }
 
         await confirmation { confirmation in
-            clientListener.onDidReceiveNimbusEvent = { controller, event in
+            onEventListener = { _ in
                 confirmation.confirm()
             }
 
-            interstitialAd.dynamicPriceAd!.didReceiveNimbusEvent(
-                controller: interstitialAd.dynamicPriceAd!.controller!,
-                event: .clicked,
-            )
-        }
-
-        await confirmation { confirmation in
-            clientListener.onDidReceiveNimbusError = { controller, event in
-                confirmation.confirm()
-            }
-
-            interstitialAd.dynamicPriceAd!.didReceiveNimbusError(
-                controller: interstitialAd.dynamicPriceAd!.controller!,
-                error: NimbusRenderError.alreadyDestroyed,
-            )
+            interstitialAd.dynamicPriceAd!.eventHandler(.clicked)
         }
     }
 
@@ -103,10 +84,7 @@ import Testing
                 confirmation.confirm()
             }
 
-            interstitialAd.dynamicPriceAd?.didReceiveNimbusEvent(
-                controller: interstitialAd.dynamicPriceAd!.controller!,
-                event: .clicked,
-            )
+            interstitialAd.dynamicPriceAd?.eventHandler(.clicked)
         }
     }
 

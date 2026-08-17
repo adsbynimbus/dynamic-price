@@ -1,5 +1,5 @@
-@preconcurrency import DynamicPrice
-@preconcurrency import NimbusKit
+import DynamicPrice
+import NimbusKit
 import SwiftUI
 
 extension DynamicPriceApp {
@@ -19,37 +19,6 @@ extension DynamicPriceApp {
         LinearPriceGranularity(min: 800, max: 2000, step: 50),
         LinearPriceGranularity(min: 2000, max: 3500, step: 100),
     )
-}
-
-extension NimbusRequestManager {
-    final class RequestListener: NimbusRequestManagerDelegate, Sendable {
-        nonisolated(unsafe) var continuation: UnsafeContinuation<NimbusAd, Error>?
-
-        func didCompleteNimbusRequest(request: NimbusRequest, ad: NimbusAd) {
-            continuation?.resume(returning: ad)
-            continuation = nil
-        }
-
-        func didFailNimbusRequest(request: NimbusRequest, error: NimbusError) {
-            continuation?.resume(throwing: error)
-            continuation = nil
-        }
-    }
-    
-    func makeRequest(_ request: NimbusRequest) async throws -> NimbusAd {
-        let listener = RequestListener()
-        delegate = listener
-        let response = try await withTaskCancellationHandler {
-            try await withUnsafeThrowingContinuation { continuation in
-                listener.continuation = continuation
-                performRequest(request: request)
-            }
-        } onCancel: {
-            listener.continuation?.resume(throwing: CancellationError())
-            listener.continuation = nil
-        }
-        return response
-    }
 }
 
 extension Task where Success == Never, Failure == Never {

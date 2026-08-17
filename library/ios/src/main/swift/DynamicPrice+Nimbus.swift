@@ -14,7 +14,7 @@ public extension NimbusRequest {
     ///
     /// - Parameter inArticle: A Boolean value indicating whether the video is placed inside an article.
     ///   If `true`, uses `.inArticle` placement; otherwise, uses `.inFeed`.
-    func addInlineVideo(inArticle: Bool = false) {
+    /*func addInlineVideo(inArticle: Bool = false) {
         guard let banner = impressions.first?.banner, banner.height > 100 else { return }
         /*
            .interstitial() sets all the expected video parameters,the fullscreen indication is
@@ -23,5 +23,5 @@ public extension NimbusRequest {
         impressions[0].video = .interstitial()
         impressions[0].video?.position = .unknown
         impressions[0].video?.placementType = inArticle ? .inArticle : .inFeed
-    }
+    } */
 }

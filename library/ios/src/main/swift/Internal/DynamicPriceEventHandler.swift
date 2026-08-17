@@ -8,29 +8,64 @@
 
 import GoogleMobileAds
 import NimbusKit
+import os
 
-internal class DynamicPriceEventHandler: NSObject, AdControllerDelegate {
+internal class DynamicPriceEventHandler: NSObject {
 
     let googleClickTracker: URL
     let isInterstitial: Bool
     var cachedAd: DynamicPriceRenderer.CachedAd?
-    var interstitialStrongRef: AdController? = nil
+    var ad: Ad?
+    var onEvent: ((AdEvent) -> Void)?
     weak var adView: BannerView?
-    weak var interstitial: InterstitialAd?
+    weak var interstitial: GoogleMobileAds.InterstitialAd?
     weak var presentingController: UIViewController?
-    weak var controller: AdController?
-    weak var listener: AdControllerDelegate?
+
+    lazy var errorHandler: (NimbusError) -> Void = {
+        if let adView = self.adView {
+            adView.delegate?.bannerView?(adView, didFailToReceiveAdWithError: $0)
+        }
+
+        if let interstitial = self.interstitial {
+            interstitial.fullScreenContentDelegate?
+                .ad?(interstitial, didFailToPresentFullScreenContentWithError: $0)
+        }
+
+        self.ad?.destroy()
+    }
+    lazy var eventHandler: (AdEvent) -> Void = {
+        if $0 == .clicked {
+            Self.trackClick(url: self.googleClickTracker)
+            if let adView = self.adView {
+                adView.delegate?.bannerViewDidRecordClick?(adView)
+            }
+
+            if let interstitial = self.interstitial {
+                interstitial.fullScreenContentDelegate?.adDidRecordClick?(interstitial)
+            }
+        } else if $0 == .destroyed {
+            if self.isInterstitial {
+                self.interstitial?.dynamicPriceAd = nil
+                Task { @MainActor in
+                    self.presentingController?.dismiss(animated: false)
+                }
+            }
+            self.ad = nil
+            self.onEvent = nil
+        }
+        self.onEvent?($0)
+    }
 
     init(
         cachedAd: DynamicPriceRenderer.CachedAd,
         googleClickTracker: URL,
-        listener: AdControllerDelegate?,
+        onEvent: ((AdEvent) -> Void)?,
         adView: BannerView? = nil,
-        interstitial: InterstitialAd? = nil,
+        interstitial: GoogleMobileAds.InterstitialAd? = nil,
     ) {
         self.cachedAd = cachedAd
         self.googleClickTracker = googleClickTracker
-        self.listener = listener
+        self.onEvent = onEvent
         self.adView = adView
         self.interstitial = interstitial
         self.isInterstitial = interstitial != nil
@@ -38,67 +73,29 @@ internal class DynamicPriceEventHandler: NSObject, AdControllerDelegate {
     }
 
     deinit {
-        guard let controller else { return }
+        guard let ad else { return }
         if Thread.isMainThread {
-            controller.destroy()
+            ad.destroy()
         } else {
-            Task { @MainActor in controller.destroy() }
+            Task { @MainActor in ad.destroy() }
         }
     }
 
     func present(from viewController: UIViewController) {
-        guard let nimbusAd = cachedAd?.value, let controller = try? Nimbus.loadBlocking(
-            ad: nimbusAd,
-            presentingViewController: viewController,
-            delegate: self,
-            isRewarded: false,
-            animated: false
-        ) else { return }
+        guard let nimbusResponse = cachedAd?.value else { return }
+        let ad = Nimbus.interstitialAd(from: nimbusResponse)
+            .onError(errorHandler)
+            .onEvent(eventHandler)
         self.presentingController = viewController
-        self.controller = controller
-        self.interstitialStrongRef = controller
-        controller.start()
-    }
-
-    func didReceiveNimbusEvent(controller: AdController, event: NimbusEvent) {
-        if event == .clicked {
-            Self.trackClick(url: googleClickTracker)
-            if let adView {
-                adView.delegate?.bannerViewDidRecordClick?(adView)
-            }
-
-            if let interstitial {
-                interstitial.fullScreenContentDelegate?.adDidRecordClick?(interstitial)
-            }
-        } else if event == .destroyed {
-            if isInterstitial {
-                interstitial?.dynamicPriceAd = nil
-                interstitialStrongRef = nil
-                Task { @MainActor in
-                    self.presentingController?.dismiss(animated: false)
-                }
-            }
+        self.ad = ad
+        Task { @MainActor in
+            try? await ad.show(from: viewController)
         }
-        listener?.didReceiveNimbusEvent(controller: controller, event: event)
-    }
-
-    func didReceiveNimbusError(controller: AdController, error: NimbusError) {
-        if let adView {
-            adView.delegate?.bannerView?(adView, didFailToReceiveAdWithError: error)
-        }
-
-        if let interstitial {
-            interstitial.fullScreenContentDelegate?
-                .ad?(interstitial, didFailToPresentFullScreenContentWithError: error)
-        }
-
-        listener?.didReceiveNimbusError(controller: controller, error: error)
-        controller.destroy()
     }
 
     static func trackClick(url: URL) {
         URLSession.shared.dataTask(
-            with: URLRequest(url: url).with(userAgent: Nimbus.shared.userAgentString)
+            with: URLRequest(url: url).with(userAgent: Nimbus.userAgent)
         ) { _, _, error in
             logger.debug("Google click tracker: \(error?.localizedDescription ?? "fired successfully")")
         }.resume()
@@ -106,15 +103,14 @@ internal class DynamicPriceEventHandler: NSObject, AdControllerDelegate {
 }
 
 internal extension UIView {
-    private static var dynamicPriceAdKey: Void?
+    private static var key: Void?
 
     var dynamicPriceAd: DynamicPriceEventHandler? {
         get {
-            objc_getAssociatedObject(self, &Self.dynamicPriceAdKey) as? DynamicPriceEventHandler
+            objc_getAssociatedObject(self, &Self.key) as? DynamicPriceEventHandler
         }
         set {
-            objc_setAssociatedObject(self, &Self.dynamicPriceAdKey, newValue,
-                .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            objc_setAssociatedObject(self, &Self.key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
 
@@ -129,16 +125,15 @@ internal extension UIView {
 }
 
 
-internal extension InterstitialAd {
-    private static var dynamicPriceAdKey: Void?
+internal extension GoogleMobileAds.InterstitialAd {
+    private static var key: Void?
 
     var dynamicPriceAd: DynamicPriceEventHandler? {
         get {
-            objc_getAssociatedObject(self, &Self.dynamicPriceAdKey) as? DynamicPriceEventHandler
+            objc_getAssociatedObject(self, &Self.key) as? DynamicPriceEventHandler
         }
         set {
-            objc_setAssociatedObject(self, &Self.dynamicPriceAdKey, newValue,
-                .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            objc_setAssociatedObject(self, &Self.key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
 }

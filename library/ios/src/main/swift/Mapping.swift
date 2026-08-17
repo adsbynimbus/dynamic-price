@@ -9,11 +9,11 @@ import NimbusKit
 
 /// Provides a mapping from a Nimbus response to Dynamic Price target
 public protocol Mapping {
-    func getTarget(_ ad: NimbusAd) -> String
+    func getTarget(_ ad: NimbusResponse) -> String
 }
 
 /// A mapping using a linear step function to generate the target dynamic price value
-public struct LinearPriceGranularity: Comparable {
+public struct LinearPriceGranularity: Comparable, Sendable {
 
     /// The minimum bid in cents
     public let min: Int
@@ -45,7 +45,7 @@ public struct LinearPriceGranularity: Comparable {
 }
 
 /// A mapping composed of multiple LinearPriceGranularities in ascending order
-public struct LinearPriceMapping: Mapping {
+public struct LinearPriceMapping: Mapping, Sendable {
 
     /// The granularities used in this mapping
     public let granularities: [LinearPriceGranularity]
@@ -73,8 +73,9 @@ public struct LinearPriceMapping: Mapping {
 
      - Returns: The keywords to set
      */
-    public func getTarget(_ ad: NimbusAd) -> String {
-        let range = granularities.first { ad.bidInCents < $0.max } ?? granularities.last!
-        return String(min(max(ad.bidInCents - (ad.bidInCents % range.step), range.min), range.max))
+    public func getTarget(_ ad: NimbusResponse) -> String {
+        let price = Int(ad.bid.price * 100)
+        let range = granularities.first { price < $0.max } ?? granularities.last!
+        return String(min(max(price - (price % range.step), range.min), range.max))
     }
 }
