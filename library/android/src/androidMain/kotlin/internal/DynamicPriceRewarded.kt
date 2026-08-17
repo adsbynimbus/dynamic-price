@@ -7,8 +7,6 @@ import com.adsbynimbus.dynamicprice.*
 import com.adsbynimbus.render.*
 import com.adsbynimbus.render.Renderer.Companion.loadBlockingAd
 import com.adsbynimbus.request.NimbusResponse
-import com.google.android.libraries.ads.mobile.sdk.common.FullScreenContentError
-import com.google.android.libraries.ads.mobile.sdk.common.FullScreenContentError.ErrorCode.MEDIATION_SHOW_ERROR
 import com.google.android.libraries.ads.mobile.sdk.rewarded.*
 
 internal class DynamicPriceRewardedAd(

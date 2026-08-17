@@ -12,12 +12,15 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.*
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.adsbynimbus.NimbusError
 import com.adsbynimbus.dynamicprice.applyDynamicPrice
 import com.adsbynimbus.dynamicprice.handleEventForNimbus
 import com.adsbynimbus.dynamicprice.sample.AdTypes.AdViewBanner
 import com.adsbynimbus.openrtb.request.Format.Companion.BANNER_320_50
 import com.adsbynimbus.openrtb.request.Format.Companion.MREC
 import com.adsbynimbus.openrtb.request.Video
+import com.adsbynimbus.render.AdController
+import com.adsbynimbus.render.AdEvent
 import com.adsbynimbus.request.NimbusRequest
 import com.adsbynimbus.request.NimbusRequest.Companion.forBannerAd
 import com.google.android.gms.ads.*
@@ -28,7 +31,15 @@ import kotlin.time.*
 import kotlin.time.Duration.Companion.seconds
 
 fun AdManagerAdView.setupDynamicPrice() {
-    appEventListener = { name, info -> handleEventForNimbus(name, info) }
+    appEventListener = { name, info ->
+        handleEventForNimbus(name, info, listener = object : AdController.Listener {
+            override fun onAdEvent(adEvent: AdEvent) {
+                println("Nimbus Ad Event: ${adEvent.name}")
+            }
+
+            override fun onError(error: NimbusError) {}
+        })
+    }
 }
 
 suspend fun AdManagerAdView.loadDynamicPrice(

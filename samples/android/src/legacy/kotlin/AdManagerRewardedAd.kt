@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import com.adsbynimbus.*
 import com.adsbynimbus.dynamicprice.applyDynamicPrice
+import com.adsbynimbus.dynamicprice.loadDynamicPriceRewardedAd
 import com.adsbynimbus.dynamicprice.sample.AdTypes.RewardedVideo
 import com.adsbynimbus.google.*
 import com.adsbynimbus.request.*
@@ -31,7 +32,7 @@ suspend fun loadDynamicPriceRewardedVideo(
         }
     }.getOrNull()
     val rewardedAd = suspendCancellableCoroutine { continuation ->
-        RewardedAd.load(context, adUnitId, adRequest.build(),
+        loadDynamicPriceRewardedAd(context, adUnitId, adRequest.build(),
             object : RewardedAdLoadCallback() {
                 override fun onAdLoaded(ad: RewardedAd) {
                     if (continuation.isActive) continuation.resume(ad)
