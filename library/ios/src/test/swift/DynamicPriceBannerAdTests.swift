@@ -14,11 +14,13 @@ import Testing
 
 @Suite @MainActor struct DynamicPriceBannerAdTests {
 
-    let rootVC = UIViewController()
+    let rootVC: UIViewController
 
+    @MainActor
     init() async throws {
         await NimbusTestEnvironment.shared.initIfNeeded()
         DynamicPriceRenderer["abc"] = .init(createNimbusAd())
+        rootVC = UIViewController()
     }
 
     @Test func `AdView destroy at deinit`() async throws {
@@ -80,10 +82,12 @@ import Testing
                 confirmation.confirm()
             }
 
-            targetView.dynamicPriceAd?.didReceiveNimbusError(
-                controller: targetView.dynamicPriceAd!.controller!,
-                error: NimbusRenderError.alreadyDestroyed,
-            )
+            await MainActor.run {
+                targetView.dynamicPriceAd?.didReceiveNimbusError(
+                    controller: targetView.dynamicPriceAd!.controller!,
+                    error: NimbusRenderError.alreadyDestroyed,
+                )
+            }
         }
     }
 
