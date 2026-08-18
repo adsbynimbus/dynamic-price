@@ -21,6 +21,9 @@ import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.google.android.gms.ads.rewarded.ServerSideVerificationOptions
 
+/** Returns true if Nimbus will render the Rewarded ad */
+inline val RewardedAd.isNimbusWin: Boolean
+    get() = adMetadata.getString("AdSystem").equals("Nimbus", ignoreCase = true)
 
 /** Loads a RewardedAd and conditionally wraps the response if a Nimbus bid is present */
 fun loadDynamicPriceRewardedAd(
@@ -38,25 +41,6 @@ fun loadDynamicPriceRewardedAd(
 }
 
 /**
- * Retrieves the Nimbus rendered [DynamicPriceAd] if it won the auction.
- *
- * This accessor should be used to destroy the Nimbus rendered ad if the InterstitialAd is being
- * discarded; Nimbus rendered ads are automatically destroyed when the interstitial is dismissed
- * after being shown.
- *
- * ```
- * interstitialAd?.dynamicPriceAd?.destroy()
- * ```
- */
-inline var RewardedAd.dynamicPriceAd: DynamicPriceAd?
-    get() = responseInfo.responseExtras.dynamicPriceAd
-    internal set(value) { responseInfo.responseExtras.dynamicPriceAd = value }
-
-/** Returns true if Nimbus will render the Rewarded ad */
-inline val RewardedAd.isNimbusWin: Boolean
-    get() = adMetadata.getString("AdSystem").equals("Nimbus", ignoreCase = true)
-
-/**
  * Wrapper callback for loading Dynamic Price Rewarded ads
  *
  * @param callback The AdLoadCallback to wrap
@@ -68,6 +52,7 @@ class DynamicPriceRewardedCallback(
     internal val nimbusAd: NimbusResponse?,
     internal val nimbusListener: AdController.Listener? = null,
 ) : RewardedAdLoadCallback() {
+
     /**
      * Wrapper callback for loading Dynamic Price Rewarded ads
      *
@@ -110,6 +95,21 @@ class DynamicPriceRewardedCallback(
     }
 }
 
+/**
+ * Retrieves the Nimbus rendered [DynamicPriceAd] if it won the auction.
+ *
+ * This accessor should be used to destroy the Nimbus rendered ad if the InterstitialAd is being
+ * discarded; Nimbus rendered ads are automatically destroyed when the interstitial is dismissed
+ * after being shown.
+ *
+ * ```
+ * rewardedAd?.dynamicPriceAd?.destroy()
+ * ```
+ */
+inline var RewardedAd.dynamicPriceAd: DynamicPriceAd?
+    get() = responseInfo.responseExtras.dynamicPriceAd
+    internal set(value) { responseInfo.responseExtras.dynamicPriceAd = value }
+
 internal class DynamicPriceRewardedAd(
     val googleAd: RewardedAd,
     val nimbusAd: NimbusResponse,
@@ -136,6 +136,33 @@ internal class DynamicPriceRewardedAd(
                 start()
             } ?: googleAd.fullScreenContentCallback?.onAdFailedToShowFullScreenContent(failToShowError)
         }
+    }
+
+    fun destroy() {
+        googleAd.dynamicPriceAd?.destroy()
+        googleAd.dynamicPriceAd = null
+        rewardListener = null
+    }
+
+    override fun onAdEvent(adEvent: AdEvent) {
+        when (adEvent) {
+            AdEvent.IMPRESSION -> {
+                shown = true
+                googleAd.fullScreenContentCallback?.onAdShowedFullScreenContent()
+                googleAd.fullScreenContentCallback?.onAdImpression()
+            }
+            AdEvent.CLICKED -> googleAd.fullScreenContentCallback?.onAdClicked()
+            AdEvent.COMPLETED -> rewardListener?.onUserEarnedReward(googleAd.rewardItem)
+            AdEvent.DESTROYED -> {
+                if (shown) fullScreenContentCallback?.onAdDismissedFullScreenContent()
+                destroy()
+            }
+            else -> return
+        }
+    }
+
+    override fun onError(error: NimbusError) {
+        destroy()
     }
 
     override fun setServerSideVerificationOptions(p0: ServerSideVerificationOptions?) =
@@ -175,32 +202,5 @@ internal class DynamicPriceRewardedAd(
 
     override fun setPlacementId(p0: Long) {
         googleAd.placementId = p0
-    }
-
-    fun destroy() {
-        googleAd.dynamicPriceAd?.destroy()
-        googleAd.dynamicPriceAd = null
-        rewardListener = null
-    }
-
-    override fun onAdEvent(adEvent: AdEvent) {
-        when (adEvent) {
-            AdEvent.IMPRESSION -> {
-                shown = true
-                googleAd.fullScreenContentCallback?.onAdShowedFullScreenContent()
-                googleAd.fullScreenContentCallback?.onAdImpression()
-            }
-            AdEvent.CLICKED -> googleAd.fullScreenContentCallback?.onAdClicked()
-            AdEvent.COMPLETED -> rewardListener?.onUserEarnedReward(googleAd.rewardItem)
-            AdEvent.DESTROYED -> {
-                if (shown) fullScreenContentCallback?.onAdDismissedFullScreenContent()
-                destroy()
-            }
-            else -> return
-        }
-    }
-
-    override fun onError(error: NimbusError) {
-        destroy()
     }
 }

@@ -115,7 +115,6 @@ class DynamicPriceRewardedCallback(
     }
 }
 
-
 /** Returns the NimbusResponse associated with the RewardedAd */
 val RewardedAd.nimbusAd: NimbusResponse?
     get() = (this as? DynamicPriceRewardedAd)?.takeIf { it.isNimbusWin }?.nimbusAd
