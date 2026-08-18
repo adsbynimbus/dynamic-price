@@ -14,11 +14,13 @@ import Testing
 
 @Suite struct DynamicPriceInterstitialAdTests {
 
-    let vc = UIViewController()
+    let vc: UIViewController
 
+    @MainActor
     init() async throws {
         await NimbusTestEnvironment.shared.initIfNeeded()
         DynamicPriceRenderer["interstitialAuction1"] = .init(createNimbusAd())
+        vc = UIViewController()
     }
 
     @Test func `InterstitailAd.handleEventForNimbus returns false when name != na_render`() async {
@@ -76,10 +78,12 @@ import Testing
                 confirmation.confirm()
             }
 
-            interstitialAd.dynamicPriceAd!.didReceiveNimbusError(
-                controller: interstitialAd.dynamicPriceAd!.controller!,
-                error: NimbusRenderError.alreadyDestroyed,
-            )
+            await MainActor.run {
+                interstitialAd.dynamicPriceAd!.didReceiveNimbusError(
+                    controller: interstitialAd.dynamicPriceAd!.controller!,
+                    error: NimbusRenderError.alreadyDestroyed,
+                )
+            }
         }
     }
 

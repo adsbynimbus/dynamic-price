@@ -6,10 +6,10 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import com.adsbynimbus.*
 import com.adsbynimbus.dynamicprice.applyDynamicPrice
+import com.adsbynimbus.dynamicprice.isNimbusWin
+import com.adsbynimbus.dynamicprice.loadDynamicPriceRewardedAd
 import com.adsbynimbus.dynamicprice.sample.AdTypes.RewardedVideo
-import com.adsbynimbus.google.*
 import com.adsbynimbus.request.*
 import com.adsbynimbus.request.NimbusRequest.Companion.forRewardedVideo
 import com.google.android.gms.ads.LoadAdError
@@ -24,14 +24,13 @@ suspend fun loadDynamicPriceRewardedVideo(
     adUnitId: String,
     adRequest: AdManagerAdRequest.Builder,
     nimbusRequest: NimbusRequest,
-): Pair<RewardedAd, NimbusResponse?> {
-    val nimbusResponse = DynamicPriceHelper.runCatching {
-        requestManager.makeRequest(context, nimbusRequest).also {
-            it.applyDynamicPrice(adRequest, mapping = mapping)
-        }
-    }.getOrNull()
-    val rewardedAd = suspendCancellableCoroutine { continuation ->
-        RewardedAd.load(context, adUnitId, adRequest.build(),
+): RewardedAd {
+    DynamicPriceHelper.runCatching {
+        val nimbusResponse = requestManager.makeRequest(context, nimbusRequest)
+        nimbusResponse.applyDynamicPrice(adRequest, mapping = mapping)
+    }
+    return suspendCancellableCoroutine { continuation ->
+        loadDynamicPriceRewardedAd(context, adUnitId, adRequest.build(),
             object : RewardedAdLoadCallback() {
                 override fun onAdLoaded(ad: RewardedAd) {
                     if (continuation.isActive) continuation.resume(ad)
@@ -45,7 +44,6 @@ suspend fun loadDynamicPriceRewardedVideo(
             },
         )
     }
-    return Pair(rewardedAd, nimbusResponse)
 }
 
 @Composable
@@ -63,43 +61,13 @@ fun RewardedAdScreen(modifier: Modifier = Modifier) {
                 adRequest = AdManagerAdRequest.Builder(),
                 nimbusRequest = forRewardedVideo(RewardedVideo.title),
             )
-        }.onSuccess { (rewardedAd, nimbusResponse) ->
-            if (nimbusResponse == null) {
-                rewardedAd.show(activity) {
-                    Log.i("DynamicPrice", "Rewarded user earned reward ${it.type}")
-                }
-            } else {
-                rewardedAd.showAd(
-                    activity = activity,
-                    nimbusAd = nimbusResponse,
-                    nimbusAdManager = DynamicPriceHelper.requestManager,
-                    callback = object : NimbusRewardCallback {
-                        override fun onAdImpression() {
-                            Log.i("DynamicPrice", "Rewarded impression")
-                        }
-
-                        override fun onAdClicked() {
-                            Log.i("DynamicPrice", "Rewarded impression")
-                        }
-
-                        override fun onAdPresented() {
-                            Log.i("DynamicPrice", "Rewarded presented")
-                        }
-
-                        override fun onAdClosed() {
-                            Log.i("DynamicPrice", "Rewarded Closed")
-                        }
-
-                        override fun onUserEarnedReward(rewardItem: RewardItem) {
-                            Log.i("DynamicPrice", "Rewarded user earned reward ${rewardItem.type}")
-                        }
-
-                        override fun onError(nimbusError: NimbusError) {
-                            Log.w("DynamicPrice", "Rewarded error ${nimbusError.message}")
-                        }
-
-                    }
-                )
+        }.onSuccess { rewardedAd ->
+            rewardedAd.onAdMetadataChangedListener = {
+                Log.i("DynamicPrice", "Rewarded metadata changed; nimbusWin=${rewardedAd.isNimbusWin}")
+            }
+            rewardedAd.fullScreenContentCallback = FullScreenLogListener(RewardedVideo.title)
+            rewardedAd.show(activity) {
+                Log.i("DynamicPrice", "Rewarded user earned reward ${it.type}")
             }
         }
     }

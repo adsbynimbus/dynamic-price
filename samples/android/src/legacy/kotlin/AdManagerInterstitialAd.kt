@@ -67,6 +67,7 @@ fun InterstitialScreen(modifier: Modifier = Modifier) {
                 nimbusRequest = forInterstitialAd(Interstitial.title),
             )
         }.onSuccess {
+            it.fullScreenContentCallback = FullScreenLogListener(Interstitial.title)
             it.show(activity)
         }.getOrNull()
     }

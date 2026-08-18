@@ -139,9 +139,7 @@ fun <T : InterstitialAd> T.handleEventForNimbus(
     "na_show" -> null.also {
         DynamicPriceRenderer.renderScope.launch(Dispatchers.Main.immediate) {
             dynamicPriceAd?.adController?.start() ?: run {
-                fullScreenContentCallback?.onAdFailedToShowFullScreenContent(
-                    AdError(-6, "Nimbus Interstitial failed to show", Nimbus.sdkName)
-                )
+                fullScreenContentCallback?.onAdFailedToShowFullScreenContent(failToShowError)
                 maybeClearInterstitial()
             }
         }
@@ -205,3 +203,6 @@ internal fun AbstractAdRequestBuilder<*>.applyTargeting(nimbusAd: NimbusResponse
     addCustomTargeting("na_size", "${nimbusAd.bid.width}x${nimbusAd.bid.height}")
     addCustomTargeting("na_type", if (isVideo) "video" else "static")
 }
+
+inline val failToShowError: AdError
+    get() = AdError(-6, "${Nimbus.sdkName} failed to show", Nimbus.sdkName)

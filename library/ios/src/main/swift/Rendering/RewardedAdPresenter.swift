@@ -10,6 +10,10 @@ import Foundation
 import GoogleMobileAds
 import NimbusKit
 
+@available(*, deprecated, message:"""
+NimbusRewardedAdPresenterDelegate is no longer used. To load a RewardedAd, call 
+`RewardedAd.loadDynamicPrice` and use RewardedAd.fullScreenContentDelegate to receive events.
+""")
 public protocol NimbusRewardedAdPresenterDelegate: AnyObject {
     func didTriggerImpression()
     func didTriggerClick()
@@ -21,8 +25,12 @@ public protocol NimbusRewardedAdPresenterDelegate: AnyObject {
     func didReceiveError(error: NimbusError)
 }
 
-public final class NimbusRewardedAdPresenter {
-    
+@available(*, deprecated, message:"""
+NimbusRewardedAdPresenterDelegate is no longer used. To load a RewardedAd, call 
+`RewardedAd.loadDynamicPrice` to load a RewardedAd and `RewardedAd.present()` to display it.
+""")
+public final class NimbusRewardedAdPresenter: AdControllerDelegate, NimbusAdViewControllerDelegate {
+
     private enum AdType {
         case rewarded(ad: RewardedAd)
         case rewardedInterstitial(ad: RewardedInterstitialAd)
@@ -32,7 +40,6 @@ public final class NimbusRewardedAdPresenter {
     
     private let ad: NimbusAd
     private var adType: AdType?
-    private var companionAd: NimbusCompanionAd?
     
     private var adController: AdController?
     
@@ -43,7 +50,6 @@ public final class NimbusRewardedAdPresenter {
     ) {
         self.ad = ad
         self.adType = .rewarded(ad: rewardedAd)
-        self.companionAd = getCompanionAd(for: request)
     }
     
     public init(
@@ -53,7 +59,6 @@ public final class NimbusRewardedAdPresenter {
     ) {
         self.ad = ad
         self.adType = .rewardedInterstitial(ad: rewardedInterstitialAd)
-        self.companionAd = getCompanionAd(for: request)
     }
     
     public func showAd(isNimbusWin: Bool, presentingViewController: UIViewController) {
@@ -98,23 +103,7 @@ public final class NimbusRewardedAdPresenter {
             break
         }
     }
-    
-    private func getCompanionAd(for request: NimbusRequest) -> NimbusCompanionAd? {
-        if let firstCompanionAd = request.impressions[safe: 0]?.video?.companionAds?.first {
-            return NimbusCompanionAd(
-                width: firstCompanionAd.width,
-                height: firstCompanionAd.height,
-                renderMode: firstCompanionAd.companionAdRenderMode ?? .concurrent
-            )
-        }
-        return nil
-    }
-}
 
-// MARK: AdControllerDelegate
-
-/// :nodoc:
-extension NimbusRewardedAdPresenter: AdControllerDelegate {
     public func didReceiveNimbusEvent(controller: AdController, event: NimbusEvent) {
         switch event {
         case .impression:
@@ -138,36 +127,22 @@ extension NimbusRewardedAdPresenter: AdControllerDelegate {
             break
         }
     }
-    
+
     public func didReceiveNimbusError(controller: AdController, error: NimbusError) {
         delegate?.didReceiveError(error: error)
     }
-}
 
-
-// MARK: NimbusAdViewControllerDelegate
-
-/// :nodoc:
-extension NimbusRewardedAdPresenter: NimbusAdViewControllerDelegate {
     public func viewWillAppear(animated: Bool) {}
-    
+
     public func viewDidAppear(animated: Bool) {
         delegate?.didPresentAd()
     }
-    
+
     public func viewWillDisappear(animated: Bool) {}
-    
+
     public func viewDidDisappear(animated: Bool) {
         adController?.destroy()
     }
-    
+
     public func didCloseAd(adView: NimbusAdView) {}
-}
-
-
-/// :nodoc:
-private extension Array {
-    subscript (safe index: Int) -> Element? {
-        index >= 0 && index < self.count ? self[index] : nil
-    }
 }
