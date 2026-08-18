@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - '**/main'
   schedule:
     - cron: '55 23 * * 6'
 
@@ -42,6 +43,7 @@ jobs:
         uses: gradle/actions/dependency-submission@9c971963bec38e04b3d30dcc455b5382be2fdbfb #v6.3.0
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          cache-read-only: ${{ !contains(github.ref, 'main') }}
       - name: Upload reports
         uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
@@ -62,7 +64,7 @@ jobs:
         run: xcodebuild build test -scheme dynamic-price ${{ steps.xcodebuild.outputs.options }}
       - name: Cache DerivedData
         uses: actions/cache/save@v6
-        if: ${{ github.ref == 'refs/heads/main' && steps.xcodebuild.outcome.build-cache-hit != 'true' }}
+        if: ${{ contains(github.ref, 'main') && steps.xcodebuild.outcome.build-cache-hit != 'true' }}
         with:
           path: |
             ~/Library/Developer/Xcode/DerivedData
