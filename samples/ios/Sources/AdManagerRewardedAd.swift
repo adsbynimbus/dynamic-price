@@ -7,41 +7,18 @@ func loadDynamicPriceRewardedVideo(
     adUnitId: String,
     adRequest: AdManagerRequest,
     nimbusRequest: NimbusRequest,
-) async throws -> (RewardedAd, NimbusAd?) {
+) async throws -> RewardedAd {
     let nimbusRequestManager = NimbusRequestManager()
     let nimbusResponse = try? await nimbusRequestManager.makeRequest(nimbusRequest)
+    
     // Apply Key-Values to AdManagerRequest
     nimbusResponse?.applyDynamicPrice(adRequest, mapping: DynamicPriceApp.mapping)
-    return (try await RewardedAd.load(with: adUnitId, request: adRequest), nimbusResponse)
-}
 
-extension RewardedAd {
-    private static let adSystemKey = GADAdMetadataKey(rawValue: "AdSystem")
-    var isNimbusWin: Bool {
-        (adMetadata?[Self.adSystemKey] as? String)?.contains("Nimbus") == true
-    }
-
-    final class MetaDataListener: NSObject, AdMetadataDelegate, Sendable {
-        nonisolated(unsafe) var continuation: UnsafeContinuation<Void, Never>?
-
-        func adMetadataDidChange(_ ad: any AdMetadataProvider) {
-            continuation?.resume()
-            continuation = nil
-        }
-    }
-
-    @MainActor
-    func waitForAdMetadata() async {
-        let listener = MetaDataListener()
-        adMetadataDelegate = listener
-        await withUnsafeContinuation { continuation in
-            listener.continuation = continuation
-        }
-    }
+    return try await RewardedAd.loadDynamicPrice(adUnitID: adUnitId, request: adRequest)
 }
 
 @Observable
-final class RewardedAdViewModel: NSObject, FullScreenContentDelegate, NimbusRewardedAdPresenterDelegate {
+final class RewardedAdViewModel: NSObject, FullScreenContentDelegate, AdMetadataDelegate {
     @MainActor
     static var rootViewController: UIViewController? {
         UIApplication.shared.connectedScenes
@@ -54,29 +31,21 @@ final class RewardedAdViewModel: NSObject, FullScreenContentDelegate, NimbusRewa
     var isLoading = false
     var didShow = false
 
-    private var nimbusPresenter: NimbusRewardedAdPresenter?
     private var rewardedAd: RewardedAd?
 
     @MainActor
     func load() async {
-        guard !isLoading, rewardedAd == nil, nimbusPresenter == nil else { return }
+        guard !isLoading, rewardedAd == nil else { return }
         isLoading = true
         let nimbusRequest = NimbusRequest.forRewardedVideo(position: adType.id)
         do {
-            let (googleAd, nimbusBid) = try await loadDynamicPriceRewardedVideo(
+            rewardedAd = try await loadDynamicPriceRewardedVideo(
                 adUnitId: DynamicPriceApp.adUnitId,
                 adRequest: AdManagerRequest(),
                 nimbusRequest: nimbusRequest,
             )
-            rewardedAd = googleAd
-            if let nimbusBid {
-                nimbusPresenter = NimbusRewardedAdPresenter(
-                    request: nimbusRequest,
-                    ad: nimbusBid,
-                    rewardedAd: googleAd,
-                )
-            }
-            await googleAd.waitForAdMetadata()
+            rewardedAd?.fullScreenContentDelegate = self
+            rewardedAd?.adMetadataDelegate = self
         } catch {
             print ("DynamicPrice: \(adType.id) no fill \(error)")
         }
@@ -86,17 +55,16 @@ final class RewardedAdViewModel: NSObject, FullScreenContentDelegate, NimbusRewa
     @MainActor
     func showAd() {
         guard !didShow, let rewardedAd else { return }
-        if let nimbusPresenter {
-            nimbusPresenter.showAd(
-                isNimbusWin: rewardedAd.isNimbusWin,
-                presentingViewController: Self.rootViewController!,
-            )
-        } else {
-            rewardedAd.present(from: nil) {
-                self.didEarnReward(reward: rewardedAd.adReward)
-            }
+
+        rewardedAd.present(from: nil) {
+            print("DynamicPrice: \(self.adType.id) earned reward")
         }
+
         didShow = true
+    }
+
+    func adMetadataDidChange(_ ad: any AdMetadataProvider) {
+        print("DynamicPrice: \(self.adType.id) metadata changed; nimbusWin=\(rewardedAd?.isNimbusWin == true)")
     }
 }
 
@@ -112,51 +80,23 @@ struct RewardedAdScreen: View {
     }
 }
 
-// MARK: - NimbusRewardedAdPresenter
-
-extension RewardedAdViewModel {
-    nonisolated public func didEarnReward(reward: AdReward) {
-        print("DynamicPrice: \(adType.id) earned reward")
-    }
-
-    nonisolated public func didReceiveError(error: NimbusError) {
-        print("DynamicPrice: \(adType.id) nimbus error \(error)")
-    }
-
-    nonisolated public func didPresentAd() {
-        print("DynamicPrice: \(adType.id) will present")
-    }
-
-    nonisolated public func didTriggerImpression() {
-        print("DynamicPrice: \(adType.id) impression")
-    }
-
-    nonisolated public func didTriggerClick() {
-        print("DynamicPrice: \(adType.id) clicked")
-    }
-
-    nonisolated public func didCloseAd() {
-        print("DynamicPrice: \(adType.id) dismissed")
-    }
-}
-
 // MARK: - FullScreenContentDelegate
 
 extension RewardedAdViewModel {
     public func adWillPresentFullScreenContent(_ ad: FullScreenPresentingAd) {
-        didPresentAd()
+        print("DynamicPrice: \(adType.id) will present")
     }
 
     public func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
-        print("DynamicPrice: \(adType.id) google error \(error)")
+        print("DynamicPrice: \(adType.id) error \(error)")
     }
 
     public func adDidRecordImpression(_ ad: FullScreenPresentingAd) {
-        didTriggerImpression()
+        print("DynamicPrice: \(adType.id) impression")
     }
 
     public func adDidRecordClick(_ ad: FullScreenPresentingAd) {
-        didTriggerClick()
+        print("DynamicPrice: \(adType.id) clicked")
     }
 
     public func adWillDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
@@ -164,6 +104,6 @@ extension RewardedAdViewModel {
     }
 
     public func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
-        didCloseAd()
+        print("DynamicPrice: \(adType.id) dismissed")
     }
 }

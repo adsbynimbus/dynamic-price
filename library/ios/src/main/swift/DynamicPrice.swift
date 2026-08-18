@@ -137,6 +137,10 @@ public extension InterstitialAd {
     }
 }
 
+public enum DynamicPriceError: Error {
+    case noViewControllerDetected
+}
+
 extension NimbusAd {
     func applyTargeting(_ request: AdManagerRequest, _ target: String?) {
         if request.customTargeting == nil {
