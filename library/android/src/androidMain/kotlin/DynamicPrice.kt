@@ -12,9 +12,7 @@ import com.adsbynimbus.request.NimbusResponse
 import com.google.android.libraries.ads.mobile.sdk.banner.BannerAd
 import com.google.android.libraries.ads.mobile.sdk.common.*
 import com.google.android.libraries.ads.mobile.sdk.common.FullScreenContentError.ErrorCode.MEDIATION_SHOW_ERROR
-import com.google.android.libraries.ads.mobile.sdk.common.LoadAdError.ErrorCode.NOT_FOUND
 import com.google.android.libraries.ads.mobile.sdk.interstitial.InterstitialAd
-import com.google.android.libraries.ads.mobile.sdk.rewarded.RewardedAd
 import kotlinx.coroutines.*
 import java.lang.ref.WeakReference
 
@@ -109,103 +107,6 @@ fun InterstitialAd.handleEventForNimbus(
     else -> null
 }
 
-/** Loads a RewardedAd and conditionally wraps the response if a Nimbus bid is present */
-suspend fun RewardedAd.Companion.loadDynamicPrice(
-    request: AdRequest,
-    nimbusListener: AdController.Listener? = null,
-): AdLoadResult<RewardedAd> = RewardedAd.load(request).run {
-    val nimbusAuctionId = request.customTargeting["na_id"] ?: return this
-    val nimbusAd = DynamicPriceRenderer.adCache.remove(nimbusAuctionId)
-    when {
-        this !is AdLoadResult.Success<RewardedAd> -> this
-        nimbusAd != null -> AdLoadResult.Success(
-            DynamicPriceRewardedAd(
-                googleAd = ad,
-                nimbusAd = nimbusAd,
-                listener = nimbusListener,
-            ),
-        )
-        ad.isNimbusWin -> AdLoadResult.Failure(
-            error = LoadAdError(
-                code = NOT_FOUND,
-                message = "Nimbus ad not found in cache",
-                responseInfo = null,
-            ),
-        )
-        else -> this
-    }
-}
-
-/** Loads a RewardedAd and conditionally wraps the response if a Nimbus bid is present */
-fun RewardedAd.Companion.loadDynamicPrice(
-    adRequest: AdRequest,
-    adLoadCallback: AdLoadCallback<RewardedAd>,
-    nimbusListener: AdController.Listener? = null,
-) {
-    RewardedAd.load(
-        adRequest = adRequest,
-        adLoadCallback = DynamicPriceRewardedCallback(
-            callback = adLoadCallback,
-            adRequest = adRequest,
-            nimbusListener = nimbusListener,
-        ),
-    )
-}
-
-/**
- * Wrapper callback for loading Dynamic Price Rewarded ads
- *
- * @param callback The AdLoadCallback to wrap
- * @param nimbusAd The Nimbus bid if one was present
- * @param nimbusListener Optional Nimbus AdController listener
- */
-class DynamicPriceRewardedCallback(
-    internal val callback: AdLoadCallback<RewardedAd>,
-    internal val nimbusAd: NimbusResponse?,
-    internal val nimbusListener: AdController.Listener? = null,
-) : AdLoadCallback<RewardedAd> by callback {
-    /**
-     * Wrapper callback for loading Dynamic Price Rewarded ads
-     *
-     * @param callback The AdLoadCallback to wrap
-     * @param adRequest The AdRequest passed to `RewardedAd.load`
-     * @param nimbusListener Optional Nimbus AdController listener
-     */
-    constructor(
-        callback: AdLoadCallback<RewardedAd>,
-        adRequest: AdRequest,
-        nimbusListener: AdController.Listener? = null,
-    ) : this(
-        callback = callback,
-        nimbusAd = adRequest.customTargeting["na_id"]?.let { DynamicPriceRenderer.adCache.remove(it) },
-        nimbusListener = nimbusListener,
-    )
-
-    init {
-        if (nimbusAd != null) DynamicPriceRenderer.adCache.remove(nimbusAd.auctionId)
-    }
-
-    override fun onAdLoaded(ad: RewardedAd) {
-        when {
-            nimbusAd != null -> callback.onAdLoaded(
-                DynamicPriceRewardedAd(
-                    googleAd = ad,
-                    nimbusAd = nimbusAd,
-                    listener = nimbusListener,
-                ),
-            )
-            ad.isNimbusWin -> callback.onAdFailedToLoad(
-                adError = LoadAdError(
-                    code = NOT_FOUND,
-                    message = "Nimbus ad not found in cache",
-                    responseInfo = null,
-                ),
-            )
-            else -> callback.onAdLoaded(ad)
-        }
-    }
-}
-
 /**
  * Wrapper for a Nimbus [AdController] associated with a NextGen [Ad] object.
  *
@@ -234,14 +135,6 @@ inline var Ad.dynamicPriceAd: DynamicPriceAd?
             if (value == null) remove("na_render") else putSerializable("na_render", value)
         }
     }
-
-/** Returns true if Nimbus will render the Rewarded ad */
-inline val RewardedAd.isNimbusWin: Boolean
-    get() = getAdMetadata().getString("AdSystem").equals("Nimbus", ignoreCase = true)
-
-/** Returns the NimbusResponse associated with the RewardedAd */
-val RewardedAd.nimbusAd: NimbusResponse?
-    get() = (this as? DynamicPriceRewardedAd)?.takeIf { it.isNimbusWin }?.nimbusAd
 
 internal fun BaseAdRequestBuilder<*>.applyTargeting(nimbusAd: NimbusResponse, target: String) {
     val isVideo = nimbusAd.bid.type == "video"
