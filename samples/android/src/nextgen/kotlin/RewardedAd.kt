@@ -40,9 +40,13 @@ fun RewardedAdScreen(modifier: Modifier = Modifier) {
         )
         if (adResponse is AdLoadResult.Success<RewardedAd>) {
             adResponse.ad.adEventCallback = object : RewardedAdEventCallback,
-                AdEventCallback by LoggingAdEventCallback(RewardedVideo.title) { }
+                AdEventCallback by LoggingAdEventCallback(RewardedVideo.title) {
+                override fun onAdMetadataChanged() {
+                    Log.i("DynamicPrice", "${RewardedVideo.title} metadata changed; nimbusWin=${adResponse.ad.isNimbusWin}")
+                }
+            }
             adResponse.ad.show(activity) {
-                Log.i("DynamicPrice", "Rewarded user earned reward ${it.type}")
+                Log.i("DynamicPrice", "${RewardedVideo.title} user earned reward ${it.type}")
             }
         }
     }

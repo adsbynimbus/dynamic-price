@@ -29,24 +29,24 @@ class GoogleMobileAdInitializer : Initializer<Unit> {
 @JvmInline
 value class LoggingAdEventCallback(val name: String) : AdEventCallback {
     override fun onAdImpression() {
-        Log.i("Ads", "$name impression")
+        Log.i("DynamicPrice", "$name impression")
     }
 
     override fun onAdClicked() {
-        Log.i("Ads", "$name clicked")
+        Log.i("DynamicPrice", "$name clicked")
     }
 
     override fun onAdShowedFullScreenContent() {
-        Log.i("Ads", "$name showed fullScreen")
+        Log.i("DynamicPrice", "$name showed fullScreen")
     }
 
     override fun onAdDismissedFullScreenContent() {
-        Log.i("Ads", "$name dismissed fullScreen")
+        Log.i("DynamicPrice", "$name dismissed fullScreen")
     }
 
     override fun onAdFailedToShowFullScreenContent(
         fullScreenContentError: FullScreenContentError,
     ) {
-        Log.w("Ads", "$name failed: ${fullScreenContentError.message}")
+        Log.w("DynamicPrice", "$name failed: ${fullScreenContentError.message}")
     }
 }
