@@ -89,7 +89,10 @@ changes to Nimbus initialization, SDK Bidders, and replacing `NimbusRequest` /
 `NimbusRequestManager` with the new `Nimbus.bannerAd`, `Nimbus.interstitialAd`, and
 `Nimbus.rewardedAd` methods for retrieving an ad.
 
-**iOS** - [https://docs.adsbynimbus.com/docs/nimbus-3.0-sdk-documentation/migrating-from-2.x/3.0-migration-guide-ios](https://docs.adsbynimbus.com/docs/nimbus-3.0-sdk-documentation/migrating-from-2.x/3.0-migration-guide-ios)
+**iOS**
+- Migration Guide - [https://docs.adsbynimbus.com/docs/nimbus-3.0-sdk-documentation/migrating-from-2.x/3.0-migration-guide-ios](https://docs.adsbynimbus.com/docs/nimbus-3.0-sdk-documentation/migrating-from-2.x/3.0-migration-guide-ios)
+- 3.0 Library Update - https://github.com/adsbynimbus/dynamic-price/pull/57
+- 3.0 Sample App Update - [Commit baa6c30](https://github.com/adsbynimbus/dynamic-price/pull/57/commits/baa6c30951d5a326473a3019b8e6835c07a3c39f)
 
 ### Summary of Changes
 
