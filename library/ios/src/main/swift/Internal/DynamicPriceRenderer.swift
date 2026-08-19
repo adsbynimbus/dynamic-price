@@ -6,7 +6,7 @@
 //  Copyright © 2026 Nimbus Advertising Solutions Inc. All rights reserved.
 //
 
-import Foundation
+import UIKit
 import NimbusKit
 import os
 
@@ -14,9 +14,9 @@ import os
 internal struct DynamicPriceRenderer: Codable {
 
     class CachedAd: NSObject {
-        let value: NimbusAd
+        let value: NimbusResponse
 
-        init(_ ad: NimbusAd) {
+        init(_ ad: NimbusResponse) {
             self.value = ad
         }
     }
@@ -28,7 +28,7 @@ internal struct DynamicPriceRenderer: Codable {
     }()
     static let jsonDecoder = JSONDecoder()
 
-    static func render(data: String?, block: @escaping (CachedAd, URL) -> Void) -> NimbusAd? {
+    static func render(data: String?, block: @escaping (CachedAd, URL) -> Void) -> NimbusResponse? {
         guard let renderer = DynamicPriceRenderer(info: data),
               let nimbusAd = DynamicPriceRenderer[renderer.auctionId] else {
             return nil
