@@ -1,16 +1,14 @@
 import GoogleMobileAds
 import DynamicPrice
-@preconcurrency import NimbusKit
+import NimbusKit
 import SwiftUI
 
 func loadDynamicPriceRewardedVideo(
     adUnitId: String,
     adRequest: AdManagerRequest,
-    nimbusRequest: NimbusRequest,
-) async throws -> RewardedAd {
-    let nimbusRequestManager = NimbusRequestManager()
-    let nimbusResponse = try? await nimbusRequestManager.makeRequest(nimbusRequest)
-    
+    nimbusRequest: NimbusKit.RewardedAd,
+) async throws -> GoogleMobileAds.RewardedAd{
+    let nimbusResponse = try? await nimbusRequest.fetch().response
     // Apply Key-Values to AdManagerRequest
     nimbusResponse?.applyDynamicPrice(adRequest, mapping: DynamicPriceApp.mapping)
 
@@ -31,13 +29,13 @@ final class RewardedAdViewModel: NSObject, FullScreenContentDelegate, AdMetadata
     var isLoading = false
     var didShow = false
 
-    private var rewardedAd: RewardedAd?
+    private var rewardedAd: GoogleMobileAds.RewardedAd?
 
     @MainActor
     func load() async {
         guard !isLoading, rewardedAd == nil else { return }
         isLoading = true
-        let nimbusRequest = NimbusRequest.forRewardedVideo(position: adType.id)
+        let nimbusRequest = Nimbus.rewardedAd(position: adType.id)
         do {
             rewardedAd = try await loadDynamicPriceRewardedVideo(
                 adUnitId: DynamicPriceApp.adUnitId,
@@ -53,7 +51,7 @@ final class RewardedAdViewModel: NSObject, FullScreenContentDelegate, AdMetadata
     }
 
     @MainActor
-    func showAd() {
+    func showAd() async {
         guard !didShow, let rewardedAd else { return }
 
         rewardedAd.present(from: nil) {
@@ -75,35 +73,7 @@ struct RewardedAdScreen: View {
             Text("Rewarded Ad Screen")
         }.task {
             await rewardedViewModel.load()
-            rewardedViewModel.showAd()
+            await rewardedViewModel.showAd()
         }.navigationTitle(rewardedViewModel.adType.id)
-    }
-}
-
-// MARK: - FullScreenContentDelegate
-
-extension RewardedAdViewModel {
-    public func adWillPresentFullScreenContent(_ ad: FullScreenPresentingAd) {
-        print("DynamicPrice: \(adType.id) will present")
-    }
-
-    public func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
-        print("DynamicPrice: \(adType.id) error \(error)")
-    }
-
-    public func adDidRecordImpression(_ ad: FullScreenPresentingAd) {
-        print("DynamicPrice: \(adType.id) impression")
-    }
-
-    public func adDidRecordClick(_ ad: FullScreenPresentingAd) {
-        print("DynamicPrice: \(adType.id) clicked")
-    }
-
-    public func adWillDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
-        print("DynamicPrice: \(adType.id) will dismiss")
-    }
-
-    public func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
-        print("DynamicPrice: \(adType.id) dismissed")
     }
 }

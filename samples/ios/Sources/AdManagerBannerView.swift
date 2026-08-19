@@ -1,6 +1,6 @@
-import GoogleMobileAds
 import DynamicPrice
-@preconcurrency import NimbusKit
+import GoogleMobileAds
+import NimbusKit
 import SwiftUI
 
 extension AdManagerBannerView: @retroactive AppEventDelegate {
@@ -8,10 +8,9 @@ extension AdManagerBannerView: @retroactive AppEventDelegate {
         handleEventForNimbus(name: name, info: info)
     }
 
-    func loadDynamicPrice(adRequest: AdManagerRequest, nimbusRequest: NimbusRequest) {
+    func loadDynamicPrice(adRequest: AdManagerRequest, nimbusRequest: InlineAd) {
         Task {
-            let nimbusRequestManager = NimbusRequestManager()
-            let nimbusResponse = try? await nimbusRequestManager.makeRequest(nimbusRequest)
+            let nimbusResponse = try? await nimbusRequest.fetch().response
             // Apply Key-Values to AdManagerRequest
             nimbusResponse?.applyDynamicPrice(adRequest, mapping: DynamicPriceApp.mapping)
 
@@ -26,7 +25,10 @@ struct BannerAdScreen: View {
             AdManagerInlineAd(AdSizeBanner) { adView in
                 adView.loadDynamicPrice(
                     adRequest: AdManagerRequest(),
-                    nimbusRequest: .forBannerAd(position: AdTypes.Banner.id)
+                    nimbusRequest: Nimbus.bannerAd(
+                        position: AdTypes.Banner.id,
+                        size: .banner,
+                    )
                 )
             }
             .frame(width: AdSizeBanner.size.width, height: AdSizeBanner.size.height)
@@ -38,11 +40,13 @@ struct BannerVideoScreen: View {
     var body: some View {
         VStack {
             AdManagerInlineAd(AdSizeMediumRectangle) { adView in
-                let nimbusRequest = NimbusRequest.forBannerAd(
+                let nimbusRequest = Nimbus.bannerAd(
                     position: AdTypes.BannerVideo.id,
-                    format: .letterbox,
-                )
-                nimbusRequest.addInlineVideo()
+                    size: .mrec,
+                ) {
+                    video()
+                }
+
                 adView.loadDynamicPrice(
                     adRequest: AdManagerRequest(),
                     nimbusRequest: nimbusRequest,
@@ -56,10 +60,10 @@ struct BannerVideoScreen: View {
 
 struct AdManagerInlineAd: UIViewRepresentable {
     typealias UIViewType = AdManagerBannerView
-    let adSize: AdSize
+    let adSize: GoogleMobileAds.AdSize
     let loadAd: (UIViewType) -> Void
 
-    init(_ adSize: AdSize, _ loadAd: @escaping (UIViewType) -> Void) {
+    init(_ adSize: GoogleMobileAds.AdSize, _ loadAd: @escaping (UIViewType) -> Void) {
         self.adSize = adSize
         self.loadAd = loadAd
     }
