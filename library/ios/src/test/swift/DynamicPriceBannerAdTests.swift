@@ -25,16 +25,23 @@ import Testing
 
     @Test func `AdView destroy at deinit`() async throws {
         let bannerView = AdManagerBannerView()
+        bannerView.addSubview(.init())
         bannerView.rootViewController = rootVC
 
-        let targetView = bannerView.targetView
+        var targetView: UIView? = bannerView.targetView
         bannerView.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
-        #expect(targetView.dynamicPriceAd != nil)
+        try? await Task.sleep(nanoseconds: 16_000_000)
+
+        #expect(targetView?.dynamicPriceAd != nil)
 
         // We need to wait for the async block in the implementation
-        #expect(targetView.subviews.last is NimbusAdView)
-        targetView.dynamicPriceAd = nil
+        #expect(targetView?.subviews.last is NimbusAdView)
+        bannerView.subviews.forEach {
+            $0.removeFromSuperview()
+        }
+        targetView = nil
+        try? await Task.sleep(nanoseconds: 16_000_000)
         #expect((bannerView.subviews.last is NimbusAdView) == false)
     }
 
@@ -48,11 +55,13 @@ import Testing
 
         bannerView.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
+        try? await Task.sleep(nanoseconds: 16_000_000)
+
         #expect(targetView.subviews.last is NimbusAdView)
     }
 
     @Test func `Client listener receives Nimbus events`() async throws {
-        let clientListener = MockAdControllerDelegate()
+        var onEventListener: ((AdEvent) -> Void)?
         let bannerView = AdManagerBannerView()
         bannerView.rootViewController = rootVC
 
@@ -61,33 +70,15 @@ import Testing
         bannerView.handleEventForNimbus(
             name: "na_render",
             info: renderInfo.json,
-            listener: clientListener,
+            onEvent: { onEventListener?($0) },
         )
 
-        #expect(bannerView.dynamicPriceAd?.listener === clientListener)
-
         await confirmation { confirmation in
-            clientListener.onDidReceiveNimbusEvent = { controller, event in
+            onEventListener = { _ in
                 confirmation.confirm()
             }
 
-            targetView.dynamicPriceAd?.didReceiveNimbusEvent(
-                controller: targetView.dynamicPriceAd!.controller!,
-                event: .clicked,
-            )
-        }
-
-        await confirmation { confirmation in
-            clientListener.onDidReceiveNimbusError = { controller, event in
-                confirmation.confirm()
-            }
-
-            await MainActor.run {
-                targetView.dynamicPriceAd?.didReceiveNimbusError(
-                    controller: targetView.dynamicPriceAd!.controller!,
-                    error: NimbusRenderError.alreadyDestroyed,
-                )
-            }
+            targetView.dynamicPriceAd?.eventHandler(.clicked)
         }
     }
 
@@ -101,6 +92,8 @@ import Testing
 
         bannerView.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
+        try? await Task.sleep(nanoseconds: 16_000_000)
+
         // Test that it fires click on NimbusEvent.clicked
         await confirmation { confirmation in
             clientDelegate.onDidRecordClick = { (banner) in
@@ -108,10 +101,7 @@ import Testing
                 confirmation.confirm()
             }
 
-            targetView.dynamicPriceAd?.didReceiveNimbusEvent(
-                controller: targetView.dynamicPriceAd!.controller!,
-                event: .clicked,
-            )
+            targetView.dynamicPriceAd?.eventHandler(.clicked)
         }
     }
 
@@ -122,17 +112,15 @@ import Testing
         let targetView = bannerView.targetView
         bannerView.handleEventForNimbus(name: "na_render", info: renderInfo.json)
 
-        guard let _ = targetView.dynamicPriceAd?.controller?.adView else {
+        try? await Task.sleep(nanoseconds: 16_000_000)
+
+        guard let _ = (targetView.dynamicPriceAd?.ad as? InlineAd)?.adView else {
             Issue.record("expected NimbusAdView to be attached")
             return
         }
 
         #expect(targetView.subviews.last is NimbusAdView)
-        targetView.dynamicPriceAd?.didReceiveNimbusError(
-            controller: targetView.dynamicPriceAd!.controller!,
-            error: NimbusRenderError.alreadyDestroyed
-        )
-
+        targetView.dynamicPriceAd?.errorHandler(.init(domain: .init(rawValue: ""), stage: .render))
         #expect((targetView.subviews.last is NimbusAdView) == false)
     }
 

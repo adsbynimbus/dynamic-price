@@ -14,6 +14,7 @@ Nimbus bid to the Ad Manager request and rendering the ad when Nimbus wins the a
     - [Android (Gradle)](#android-gradle)
     - [iOS (Swift Package Manager)](#ios-swift-package-manager)
 - [Migration Guide](#migration-guide)
+    - [Nimbus SDK 3.0 Migration Guide](#nimbus-sdk-30-migration-guide)
     - [Summary of Changes](#summary-of-changes)
     - [Android Migration (extension-google)](#android-migration-extension-google)
     - [iOS Migration (NimbusGAMKit)](#ios-migration-nimbusgamkit)
@@ -27,7 +28,7 @@ Nimbus bid to the Ad Manager request and rendering the ad when Nimbus wins the a
 |:---------------------------------------------|:--------------------------------------------------------------|
 | [**Android Next Gen**](library/android)      | SDK 24 (Android 7.0), Kotlin 2.0, JVM 17, GMA Next Gen 1.3.0  |
 | [**Android Legacy**](library/android-legacy) | SDK 23 (Android 6.0), Kotlin 2.0, JVM 11, GMA (Legacy) 24.9.0 |
-| [**iOS**](library/ios)                       | iOS 15.0, Swift 5.10, GMA 12                                  |
+| [**iOS**](library/ios)                       | iOS 15.0, Swift 5.10, GMA 12, Nimbus 3+                       |
 
 ## Integration
 
@@ -52,7 +53,7 @@ Add the following dependency to your `Package.swift`:
 ```swift
 let package = Package(
     dependencies: [
-        .package(url: "https://github.com/adsbynimbus/dynamic-price", from: "1.0.0")
+        .package(url: "https://github.com/adsbynimbus/dynamic-price", branch: "3.0/main")
     ],
     targets: [
         .target(
@@ -81,6 +82,18 @@ compatible with all existing inventory running Dynamic Price with Nimbus Renderi
 </script>
 ```
 
+### Nimbus SDK 3.0 Update
+
+In addition to the changes listed below, please review the 3.0 Migration guide for information on
+changes to Nimbus initialization, SDK Bidders, and replacing `NimbusRequest` /
+`NimbusRequestManager` with the new `Nimbus.bannerAd`, `Nimbus.interstitialAd`, and
+`Nimbus.rewardedAd` methods for retrieving an ad.
+
+**iOS**
+- Migration Guide - [https://docs.adsbynimbus.com/docs/nimbus-3.0-sdk-documentation/migrating-from-2.x/3.0-migration-guide-ios](https://docs.adsbynimbus.com/docs/nimbus-3.0-sdk-documentation/migrating-from-2.x/3.0-migration-guide-ios)
+- 3.0 Library Update - https://github.com/adsbynimbus/dynamic-price/pull/57
+- 3.0 Sample App Update - [Commit baa6c30](https://github.com/adsbynimbus/dynamic-price/pull/57/commits/baa6c30951d5a326473a3019b8e6835c07a3c39f)
+
 ### Summary of Changes
 
 #### Win / Loss (Android + iOS)
@@ -90,10 +103,10 @@ release.
 
 #### `applyDynamicPrice` (iOS Only)
 
-The implementation on iOS has been updated to store the `NimbusAd` in a LRU Cache automatically when
-calling `NimbusAd.applyDynamicPrice(AdManagerRequest)` for rendering in `handleEventForNimbus`. It
-is no longer required to call `applyDynamicPrice` on the `AdManagerBannerView` or
-`AdManagerInterstitialAd` objects.
+The implementation on iOS has been updated to store the `NimbusResponse` in a LRU Cache
+automatically when calling `NimbusResponse.applyDynamicPrice(AdManagerRequest)` for rendering in
+`handleEventForNimbus`. It is no longer required to call `applyDynamicPrice` on the
+`AdManagerBannerView` or `AdManagerInterstitialAd` objects.
 
 #### `BannerView.handleEventForNimbus` (iOS Only)
 
@@ -114,19 +127,30 @@ removed in an upcoming release.
 
 1. Remove the `NimbusGAMKit` library from your Swift Package or Xcode project.
 2. Add the `https://github.com/adsbynimbus/dynamic-price` Swift Package and `DynamicPrice` library
-to your application target.
-3. *Perform a clean build!* The change in step 4 can cause a build failure if using a stale build.
-4. The `handleEventForNimbus` extension has been moved to the `BannerView` class so it is no longer
+to your application target using `branch: "3.0/main`.
+3. Update the nimbus-ios-sdk Swift Package to `from: 3.0.0-rc.4` or remove the reference to
+transitively import it from the `dynamic-price` package.
+4. *Perform a clean build!* The change in step 4 can cause a build failure if using a stale build.
+5. `NimbusGAMLinearPriceMapping` and `NimbusGAMLinearPriceGranularity` have been removed. Use
+`LinearPriceMapping` and `LinearPriceGranularity` instead.
+6. The `handleEventForNimbus` extension has been moved to the `BannerView` class so it is no longer
 required to cast to `AdManagerBannerView` in the `AppEventDelegate` callback.
-5. Remove all references to `AdManagerBannerView.updatePrice`, `InterstitialAd.updatePrice`, and
-`NimbusRequestManager.notifyError`. These methods are no longer used and will be removed in an
-upcoming release.
-6. `AdLoader.loadDynamicPrice` and `AdManagerBannerView.loadDynamicPrice` have been deprecated.
+7. Replaced `listener: AdControllerDelegate?` with `onError: ((NimbusError) -> Void)?` and
+`onEvent: ((AdEvent) -> Void)?` parameters in `handleEventForNimbus`. Errors that occur before an
+impressions has fired will be sent to the Google Ad delegate as well.
+8. Remove all references to `AdManagerBannerView.updatePrice`, `InterstitialAd.updatePrice`, and
+`NimbusRequestManager.notifyError`. These methods have been deleted.
+9. Remove all references to `NimbusRequestManager` and replace instances of `NimbusRequest` with the
+3.x equivalent of `Nimbus.bannerAd`, `Nimbus.insterstitialAd`, and `Nimbus.rewardedAd` ad creation
+methods and retrieve the `NimbusResponse` by calling `try? await nimbusAd.fetch().response`.
+10. `AdLoader.loadDynamicPrice` and `AdManagerBannerView.loadDynamicPrice` have been deleted.
 Replace any occurrences with the original load methods and ensure you are calling
-`NimbusAd.applyDynamicPrice(AdManagerRequest)` prior to calling `(AdLoader/AdManagerAdView).load(AdManagerRequest)`.
-7. Remove all occurrences of `AdManagerAdView.applyDynamicPrice` and `InterstitialAd.applyDynamicPrice`.
-These methods are no longer required for Nimbus rendering and will be removed in an upcoming release.
-8. `InterstitialAd.presentDynamicPrice(from: )` has been deprecated and should be replaced with the
+`NimbusResponse.applyDynamicPrice(AdManagerRequest)` prior to calling
+`(AdLoader/AdManagerAdView).load(AdManagerRequest)`.
+11. Remove all occurrences of `AdManagerAdView.applyDynamicPrice` and
+`InterstitialAd.applyDynamicPrice`. These methods are no longer required for Nimbus rendering and
+have been deleted.
+12. `InterstitialAd.presentDynamicPrice(from: )` has been deleted and should be replaced with the
 original `InterstitialAd.present(from: nil)` method. The `DynamicPrice` SDK will automatically
 present the Nimbus rendered interstitial after the Google interstitial has been presented.
 
@@ -175,13 +199,15 @@ extension AdManagerBannerView: @retroactive AppEventDelegate {
         banner.handleEventForNimbus(name: name, info: info)
     }
 
-    func loadDynamicPrice(adRequest: AdManagerRequest, nimbusRequest: NimbusRequest) {
+    func loadDynamicPrice(adRequest: AdManagerRequest, adUnitID: String) async {
         Task {
             // Set the appEventDelegate that includes the call to `handleEventForNimbus`
             self.appEventDelegate = self
-            // See samples/ios/Sources/DynamicPrice+Helper.swift for makeRequest async method
-            let nimbusRequestManager = NimbusRequestManager()
-            let nimbusResponse = try? await nimbusRequestManager.makeRequest(nimbusRequest)
+            // Always create a new NimbusKit.InlineAd object for each request
+            let nimbusResponse = try? await Nimbus.bannerAd(
+                position: adUnitID,
+                size: .banner,
+            ).fetch().response
 
             // Apply Key-Values to AdManagerRequest
             nimbusResponse?.applyDynamicPrice(into: adRequest, mapping: DynamicPriceApp.mapping)
@@ -251,9 +277,10 @@ extension AdManagerInterstitialAd: @retroactive AppEventDelegate {
 }
 
 func loadDynamicPriceInterstitialAd(adUnitId: String) async throws -> InterstitialAd? {
-    let nimbusRequestManager = NimbusRequestManager()
-    let nimbusRequest = NimbusRequest.forInterstitialAd(position: adUnitId)
-    let nimbusResponse = try? await nimbusRequestManager.makeRequest(nimbusRequest)
+    // Always create a new AdManagerRequest for each ad call
+    let adRequest = AdManagerRequest()
+    // Always create a new NimbusKit.InterstitialAd object for each request
+    let nimbusResponse = try? await Nimbus.interstitialAd(position: adType.id).fetch().response
     // Apply Key-Values to AdManagerRequest
     nimbusResponse?.applyDynamicPrice(into: adRequest, mapping: DynamicPriceApp.mapping)
 

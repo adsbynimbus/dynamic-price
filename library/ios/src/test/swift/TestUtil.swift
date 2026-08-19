@@ -17,7 +17,9 @@ actor NimbusTestEnvironment {
 
     func initIfNeeded() async {
         guard !isInitialized else { return }
-        Nimbus.shared.initialize(publisher: "wee", apiKey: "woo")
+        await MainActor.run {
+            Nimbus.initialize(publisherKey: "wee", apiKey: "woo")
+        }
         isInitialized = true
     }
 }
@@ -25,38 +27,25 @@ actor NimbusTestEnvironment {
 func createNimbusAd(
     index: Int = 0,
     bidInCents: Int = 200,
-    type: NimbusAuctionType = .static,
+    type: NimbusResponse.Bid.MarkupType = .static,
     network: String = "network"
-) -> NimbusAd {
-    NimbusAd(
-        position: "position-\(index)",
-        auctionType: type,
-        bidRaw: Double(bidInCents) / 100,
-        bidInCents: bidInCents,
-        contentType: "",
-        auctionId: "auctionId-\(index)",
-        network: network,
-        markup: "markup",
-        isInterstitial: true,
-        placementId: "",
-        duration: type == .video ? 1 : nil,
-        adDimensions: type == .static ? NimbusAdDimensions(width: 320, height: 50) : nil,
-        trackers: nil,
-        isMraid: true,
-        extensions: nil,
+) -> NimbusResponse {
+    NimbusResponse(
+        id: "auctionId-\(index)",
+        bid: .init(
+            mtype: type,
+            adm: "markup",
+            price: Double(bidInCents) / 100,
+            ext: .init(
+                omp: .init(
+                    buyer: network,
+                    buyerPlacementId: nil,
+                ),
+            ),
+            w: type == .static ? 320 : nil,
+            h: type == .static ? 50 : nil,
+        )
     )
-}
-
-final class MockAdControllerDelegate: AdControllerDelegate {
-    var onDidReceiveNimbusEvent: ((any AdController, NimbusEvent) -> Void)?
-    func didReceiveNimbusEvent(controller: any AdController, event: NimbusEvent) {
-        onDidReceiveNimbusEvent?(controller, event)
-    }
-
-    var onDidReceiveNimbusError: ((any AdController, any NimbusError) -> Void)?
-    func didReceiveNimbusError(controller: any AdController, error: any NimbusError) {
-    onDidReceiveNimbusError?(controller, error)
-    }
 }
 
 final class MockBannerDelegate: NSObject, BannerViewDelegate {
