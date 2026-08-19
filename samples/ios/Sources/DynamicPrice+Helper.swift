@@ -1,5 +1,4 @@
 import DynamicPrice
-import NimbusKit
 import SwiftUI
 
 extension DynamicPriceApp {
