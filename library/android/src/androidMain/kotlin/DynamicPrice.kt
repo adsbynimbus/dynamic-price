@@ -17,17 +17,6 @@ import kotlinx.coroutines.*
 import java.lang.ref.WeakReference
 
 /** Appends Nimbus Key Values to the Ad Manager request and caches the ad for rendering. */
-@Deprecated("Use NimbusResponse.applyDynamicPrice instead",
-    ReplaceWith("", imports = ["com.adsbynimbus.dynamicprice"]))
-fun <T : BaseAdRequestBuilder<T>> BaseAdRequestBuilder<T>.applyDynamicPrice(
-    nimbusAd: NimbusResponse,
-    mapping: com.adsbynimbus.lineitem.Mapping,
-) {
-    DynamicPriceRenderer.adCache.put(nimbusAd.auctionId, nimbusAd)
-    applyTargeting(nimbusAd, mapping.getTarget(nimbusAd))
-}
-
-/** Appends Nimbus Key Values to the Ad Manager request and caches the ad for rendering. */
 fun <T : BaseAdRequestBuilder<T>> NimbusResponse.applyDynamicPrice(request: T, mapping: Mapping) {
     DynamicPriceRenderer.adCache.put(auctionId, this)
     request.applyTargeting(this, mapping.getTarget(this))
