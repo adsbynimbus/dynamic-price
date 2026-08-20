@@ -1,10 +1,11 @@
 package com.adsbynimbus.dynamicprice
 
-import com.adsbynimbus.NimbusAd
+import com.adsbynimbus.NimbusResponse
+import kotlin.math.roundToInt
 
 /** Provides a mapping from a Nimbus response to Dynamic Price target */
 fun interface Mapping {
-    fun getTarget(ad: NimbusAd): String
+    fun getTarget(ad: NimbusResponse): String
 }
 
 /**
@@ -26,9 +27,10 @@ class LinearPriceMapping(vararg val granularities: LinearPriceGranularity): Mapp
 
     init { granularities.sortWith(this) }
 
-    override fun getTarget(ad: NimbusAd): String {
-        val range = granularities.firstOrNull { ad.bidInCents() < it.max } ?: granularities.last()
-        return "${(ad.bidInCents() - ad.bidInCents() % range.step).coerceIn(range.min, range.max)}"
+    override fun getTarget(ad: NimbusResponse): String {
+        val bidInCents = (ad.bid.price * 100).roundToInt()
+        val range = granularities.firstOrNull { bidInCents < it.max } ?: granularities.last()
+        return "${(bidInCents - bidInCents % range.step).coerceIn(range.min, range.max)}"
     }
 
     override fun compare(o1: LinearPriceGranularity, o2: LinearPriceGranularity): Int =

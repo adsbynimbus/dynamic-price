@@ -18,9 +18,11 @@ import androidx.core.view.children
 import androidx.core.view.isEmpty
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.adsbynimbus.*
-import com.adsbynimbus.render.*
-import com.adsbynimbus.request.NimbusResponse
+import com.adsbynimbus.Ad
+import com.adsbynimbus.AdEvent
+import com.adsbynimbus.Nimbus
+import com.adsbynimbus.NimbusError
+import com.adsbynimbus.NimbusResponse
 import com.google.android.gms.ads.AdActivity
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.BaseAdView
@@ -31,7 +33,6 @@ import kotlinx.serialization.json.Json
 import java.lang.AutoCloseable
 import java.lang.ref.WeakReference
 import java.net.*
-import kotlin.coroutines.*
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -124,21 +125,25 @@ internal value class OneShotConnection(val connection: HttpURLConnection): AutoC
 }
 
 internal class DynamicPriceEventHandler(
-    val controller: AdController,
+    val controller: Ad,
     val googleClickTracker: String,
+    val onError: NimbusError.Listener,
+    val onEvent: AdEvent.Listener,
     val adViewRef: WeakReference<BaseAdView> = WeakReference(null),
     val interstitialRef: WeakReference<InterstitialAd> = WeakReference(null),
     val coroutineScope: CoroutineScope = DynamicPriceRenderer.renderScope,
-) : AdController.Listener, View.OnAttachStateChangeListener {
+) : AdEvent.Listener, NimbusError.Listener, View.OnAttachStateChangeListener {
 
     val isInterstitial = interstitialRef.get() != null
     var lifecycleJob: Job? = null
 
     init {
-        if (!isInterstitial) controller.view?.let {
+        if (!isInterstitial) controller.adView?.let {
             it.addOnAttachStateChangeListener(this)
             if (it.isAttachedToWindow) it.startLifecycleJob()
         }
+        controller.onEvent(this)
+        controller.onError(this)
     }
 
     inline val skipDestroy get() = CancellationException("na")
@@ -169,7 +174,7 @@ internal class DynamicPriceEventHandler(
 
     override fun onAdEvent(adEvent: AdEvent) {
         when (adEvent) {
-            AdEvent.CLICKED -> {
+            AdEvent.Clicked -> {
                 coroutineScope.launch(Dispatchers.IO) {
                     when (OneShotConnection(googleClickTracker).use { it.responseCode }) {
                         in 200..399 -> debugLog { "Fired Google click tracker" }
@@ -179,44 +184,29 @@ internal class DynamicPriceEventHandler(
                 adViewRef.get()?.adListener?.onAdClicked()
                 interstitialRef.get()?.fullScreenContentCallback?.onAdClicked()
             }
-            AdEvent.DESTROYED -> if (isInterstitial) maybeClearInterstitial() else {
+            AdEvent.Destroyed -> if (isInterstitial) maybeClearInterstitial() else {
                 lifecycleJob?.cancel(skipDestroy)
-                controller.view?.removeOnAttachStateChangeListener(this)
+                controller.adView?.removeOnAttachStateChangeListener(this)
             }
             else -> return
         }
+        onEvent.onAdEvent(adEvent)
     }
 
     override fun onError(error: NimbusError) {
-        controller.destroy()
         val errorMessage = { "Error Rendering Dynamic Price Nimbus Ad [${error.message}]" }
         interstitialRef.get()?.fullScreenContentCallback?.onAdFailedToShowFullScreenContent(
             AdError(-7, errorMessage(), Nimbus.sdkName)
         )
+        onError.onError(error)
         warningLog(errorMessage)
+        controller.destroy()
     }
 }
 
 internal inline val View.targetView: ViewGroup
     get() = allViews.filterIsInstance<ViewGroup>().first { viewGroup ->
         viewGroup.isEmpty() || viewGroup.children.any { it is WebView }
-    }
-
-/** Renders a Nimbus Ad into the provided ViewGroup */
-internal suspend inline fun NimbusAd.renderInline(container: ViewGroup): AdController =
-    suspendCancellableCoroutine { continuation ->
-        Renderer.loadAd(
-            this, container,
-            object : Renderer.Listener, NimbusError.Listener {
-                override fun onAdRendered(controller: AdController) {
-                    if (continuation.isActive) continuation.resume(controller) else controller.destroy()
-                }
-
-                override fun onError(error: NimbusError) {
-                    if (continuation.isActive) continuation.resumeWithException(error)
-                }
-            },
-        )
     }
 
 internal fun debugLog(block: () -> String) { Log.println(Log.DEBUG, "DynamicPrice", block()) }

@@ -1,22 +1,25 @@
 package com.adsbynimbus.dynamicprice
 
-import com.adsbynimbus.openrtb.response.BidResponse
-import com.adsbynimbus.request.NimbusResponse
+import com.adsbynimbus.NimbusResponse
+import com.adsbynimbus.NimbusResponse.Bid.MarkupType
 
 fun createNimbusAd(
     index: Int = 0,
     bidInCents: Int = 200,
-    type: String = "static",
+    type: MarkupType = MarkupType.Banner,
     network: String = "network",
-) = NimbusResponse(bid = BidResponse(
-    position = "position-$index",
-    type = type,
-    bid_raw = bidInCents / 100f,
-    bid_in_cents = bidInCents,
-    auction_id = "auctionId-$index",
-    network = network,
-    markup = "markup",
-    width = if (type == "static") 320 else 0,
-    height = if (type == "static") 50 else 0,
-))
-
+) = NimbusResponse(
+    id = "auctionId-$index",
+    bid = NimbusResponse.Bid(
+        mtype = type,
+        adm = "markup",
+        price = bidInCents / 100f,
+        w = if (type == MarkupType.Banner) 320 else 0,
+        h = if (type == MarkupType.Banner) 50 else 0,
+        ext = NimbusResponse.Bid.Extension(
+            omp = NimbusResponse.Bid.OpenMarket(
+                buyer = network,
+            ),
+        ),
+    ),
+)

@@ -2,91 +2,85 @@ package com.adsbynimbus.dynamicprice
 
 import android.app.Activity
 import androidx.core.os.BundleCompat.getSerializable
-import androidx.core.view.*
+import com.adsbynimbus.Ad
+import com.adsbynimbus.AdEvent
 import com.adsbynimbus.Nimbus
-import com.adsbynimbus.NimbusAd
+import com.adsbynimbus.NimbusError
+import com.adsbynimbus.NimbusResponse
 import com.adsbynimbus.dynamicprice.internal.*
-import com.adsbynimbus.render.*
-import com.adsbynimbus.render.Renderer.Companion.loadBlockingAd
-import com.adsbynimbus.request.NimbusResponse
 import com.google.android.libraries.ads.mobile.sdk.banner.BannerAd
-import com.google.android.libraries.ads.mobile.sdk.common.*
-import com.google.android.libraries.ads.mobile.sdk.common.FullScreenContentError.ErrorCode.MEDIATION_SHOW_ERROR
+import com.google.android.libraries.ads.mobile.sdk.common.BaseAdRequestBuilder
+import com.google.android.libraries.ads.mobile.sdk.common.FullScreenContentError
 import com.google.android.libraries.ads.mobile.sdk.interstitial.InterstitialAd
 import kotlinx.coroutines.*
 import java.lang.ref.WeakReference
 
+internal typealias GoogleAd = com.google.android.libraries.ads.mobile.sdk.common.Ad
+
 /** Appends Nimbus Key Values to the Ad Manager request and caches the ad for rendering. */
 fun <T : BaseAdRequestBuilder<T>> NimbusResponse.applyDynamicPrice(request: T, mapping: Mapping) {
-    DynamicPriceRenderer.adCache.put(auctionId, this)
+    DynamicPriceRenderer.adCache.put(id, this)
     request.applyTargeting(this, mapping.getTarget(this))
 }
 
 /**
- * Renders a [NimbusAd] when the `na_render` app event is called.
+ * Renders a [NimbusResponse] when the `na_render` app event is called.
  *
  * @param name event name passed from the `onAppEvent` callback.
  * @param data associated event data passed from the `onAppEvent` callback.
- * @param listener optional listener for Nimbus Ad events and errors.
  * @param activity optional context the ad is loaded in; current activity used as the default.
+ * @param onError Optional NimbusError.Listener for Nimbus errors
+ * @param onEvent Optional AdEvent.Listener for Nimbus Ad events
  * @return a NimbusResponse object if Nimbus won the auction or null otherwise
  */
 fun BannerAd.handleEventForNimbus(
     name: String,
     data: String?,
-    listener: AdController.Listener? = null,
     activity: Activity? = null,
+    onError: NimbusError.Listener = NimbusError.Listener { },
+    onEvent: AdEvent.Listener = AdEvent.Listener { },
 ): NimbusResponse? = when(name) {
-    "na_render" -> DynamicPriceRenderer.render(this, data, listener) { nimbusAd ->
-        val context = (activity?.takeUnless { it.isDestroyed } ?: currentActivity)
-        @Suppress("Deprecation") // Revisit this on next SDK update
-        val root = getView(context!!)
+    "na_render" -> DynamicPriceRenderer.render(this, data, onError, onEvent) { nimbusAd ->
+        val context = activity?.takeUnless { it.isDestroyed } ?: currentActivity
+        val root = @Suppress("Deprecation") getView(context!!) // Revisit this on next SDK update
         val container = root.targetView
-        /*
-            Creating the NimbusAdView with an activity context before rendering fixes a crash
-            that occurs when clicking on a companion ad.
-         */
-        val nimbusAdView = NimbusAdView(context)
-        nimbusAd.renderInline(nimbusAdView).apply {
-            // A NimbusAdView created outside the Renderer must be added to the container
-            container.addView(nimbusAdView)
-            view?.addOnAttachStateChangeListener(
+        Nimbus.inlineAd(from = nimbusAd).apply {
+            adView?.addOnAttachStateChangeListener(
                 AdControllerCleanupListener(controller = this, rootRef = WeakReference(root))
             )
-            if (nimbusAd.type() != "video") return@apply
-            container.getChildAt(0)?.doOnLayout { webView ->
-                view?.updateLayoutParams {
-                    height = webView.height
-                    width = webView.width
-                }
-            }
+            show(container)
         }
     }
     else -> null
 }
 
 /**
- * Renders a [NimbusAd] when the `na_render` app event is called.
+ * Renders a [NimbusResponse] when the `na_render` app event is called.
  *
  * @param name event name passed from the `onAppEvent` callback.
  * @param data associated event data passed from the `onAppEvent` callback.
- * @param listener optional listener for Nimbus Ad events and errors.
  * @param activity optional context the ad is loaded in; current activity used as the default.
+ * @param onError Optional NimbusError.Listener for Nimbus errors
+ * @param onEvent Optional AdEvent.Listener for Nimbus Ad events
  * @return a NimbusResponse object if Nimbus won the auction or null otherwise
  */
 fun InterstitialAd.handleEventForNimbus(
     name: String,
     data: String?,
-    listener: AdController.Listener? = null,
     activity: Activity? = null,
+    onError: NimbusError.Listener = NimbusError.Listener { },
+    onEvent: AdEvent.Listener = AdEvent.Listener { },
 ): NimbusResponse? = when (name) {
-    "na_render" -> DynamicPriceRenderer.render(this, data, listener) { nimbusAd ->
-        val context = (activity?.takeUnless { it.isDestroyed } ?: currentActivity)
-        context!!.loadBlockingAd(nimbusAd)!!
+    "na_render" -> DynamicPriceRenderer.render(this, data, onError, onEvent) { nimbusAd ->
+        val context = activity?.takeUnless { it.isDestroyed } ?: currentActivity
+        Nimbus.interstitialAd(from = nimbusAd).load(context)
     }
     "na_show" -> with(DynamicPriceRenderer) {
         renderScope.launch(Dispatchers.Main) {
-            dynamicPriceAd?.adController?.start() ?: run {
+            runCatching {
+                val interstitial = dynamicPriceAd?.adController as com.adsbynimbus.InterstitialAd
+                interstitial.show(activity?.takeUnless { it.isDestroyed } ?: currentActivity!!)
+            }.onFailure {
                 adEventCallback?.onAdFailedToShowFullScreenContent(failToShowError)
                 maybeClearInterstitial(activity)
             }
@@ -97,13 +91,12 @@ fun InterstitialAd.handleEventForNimbus(
 }
 
 /**
- * Wrapper for a Nimbus [AdController] associated with a NextGen [Ad] object.
+ * Wrapper for a Nimbus [Ad] associated with a NextGen [GoogleAd] object.
  *
  * @see dynamicPriceAd
  */
-@JvmInline
-value class DynamicPriceAd(val adController: AdController) : java.io.Serializable {
-    /** Destroys the associated [AdController]. */
+class DynamicPriceAd(val adController: Ad) : java.io.Serializable {
+    /** Destroys the associated [Ad]. */
     fun destroy(): Unit = adController.destroy()
 }
 
@@ -117,7 +110,7 @@ value class DynamicPriceAd(val adController: AdController) : java.io.Serializabl
  * bannerAd?.dynamicPriceAd?.destroy()
  * ```
  */
-inline var Ad.dynamicPriceAd: DynamicPriceAd?
+inline var GoogleAd.dynamicPriceAd: DynamicPriceAd?
     get() = getSerializable(getResponseInfo().responseExtras, "na_render", DynamicPriceAd::class.java)
     internal set(value) {
         getResponseInfo().responseExtras.apply {
@@ -125,19 +118,19 @@ inline var Ad.dynamicPriceAd: DynamicPriceAd?
         }
     }
 
-internal fun BaseAdRequestBuilder<*>.applyTargeting(nimbusAd: NimbusResponse, target: String) {
-    val isVideo = nimbusAd.bid.type == "video"
-    putCustomTargeting("na_id", nimbusAd.bid.auction_id)
-    putCustomTargeting("na_bid" + if (isVideo) "_video" else "",
-        if (Nimbus.testMode) "0" else target)
-    putCustomTargeting("na_network", nimbusAd.bid.network)
-    putCustomTargeting("na_render", if (isVideo) "video" else "static")
-    putCustomTargeting("na_size", "${nimbusAd.bid.width}x${nimbusAd.bid.height}")
-    putCustomTargeting("na_type", if (isVideo) "video" else "static")
-}
-
 internal inline val failToShowError get() = FullScreenContentError(
-    code = MEDIATION_SHOW_ERROR,
+    code = FullScreenContentError.ErrorCode.MEDIATION_SHOW_ERROR,
     message = "${Nimbus.sdkName} controller failed to show",
     mediationAdError = null,
 )
+
+internal fun BaseAdRequestBuilder<*>.applyTargeting(nimbusAd: NimbusResponse, target: String) {
+    val isVideo = nimbusAd.bid.mtype == NimbusResponse.Bid.MarkupType.Video
+    putCustomTargeting("na_id", nimbusAd.id)
+    putCustomTargeting("na_bid" + if (isVideo) "_video" else "",
+        if (Nimbus.configuration.testMode) "0" else target)
+    nimbusAd.bid.ext.omp?.buyer?.let { putCustomTargeting("na_network", it) }
+    putCustomTargeting("na_render", if (isVideo) "video" else "static")
+    putCustomTargeting("na_size", "${nimbusAd.bid.w}x${nimbusAd.bid.h}")
+    putCustomTargeting("na_type", if (isVideo) "video" else "static")
+}
