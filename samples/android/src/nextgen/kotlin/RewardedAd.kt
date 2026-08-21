@@ -6,21 +6,20 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import com.adsbynimbus.Nimbus
 import com.adsbynimbus.dynamicprice.*
 import com.adsbynimbus.dynamicprice.sample.AdTypes.*
-import com.adsbynimbus.request.NimbusRequest
-import com.adsbynimbus.request.NimbusRequest.Companion.forRewardedVideo
 import com.google.android.libraries.ads.mobile.sdk.common.*
 import com.google.android.libraries.ads.mobile.sdk.rewarded.*
 
 suspend fun loadDynamicPriceRewardedVideo(
     context: Context,
     adRequest: AdRequest.Builder,
-    nimbusRequest: NimbusRequest,
+    nimbusRequest: com.adsbynimbus.RewardedAd,
 ): AdLoadResult<RewardedAd> {
     DynamicPriceHelper.runCatching {
-        val nimbusResponse = requestManager.makeRequest(context, nimbusRequest)
-        nimbusResponse.applyDynamicPrice(adRequest, mapping = mapping)
+        val nimbusResponse = nimbusRequest.fetch(context).response
+        nimbusResponse?.applyDynamicPrice(adRequest, mapping = mapping)
     }
     return RewardedAd.loadDynamicPrice(adRequest.build())
 }
@@ -36,7 +35,7 @@ fun RewardedAdScreen(modifier: Modifier = Modifier) {
         val adResponse = loadDynamicPriceRewardedVideo(
             context = activity,
             adRequest = AdRequest.Builder(BuildConfig.ADMANAGER_ADUNIT_ID),
-            nimbusRequest = forRewardedVideo(RewardedVideo.title),
+            nimbusRequest = Nimbus.rewardedAd(RewardedVideo.title),
         )
         if (adResponse is AdLoadResult.Success<RewardedAd>) {
             adResponse.ad.adEventCallback = object : RewardedAdEventCallback,
