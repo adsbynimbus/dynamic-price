@@ -27,7 +27,7 @@ class NimbusInitializer : Initializer<Unit> {
     override fun create(context: Context) {
         val nimbusStartup = measureTime {
             Nimbus.initialize(context, BuildConfig.PUBLISHER_KEY, BuildConfig.API_KEY)
-            Nimbus.testMode = true
+            Nimbus.configuration.testMode = true
         }
 
         Log.i("DynamicPrice", "Nimbus init time: $nimbusStartup")

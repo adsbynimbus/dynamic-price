@@ -1,6 +1,5 @@
 package com.adsbynimbus.dynamicprice.sample
 
-import com.adsbynimbus.NimbusAdManager
 import com.adsbynimbus.dynamicprice.*
 
 object DynamicPriceHelper {
@@ -18,7 +17,4 @@ object DynamicPriceHelper {
         LinearPriceGranularity(800, 2000, 50),
         LinearPriceGranularity(2000, 3500, 100)
     )
-
-    /** Must be called after Nimbus.initialize() */
-    val requestManager: NimbusAdManager = NimbusAdManager()
 }

@@ -5,15 +5,17 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import com.adsbynimbus.InterstitialAd
+import com.adsbynimbus.Nimbus
 import com.adsbynimbus.dynamicprice.applyDynamicPrice
 import com.adsbynimbus.dynamicprice.dynamicPriceAd
 import com.adsbynimbus.dynamicprice.handleEventForNimbus
 import com.adsbynimbus.dynamicprice.sample.AdTypes.Interstitial
-import com.adsbynimbus.request.NimbusRequest
-import com.adsbynimbus.request.NimbusRequest.Companion.forInterstitialAd
 import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.admanager.AdManagerAdRequest
+import com.google.android.gms.ads.admanager.AdManagerInterstitialAd
+import com.google.android.gms.ads.admanager.AdManagerInterstitialAdLoadCallback
 import com.google.android.gms.ads.admanager.*
-import com.google.android.gms.ads.interstitial.InterstitialAd
 import kotlinx.coroutines.*
 import kotlin.coroutines.*
 
@@ -22,11 +24,11 @@ suspend fun loadDynamicPriceInterstitial(
     context: Context,
     adUnitId: String,
     adRequest: AdManagerAdRequest.Builder,
-    nimbusRequest: NimbusRequest,
+    nimbusRequest: InterstitialAd,
 ): AdManagerInterstitialAd {
     DynamicPriceHelper.runCatching {
-        val nimbusResponse = requestManager.makeRequest(context, nimbusRequest)
-        nimbusResponse.applyDynamicPrice(adRequest, mapping = mapping)
+        val nimbusResponse = nimbusRequest.fetch(context).response
+        nimbusResponse?.applyDynamicPrice(adRequest, mapping = mapping)
     }
     return suspendCancellableCoroutine { continuation ->
         AdManagerInterstitialAd.load(context, adUnitId, adRequest.build(),
@@ -57,14 +59,14 @@ fun InterstitialScreen(modifier: Modifier = Modifier) {
         Text(modifier = modifier, text = "Unable to resolve Activity")
         return
     }
-    var interstitialAd by remember { mutableStateOf<InterstitialAd?>(null) }
+    var interstitialAd by remember { mutableStateOf<AdManagerInterstitialAd?>(null) }
     LaunchedEffect(true) {
         interstitialAd = runCatching {
             loadDynamicPriceInterstitial(
                 context = activity,
                 adUnitId = BuildConfig.ADMANAGER_ADUNIT_ID,
                 adRequest = AdManagerAdRequest.Builder(),
-                nimbusRequest = forInterstitialAd(Interstitial.title),
+                nimbusRequest = Nimbus.interstitialAd(Interstitial.title),
             )
         }.onSuccess {
             it.fullScreenContentCallback = FullScreenLogListener(Interstitial.title)

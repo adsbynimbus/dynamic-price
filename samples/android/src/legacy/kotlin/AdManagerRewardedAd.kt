@@ -6,12 +6,11 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import com.adsbynimbus.Nimbus
 import com.adsbynimbus.dynamicprice.applyDynamicPrice
 import com.adsbynimbus.dynamicprice.isNimbusWin
 import com.adsbynimbus.dynamicprice.loadDynamicPriceRewardedAd
 import com.adsbynimbus.dynamicprice.sample.AdTypes.RewardedVideo
-import com.adsbynimbus.request.*
-import com.adsbynimbus.request.NimbusRequest.Companion.forRewardedVideo
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.admanager.*
 import com.google.android.gms.ads.rewarded.*
@@ -23,11 +22,11 @@ suspend fun loadDynamicPriceRewardedVideo(
     context: Context,
     adUnitId: String,
     adRequest: AdManagerAdRequest.Builder,
-    nimbusRequest: NimbusRequest,
+    nimbusRequest: com.adsbynimbus.RewardedAd,
 ): RewardedAd {
     DynamicPriceHelper.runCatching {
-        val nimbusResponse = requestManager.makeRequest(context, nimbusRequest)
-        nimbusResponse.applyDynamicPrice(adRequest, mapping = mapping)
+        val nimbusResponse = nimbusRequest.fetch(context).response
+        nimbusResponse?.applyDynamicPrice(adRequest, mapping = mapping)
     }
     return suspendCancellableCoroutine { continuation ->
         loadDynamicPriceRewardedAd(context, adUnitId, adRequest.build(),
@@ -59,7 +58,7 @@ fun RewardedAdScreen(modifier: Modifier = Modifier) {
                 context = activity,
                 adUnitId = BuildConfig.ADMANAGER_ADUNIT_ID,
                 adRequest = AdManagerAdRequest.Builder(),
-                nimbusRequest = forRewardedVideo(RewardedVideo.title),
+                nimbusRequest = Nimbus.rewardedAd(RewardedVideo.title),
             )
         }.onSuccess { rewardedAd ->
             rewardedAd.onAdMetadataChangedListener = {
