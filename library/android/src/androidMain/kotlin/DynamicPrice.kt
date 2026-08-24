@@ -1,7 +1,10 @@
 package com.adsbynimbus.dynamicprice
 
 import android.app.Activity
+import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.core.os.BundleCompat.getSerializable
+import androidx.core.view.updateLayoutParams
 import com.adsbynimbus.Ad
 import com.adsbynimbus.AdEvent
 import com.adsbynimbus.Nimbus
@@ -14,6 +17,7 @@ import com.google.android.libraries.ads.mobile.sdk.common.FullScreenContentError
 import com.google.android.libraries.ads.mobile.sdk.interstitial.InterstitialAd
 import kotlinx.coroutines.*
 import java.lang.ref.WeakReference
+import kotlin.math.min
 
 internal typealias GoogleAd = com.google.android.libraries.ads.mobile.sdk.common.Ad
 
@@ -40,15 +44,23 @@ fun BannerAd.handleEventForNimbus(
     onError: NimbusError.Listener = NimbusError.Listener { },
     onEvent: AdEvent.Listener = AdEvent.Listener { },
 ): NimbusResponse? = when(name) {
-    "na_render" -> DynamicPriceRenderer.render(this, data, onError, onEvent) { nimbusAd ->
-        val context = activity?.takeUnless { it.isDestroyed } ?: currentActivity
-        val root = @Suppress("Deprecation") getView(context!!) // Revisit this on next SDK update
-        val container = root.targetView
-        Nimbus.inlineAd(from = nimbusAd).apply {
-            adView?.addOnAttachStateChangeListener(
-                AdControllerCleanupListener(controller = this, rootRef = WeakReference(root))
+    "na_render" -> DynamicPriceRenderer.from(data)?.let { renderer ->
+        renderer.nimbusResponse?.also {
+            val context = activity?.takeUnless { it.isDestroyed } ?: currentActivity
+            val root = @Suppress("Deprecation") getView(context!!) // Revisit this on next SDK update
+            val container = root.targetView
+            val nimbusAd = Nimbus.inlineAd(from = it)
+            val handler = DynamicPriceEventHandler(
+                googleAd = this,
+                googleClickTracker = renderer.clickTracker,
+                nimbusAd = nimbusAd,
+                onError = onError,
+                onEvent = onEvent,
+                rootView = root,
             )
-            show(container)
+
+            root.addOnAttachStateChangeListener(handler)
+            root.add
         }
     }
     else -> null

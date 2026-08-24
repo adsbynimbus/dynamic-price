@@ -1,12 +1,16 @@
 package com.adsbynimbus.dynamicprice.sample
 
+import ads_mobile_sdk.wi
 import android.graphics.Rect
 import android.view.*
 import android.view.View.OnLayoutChangeListener
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.*
@@ -74,7 +78,7 @@ fun AdView.refreshingDynamicPrice(
             lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 // The while loop enables refreshing the ad tied to the lifecycle
                 while (isActive) {
-                    delay(30.seconds - lastRequestTime.elapsedNow())
+                    delay(600.seconds - lastRequestTime.elapsedNow())
                     if (getBannerAd() != null) waitUntilVisible()
                     if (isActive) {
                         lastRequestTime = TimeSource.Monotonic.markNow()
@@ -98,19 +102,28 @@ fun AdView.refreshingDynamicPrice(
 @Composable
 fun BannerAdScreen(modifier: Modifier = Modifier) {
     val lifecycleOwner = LocalLifecycleOwner.current
-    AdManagerInlineAd(
-        onLoadAd = {
-            it.refreshingDynamicPrice(
-                adEventCallback = LoggingAdEventCallback(AdViewBanner.title),
-                adRequestProvider = {
-                    BannerAdRequest.Builder(BuildConfig.ADMANAGER_ADUNIT_ID, GoogleAdSize.BANNER)
-                },
-                nimbusRequest = Nimbus.bannerAd(AdViewBanner.title, AdSize.Banner),
-                lifecycleOwner = lifecycleOwner,
-            )
-        },
-        modifier = modifier,
-    )
+    val window = LocalWindowInfo.current
+    Box {
+        AdManagerInlineAd(
+            onLoadAd = {
+                it.refreshingDynamicPrice(
+                    adEventCallback = LoggingAdEventCallback(AdViewBanner.title),
+                    adRequestProvider = {
+                        BannerAdRequest.Builder(
+                            adUnitId = BuildConfig.ADMANAGER_ADUNIT_ID,
+                            adSize = GoogleAdSize.getLargeAnchoredAdaptiveBannerAdSize(
+                                context = it.context,
+                                width = window.containerDpSize.width.value.toInt(),
+                            ),
+                        )
+                    },
+                    nimbusRequest = Nimbus.bannerAd(AdViewBanner.title, AdSize.Banner),
+                    lifecycleOwner = lifecycleOwner,
+                )
+            },
+            modifier = modifier.align(Alignment.BottomCenter),
+        )
+    }
 }
 
 @Composable
@@ -121,7 +134,10 @@ fun BannerVideoScreen(modifier: Modifier = Modifier) {
             it.refreshingDynamicPrice(
                 adEventCallback = LoggingAdEventCallback(AdViewBannerWithVideo.title),
                 adRequestProvider = {
-                    BannerAdRequest.Builder(BuildConfig.ADMANAGER_ADUNIT_ID, GoogleAdSize.MEDIUM_RECTANGLE)
+                    BannerAdRequest.Builder(
+                        BuildConfig.ADMANAGER_ADUNIT_ID,
+                        GoogleAdSize.MEDIUM_RECTANGLE
+                    )
                 },
                 nimbusRequest = Nimbus.bannerAd(AdViewBannerWithVideo.title, AdSize.Mrec) {
                     video()
