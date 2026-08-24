@@ -94,19 +94,29 @@ fun AdView.refreshingDynamicPrice(
 @Composable
 fun BannerAdScreen(modifier: Modifier = Modifier) {
     val lifecycleOwner = LocalLifecycleOwner.current
-    AdManagerInlineAd(
-        onLoadAd = {
-            it.refreshingDynamicPrice(
-                adEventCallback = LoggingAdEventCallback(AdViewBanner.title),
-                adRequestProvider = {
-                    BannerAdRequest.Builder(BuildConfig.ADMANAGER_ADUNIT_ID, AdSize.BANNER)
-                },
-                nimbusRequest = forBannerAd(AdViewBanner.title, BANNER_320_50),
-                lifecycleOwner = lifecycleOwner,
-            )
-        },
-        modifier = modifier,
-    )
+    val window = LocalWindowInfo.current
+    Box {
+        AdManagerInlineAd(
+            onLoadAd = {
+                it.refreshingDynamicPrice(
+                    adEventCallback = LoggingAdEventCallback(AdViewBanner.title),
+                    adRequestProvider = {
+                        @Suppress("Deprecation")
+                        BannerAdRequest.Builder(
+                            adUnitId = BuildConfig.ADMANAGER_ADUNIT_ID,
+                            adSize = AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
+                                context = it.context,
+                                width = window.containerDpSize.width.value.toInt(),
+                            ),
+                        )
+                    },
+                    nimbusRequest = forBannerAd(AdViewBanner.title, BANNER_320_50),
+                    lifecycleOwner = lifecycleOwner,
+                )
+            },
+            modifier = modifier.align(Alignment.BottomCenter),
+        )
+    }
 }
 
 @Composable
