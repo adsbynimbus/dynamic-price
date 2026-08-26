@@ -21,6 +21,7 @@ class GoogleMobileAdInitializer : Initializer<Unit> {
                 Log.i("DynamicPrice", "Google init time: $googleInit")
             }
         }
+        com.adsbynimbus.dynamicprice.internal.enableScaling = true
     }
 
     override fun dependencies(): MutableList<Class<out Initializer<*>>> = mutableListOf()
