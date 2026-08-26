@@ -64,6 +64,7 @@ fun BannerAd.handleEventForNimbus(
             view?.addOnAttachStateChangeListener(
                 AdControllerCleanupListener(controller = this, rootRef = WeakReference(root))
             )
+            if (enableScaling) container.applyScale()
             if (nimbusAd.type() != "video") return@apply
             container.getChildAt(0)?.doOnLayout { webView ->
                 view?.updateLayoutParams {

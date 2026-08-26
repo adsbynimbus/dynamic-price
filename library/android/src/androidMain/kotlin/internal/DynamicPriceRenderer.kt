@@ -29,6 +29,7 @@ import java.lang.AutoCloseable
 import java.lang.ref.WeakReference
 import java.net.*
 import kotlin.coroutines.*
+import kotlin.math.min
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.use
@@ -222,3 +223,16 @@ internal class AdControllerCleanupListener(
 
 internal fun debugLog(block: () -> String) { Log.println(Log.DEBUG, "DynamicPrice", block()) }
 internal fun warningLog(block: () -> String) { Log.println(Log.WARN, "DynamicPrice", block()) }
+
+var enableScaling: Boolean = false
+
+internal fun View.applyScale() {
+    addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
+        val parent = v.parent as? View ?: return@addOnLayoutChangeListener
+        val scale: Float = min(parent.width / v.width.toFloat(), parent.height / v.height.toFloat())
+        if (scale.isFinite()) {
+            v.scaleX = scale
+            v.scaleY = scale
+        }
+    }
+}
