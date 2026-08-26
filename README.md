@@ -38,10 +38,10 @@ Add the DynamicPrice library to your `build.gradle.kts` file:
 ```kotlin
 dependencies {
     // For use with the Google Mobile Ads Next Gen SDK
-    implementation("com.adsbynimbus.dynamicprice:dynamicprice:1.0.1")
+    implementation("com.adsbynimbus.dynamicprice:dynamicprice:1.1.0")
 
     // For use with the Google Mobile Ads (Legacy) SDK
-    implementation("com.adsbynimbus.dynamicprice:dynamicprice-legacy:1.0.0")
+    implementation("com.adsbynimbus.dynamicprice:dynamicprice-legacy:1.1.0")
 }
 ```
 
@@ -52,7 +52,7 @@ Add the following dependency to your `Package.swift`:
 ```swift
 let package = Package(
     dependencies: [
-        .package(url: "https://github.com/adsbynimbus/dynamic-price", from: "1.0.0")
+        .package(url: "https://github.com/adsbynimbus/dynamic-price", from: "1.1.0")
     ],
     targets: [
         .target(
@@ -109,6 +109,9 @@ AdManagerBannerView` before calling `handleEventForNimbus`.
 3. Remove all references to `GoogleAuctionData`, `RequestManager.notifyNoFill` and
 `RequestManager.notifyImpression`. These classes and methods are no longer used and will be
 removed in an upcoming release.
+4. Replace `com.adsbynimbus.lineitem` and `com.adsbynimbus.google` imports with
+`com.adsbynimbus.dynamicprice`. All classes have been duplicated into the new namespace and the
+previous implementations will be removed in an upcoming release.
 
 ### iOS Migration (NimbusGAMKit)
 
@@ -129,6 +132,8 @@ These methods are no longer required for Nimbus rendering and will be removed in
 8. `InterstitialAd.presentDynamicPrice(from: )` has been deprecated and should be replaced with the
 original `InterstitialAd.present(from: nil)` method. The `DynamicPrice` SDK will automatically
 present the Nimbus rendered interstitial after the Google interstitial has been presented.
+9. `NimbusGAMLinearPriceMapping` and `NimbusGAMLinearPriceGranularity` have been renamed to
+`LinearPriceMapping` and `LinearPriceGranularity`
 
 ---
 
