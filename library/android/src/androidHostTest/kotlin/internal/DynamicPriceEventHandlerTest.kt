@@ -39,7 +39,7 @@ class DynamicPriceEventHandlerTest {
     var controller: AdController = mockk(relaxed = true)
     val bannerAd: BannerAd = mockk(relaxed = true)
     val interstitialAd: InterstitialAd = mockk(relaxed = true)
-    var view: View = mockk(relaxed = true)
+    var adView: View = mockk(relaxed = true)
     val testDispatcher = StandardTestDispatcher()
     val testScope = TestScope(testDispatcher)
 
@@ -65,10 +65,9 @@ class DynamicPriceEventHandlerTest {
 
     @BeforeTest
     fun setUp() {
-        clearMocks(controller, view, bannerAd, interstitialAd)
+        clearMocks(controller, adView, bannerAd, interstitialAd)
 
-        every { controller.view } returns view
-        every { view.post(any()) } answers {
+        every { adView.post(any()) } answers {
             (it.invocation.args[0] as Runnable).run()
             true
         }
@@ -82,11 +81,13 @@ class DynamicPriceEventHandlerTest {
     @Test
     fun `onAdEvent CLICKED should trigger click tracker and callbacks`() = testScope.runTest {
         arrayOf(DynamicPriceEventHandler(
+            bannerView = adView,
             googleAd = bannerAd,
             googleClickTracker = "https://test.com/click",
             nimbusAd = controller,
             coroutineScope = this,
         ), DynamicPriceEventHandler(
+            bannerView = null,
             googleAd = interstitialAd,
             googleClickTracker = "https://test.com/click",
             nimbusAd = controller,
@@ -104,6 +105,7 @@ class DynamicPriceEventHandlerTest {
     @Test
     fun `onAdEvent DESTROYED for interstitial should NOT destroy controller`() = testScope.runTest {
         val handler = DynamicPriceEventHandler(
+            bannerView = null,
             googleAd = interstitialAd,
             googleClickTracker = "",
             nimbusAd = controller,
@@ -122,6 +124,7 @@ class DynamicPriceEventHandlerTest {
     @Test
     fun `onError should destroy controller and call fail callback on interstitial`() = testScope.runTest {
         val handler = DynamicPriceEventHandler(
+            bannerView = null,
             googleAd = interstitialAd,
             googleClickTracker = "",
             nimbusAd = controller,

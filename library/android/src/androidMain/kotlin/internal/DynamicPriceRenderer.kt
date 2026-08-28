@@ -19,6 +19,7 @@ import com.adsbynimbus.*
 import com.adsbynimbus.dynamicprice.*
 import com.adsbynimbus.render.*
 import com.adsbynimbus.request.NimbusResponse
+import com.google.android.libraries.ads.mobile.sdk.banner.AdView
 import com.google.android.libraries.ads.mobile.sdk.banner.BannerAd
 import com.google.android.libraries.ads.mobile.sdk.common.*
 import com.google.android.libraries.ads.mobile.sdk.interstitial.InterstitialAd
@@ -44,19 +45,14 @@ internal class DynamicPriceRenderer(
             ad: Ad,
             data: String?,
             publisherListener: AdController.Listener?,
-            render: suspend (NimbusResponse) -> AdController,
+            render: suspend (NimbusResponse, String) -> AdController,
         ): NimbusResponse? {
             val event = runCatching { jsonSerializer.decodeFromString(serializer(), data!!) }
                 .getOrNull() ?: return null
             return adCache[event.auctionId]?.also { response ->
                 renderScope.launch(Dispatchers.Main) {
                     runCatching {
-                        val controller = render(response).apply {
-                            listeners.add(DynamicPriceEventHandler(
-                                googleAd = ad,
-                                googleClickTracker = event.clickTracker,
-                                nimbusAd = this,
-                            ))
+                        val controller = render(response, event.clickTracker).apply {
                             publisherListener?.let { listeners.add(it) }
                         }
                         ad.dynamicPriceAd = DynamicPriceAd(controller)
@@ -141,14 +137,18 @@ internal value class OneShotConnection(val connection: HttpURLConnection): AutoC
 }
 
 internal class DynamicPriceEventHandler(
+    bannerView: View?,
     googleAd: Ad,
     val googleClickTracker: String,
     val nimbusAd: AdController,
     val coroutineScope: CoroutineScope = DynamicPriceRenderer.renderScope,
-) : AdController.Listener {
+) : AdController.Listener, View.OnAttachStateChangeListener {
 
-    val isInterstitial = googleAd is InterstitialAd
+    val isInterstitial = bannerView == null
     val googleAdRef = WeakReference(googleAd)
+    val bannerViewRef = WeakReference(bannerView)
+
+    init { bannerView?.addOnAttachStateChangeListener(this) }
 
     val adEventCallback: AdEventCallback?
         get() = when(val ad = googleAdRef.get()) {
@@ -170,7 +170,9 @@ internal class DynamicPriceEventHandler(
             }
             AdEvent.DESTROYED -> {
                 googleAdRef.get()?.dynamicPriceAd = null
-                if (isInterstitial) maybeClearInterstitial()
+                if (isInterstitial) maybeClearInterstitial() else {
+                    bannerViewRef.get()?.removeOnAttachStateChangeListener(this)
+                }
             }
             else -> return
         }
@@ -180,6 +182,18 @@ internal class DynamicPriceEventHandler(
         nimbusAd.destroy()
         if (isInterstitial) adEventCallback?.onAdFailedToShowFullScreenContent(failToShowError)
     }
+
+    override fun onViewDetachedFromWindow(v: View) {
+        val adView = v.parent as? AdView ?: return
+        v.post {
+            if (v.parent != adView && adView.getBannerAd() !== googleAdRef.get()) {
+                nimbusAd.destroy()
+                v.removeOnAttachStateChangeListener(this)
+            }
+        }
+    }
+
+    override fun onViewAttachedToWindow(v: View) { /* no-op */ }
 }
 
 internal inline val View.targetView: ViewGroup
@@ -203,22 +217,6 @@ internal suspend inline fun NimbusAd.renderInline(container: ViewGroup): AdContr
             },
         )
     }
-}
-
-internal class AdControllerCleanupListener(
-    val controller: AdController,
-    val rootRef: WeakReference<View>,
-): View.OnAttachStateChangeListener {
-    override fun onViewDetachedFromWindow(v: View) {
-        v.post {
-            if (rootRef.get()?.parent == null) {
-                controller.destroy()
-                v.removeOnAttachStateChangeListener(this)
-            }
-        }
-    }
-
-    override fun onViewAttachedToWindow(v: View) { /* no-op */ }
 }
 
 internal fun debugLog(block: () -> String) { Log.println(Log.DEBUG, "DynamicPrice", block()) }
