@@ -14,7 +14,6 @@ import com.google.android.libraries.ads.mobile.sdk.common.*
 import com.google.android.libraries.ads.mobile.sdk.common.FullScreenContentError.ErrorCode.MEDIATION_SHOW_ERROR
 import com.google.android.libraries.ads.mobile.sdk.interstitial.InterstitialAd
 import kotlinx.coroutines.*
-import java.lang.ref.WeakReference
 
 /** Appends Nimbus Key Values to the Ad Manager request and caches the ad for rendering. */
 @Deprecated("Use NimbusResponse.applyDynamicPrice instead",
@@ -48,7 +47,7 @@ fun BannerAd.handleEventForNimbus(
     listener: AdController.Listener? = null,
     activity: Activity? = null,
 ): NimbusResponse? = when(name) {
-    "na_render" -> DynamicPriceRenderer.render(this, data, listener) { nimbusAd ->
+    "na_render" -> DynamicPriceRenderer.render(this, data, listener) { nimbusAd, clickTracker ->
         val context = (activity?.takeUnless { it.isDestroyed } ?: currentActivity)
         @Suppress("Deprecation") // Revisit this on next SDK update
         val root = getView(context!!)
@@ -61,9 +60,12 @@ fun BannerAd.handleEventForNimbus(
         nimbusAd.renderInline(nimbusAdView).apply {
             // A NimbusAdView created outside the Renderer must be added to the container
             container.addView(nimbusAdView)
-            view?.addOnAttachStateChangeListener(
-                AdControllerCleanupListener(controller = this, rootRef = WeakReference(root))
-            )
+            listeners.add(DynamicPriceEventHandler(
+                bannerView = root,
+                googleAd = this@handleEventForNimbus,
+                googleClickTracker = clickTracker,
+                nimbusAd = this,
+            ))
             if (enableScaling) container.applyScale()
             if (nimbusAd.type() != "video") return@apply
             container.getChildAt(0)?.doOnLayout { webView ->
@@ -92,9 +94,16 @@ fun InterstitialAd.handleEventForNimbus(
     listener: AdController.Listener? = null,
     activity: Activity? = null,
 ): NimbusResponse? = when (name) {
-    "na_render" -> DynamicPriceRenderer.render(this, data, listener) { nimbusAd ->
+    "na_render" -> DynamicPriceRenderer.render(this, data, listener) { nimbusAd, clickTracker ->
         val context = (activity?.takeUnless { it.isDestroyed } ?: currentActivity)
-        context!!.loadBlockingAd(nimbusAd)!!
+        context!!.loadBlockingAd(nimbusAd)!!.apply {
+            listeners.add(DynamicPriceEventHandler(
+                bannerView = null,
+                googleAd = this@handleEventForNimbus,
+                googleClickTracker = clickTracker,
+                nimbusAd = this,
+            ))
+        }
     }
     "na_show" -> with(DynamicPriceRenderer) {
         renderScope.launch(Dispatchers.Main) {

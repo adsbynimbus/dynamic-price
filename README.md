@@ -38,7 +38,7 @@ Add the DynamicPrice library to your `build.gradle.kts` file:
 ```kotlin
 dependencies {
     // For use with the Google Mobile Ads Next Gen SDK
-    implementation("com.adsbynimbus.dynamicprice:dynamicprice:1.1.0")
+    implementation("com.adsbynimbus.dynamicprice:dynamicprice:1.1.1")
 
     // For use with the Google Mobile Ads (Legacy) SDK
     implementation("com.adsbynimbus.dynamicprice:dynamicprice-legacy:1.1.0")
