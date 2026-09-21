@@ -3,7 +3,7 @@ android = "9.4.0"
 dokka = "2.2.0"
 kotlin = "2.4.20"
 
-ads-google-legacy = "25.4.0"
+ads-google-legacy = "25.5.0"
 ads-google-nextgen = "1.4.0"
 ads-nimbus = "2.37.2"
 
