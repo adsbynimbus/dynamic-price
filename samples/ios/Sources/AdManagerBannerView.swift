@@ -23,12 +23,11 @@ extension AdManagerBannerView: @retroactive AppEventDelegate {
 struct BannerAdScreen: View {
     var body: some View {
         VStack {
-            AdManagerInlineAd(AdSizeBanner) { adView in
-                adView.loadDynamicPrice(
-                    adRequest: AdManagerRequest(),
-                    nimbusRequest: .forBannerAd(position: AdTypes.Banner.id)
-                )
-            }
+            // Refreshing is handled by the DynamicPriceView
+            DynamicPriceInlineAd(
+                adSize: AdSizeBanner,
+                nimbusRequest: .forBannerAd(position: AdTypes.Banner.id),
+            )
             .frame(width: AdSizeBanner.size.width, height: AdSizeBanner.size.height)
         }.navigationTitle(AdTypes.Banner.rawValue)
     }

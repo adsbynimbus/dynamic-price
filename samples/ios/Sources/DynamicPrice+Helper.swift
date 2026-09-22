@@ -35,7 +35,8 @@ extension NimbusRequestManager {
             continuation = nil
         }
     }
-    
+
+    @MainActor
     func makeRequest(_ request: NimbusRequest) async throws -> NimbusAd {
         let listener = RequestListener()
         delegate = listener
