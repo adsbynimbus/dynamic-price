@@ -52,6 +52,10 @@ gradle.lifecycle.beforeProject {
         it.configureEach {
             resolutionStrategy.eachDependency {
                 when (requested.module.group) {
+                    "org.freemarker" -> {
+                        useVersion("2.3.35")
+                        because("Fixes CVE-2026-84939")
+                    }
                     "org.jsoup" -> {
                         useVersion("1.23.1")
                         because("Fixes CWE-79")

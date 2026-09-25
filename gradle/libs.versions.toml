@@ -1,6 +1,6 @@
 [versions]
-android = "9.4.0"
-dokka = "2.2.0"
+android = "9.4.1"
+dokka = "2.3.0-Beta"
 kotlin = "2.4.20"
 
 ads-google-legacy = "25.5.0"
@@ -9,10 +9,10 @@ ads-nimbus = "2.37.2"
 
 androidx-activity = "1.13.0"
 androidx-compose = "2026.09.00"
-androidx-core = "1.19.0"
+androidx-core = "1.19.1"
 androidx-lifecycle = "2.11.0"
 androidx-media3 = "1.11.1"
-androidx-navigation = "2.10.1"
+androidx-navigation = "2.10.2"
 androidx-startup = "1.2.0"
 kotlinx-coroutines = "1.11.0"
 leakcanary = "3.0-alpha-9"
