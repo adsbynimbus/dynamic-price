@@ -66,7 +66,6 @@ fun BannerAd.handleEventForNimbus(
                 googleClickTracker = clickTracker,
                 nimbusAd = this,
             ))
-            if (enableScaling) container.applyScale()
             if (nimbusAd.type() != "video") return@apply
             container.getChildAt(0)?.doOnLayout { webView ->
                 view?.updateLayoutParams {
