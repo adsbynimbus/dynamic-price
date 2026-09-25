@@ -221,16 +221,3 @@ internal suspend inline fun NimbusAd.renderInline(container: ViewGroup): AdContr
 
 internal fun debugLog(block: () -> String) { Log.println(Log.DEBUG, "DynamicPrice", block()) }
 internal fun warningLog(block: () -> String) { Log.println(Log.WARN, "DynamicPrice", block()) }
-
-var enableScaling: Boolean = false
-
-internal fun View.applyScale() {
-    addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
-        val parent = v.parent as? View ?: return@addOnLayoutChangeListener
-        val scale: Float = min(parent.width / v.width.toFloat(), parent.height / v.height.toFloat())
-        if (scale.isFinite()) {
-            v.scaleX = scale
-            v.scaleY = scale
-        }
-    }
-}
