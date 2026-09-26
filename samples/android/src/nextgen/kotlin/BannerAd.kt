@@ -101,7 +101,7 @@ fun BannerAdScreen(modifier: Modifier = Modifier) {
                 it.refreshingDynamicPrice(
                     adEventCallback = LoggingAdEventCallback(AdViewBanner.title),
                     adRequestProvider = {
-                        @Suppress("Deprecation")
+                        @Suppress("Deprecation") //anchoredAdaptiveBanner is deprecated
                         BannerAdRequest.Builder(
                             adUnitId = BuildConfig.ADMANAGER_ADUNIT_ID,
                             adSize = AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
@@ -122,12 +122,19 @@ fun BannerAdScreen(modifier: Modifier = Modifier) {
 @Composable
 fun BannerVideoScreen(modifier: Modifier = Modifier) {
     val lifecycleOwner = LocalLifecycleOwner.current
+    val window = LocalWindowInfo.current
     AdManagerInlineAd(
         onLoadAd = {
             it.refreshingDynamicPrice(
                 adEventCallback = LoggingAdEventCallback(AdViewBannerWithVideo.title),
                 adRequestProvider = {
-                    BannerAdRequest.Builder(BuildConfig.ADMANAGER_ADUNIT_ID, AdSize.MEDIUM_RECTANGLE)
+                    BannerAdRequest.Builder(
+                        adUnitId = BuildConfig.ADMANAGER_ADUNIT_ID,
+                        adSize = AdSize.getCurrentOrientationInlineAdaptiveBannerAdSize(
+                            context = it.context,
+                            width = window.containerDpSize.width.value.toInt(),
+                        ),
+                    )
                 },
                 nimbusRequest = forBannerAd(AdViewBannerWithVideo.title, MREC).apply {
                     request.imp[0].video = Video()
