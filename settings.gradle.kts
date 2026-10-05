@@ -57,7 +57,7 @@ gradle.lifecycle.beforeProject {
                         because("Fixes CVE-2026-84939")
                     }
                     "org.jsoup" -> {
-                        useVersion("1.23.1")
+                        useVersion("1.23.2")
                         because("Fixes CWE-79")
                     }
                     "com.fasterxml.jackson", "com.fasterxml.jackson.core" -> {
