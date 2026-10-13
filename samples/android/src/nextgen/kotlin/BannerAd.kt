@@ -95,7 +95,7 @@ fun AdView.refreshingDynamicPrice(
 fun BannerAdScreen(modifier: Modifier = Modifier) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val window = LocalWindowInfo.current
-    Box {
+    Box(modifier = modifier, contentAlignment = Alignment.BottomCenter) {
         AdManagerInlineAd(
             onLoadAd = {
                 it.refreshingDynamicPrice(
@@ -114,7 +114,6 @@ fun BannerAdScreen(modifier: Modifier = Modifier) {
                     lifecycleOwner = lifecycleOwner,
                 )
             },
-            modifier = modifier.align(Alignment.BottomCenter),
         )
     }
 }
@@ -123,27 +122,28 @@ fun BannerAdScreen(modifier: Modifier = Modifier) {
 fun BannerVideoScreen(modifier: Modifier = Modifier) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val window = LocalWindowInfo.current
-    AdManagerInlineAd(
-        onLoadAd = {
-            it.refreshingDynamicPrice(
-                adEventCallback = LoggingAdEventCallback(AdViewBannerWithVideo.title),
-                adRequestProvider = {
-                    BannerAdRequest.Builder(
-                        adUnitId = BuildConfig.ADMANAGER_ADUNIT_ID,
-                        adSize = AdSize.getCurrentOrientationInlineAdaptiveBannerAdSize(
-                            context = it.context,
-                            width = window.containerDpSize.width.value.toInt(),
-                        ),
-                    )
-                },
-                nimbusRequest = forBannerAd(AdViewBannerWithVideo.title, MREC).apply {
-                    request.imp[0].video = Video()
-                },
-                lifecycleOwner = lifecycleOwner,
-            )
-        },
-        modifier = modifier,
-    )
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        AdManagerInlineAd(
+            onLoadAd = {
+                it.refreshingDynamicPrice(
+                    adEventCallback = LoggingAdEventCallback(AdViewBannerWithVideo.title),
+                    adRequestProvider = {
+                        BannerAdRequest.Builder(
+                            adUnitId = BuildConfig.ADMANAGER_ADUNIT_ID,
+                            adSize = AdSize.getCurrentOrientationInlineAdaptiveBannerAdSize(
+                                context = it.context,
+                                width = window.containerDpSize.width.value.toInt(),
+                            ),
+                        )
+                    },
+                    nimbusRequest = forBannerAd(AdViewBannerWithVideo.title, MREC).apply {
+                        request.imp[0].video = Video()
+                    },
+                    lifecycleOwner = lifecycleOwner,
+                )
+            }
+        )
+    }
 }
 
 @Composable
@@ -152,7 +152,7 @@ fun AdManagerInlineAd(
     modifier: Modifier = Modifier,
 ) {
     if (LocalInspectionMode.current) {
-        Box { Text(text = "Google Mobile Ads preview banner.", modifier.align(Alignment.Center)) }
+        Text("Google Mobile Ads preview banner.")
         return
     }
 
