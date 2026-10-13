@@ -43,16 +43,18 @@ suspend fun AdView.loadDynamicPrice(
         nimbusResponse.applyDynamicPrice(adRequest, mapping = mapping)
     }
     return suspendCancellableCoroutine {
+        val request = adRequest.build()
         val callback = object : AdLoadCallback<BannerAd> {
             override fun onAdFailedToLoad(adError: LoadAdError) {
                 if (it.isActive) it.resumeWithException(RuntimeException(adError.message))
             }
 
             override fun onAdLoaded(ad: BannerAd) {
+                if (request.adSize.isAnchoredAdaptiveBanner) resize(request.adSize)
                 if (it.isActive) it.resume(ad)
             }
         }
-        loadAd(adRequest = adRequest.build(), adLoadCallback = callback)
+        loadAd(adRequest = request, adLoadCallback = callback)
     }
 }
 
