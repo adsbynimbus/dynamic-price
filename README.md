@@ -25,8 +25,8 @@ Nimbus bid to the Ad Manager request and rendering the ad when Nimbus wins the a
 
 | Platform                                     | Minimum Requirements                                          |
 |:---------------------------------------------|:--------------------------------------------------------------|
-| [**Android Next Gen**](library/android)      | SDK 24 (Android 7.0), Kotlin 2.0, JVM 17, GMA Next Gen 1.3.0  |
-| [**Android Legacy**](library/android-legacy) | SDK 23 (Android 6.0), Kotlin 2.0, JVM 11, GMA (Legacy) 24.9.0 |
+| [**Android Next Gen**](library/android)      | SDK 24 (Android 7.0), Kotlin 2.1, JVM 17, GMA Next Gen 1.5.0  |
+| [**Android Legacy**](library/android-legacy) | SDK 23 (Android 6.0), Kotlin 2.1, JVM 11, GMA (Legacy) 24.9.0 |
 | [**iOS**](library/ios)                       | iOS 15.0, Swift 5.10, GMA 12                                  |
 
 ## Integration
@@ -90,9 +90,9 @@ release.
 
 #### `applyDynamicPrice` (iOS Only)
 
-The implementation on iOS has been updated to store the `NimbusAd` in a LRU Cache automatically when
-calling `NimbusAd.applyDynamicPrice(AdManagerRequest)` for rendering in `handleEventForNimbus`. It
-is no longer required to call `applyDynamicPrice` on the `AdManagerBannerView` or
+The implementation on iOS has been updated to store the `NimbusAd` in an LRU Cache automatically
+when calling `NimbusAd.applyDynamicPrice(AdManagerRequest)` for rendering in `handleEventForNimbus`.
+It is no longer required to call `applyDynamicPrice` on the `AdManagerBannerView` or
 `AdManagerInterstitialAd` objects.
 
 #### `BannerView.handleEventForNimbus` (iOS Only)
