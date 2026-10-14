@@ -30,7 +30,6 @@ import java.lang.AutoCloseable
 import java.lang.ref.WeakReference
 import java.net.*
 import kotlin.coroutines.*
-import kotlin.math.min
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.use
