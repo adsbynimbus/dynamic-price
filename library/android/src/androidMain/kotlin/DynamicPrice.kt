@@ -2,7 +2,6 @@ package com.adsbynimbus.dynamicprice
 
 import android.app.Activity
 import androidx.core.os.BundleCompat.getSerializable
-import androidx.core.view.*
 import com.adsbynimbus.Nimbus
 import com.adsbynimbus.NimbusAd
 import com.adsbynimbus.dynamicprice.internal.*
