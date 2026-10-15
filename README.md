@@ -26,8 +26,8 @@ Nimbus bid to the Ad Manager request and rendering the ad when Nimbus wins the a
 
 | Platform                                     | Minimum Requirements                                          |
 |:---------------------------------------------|:--------------------------------------------------------------|
-| [**Android Next Gen**](library/android)      | SDK 24 (Android 7.0), Kotlin 2.0, JVM 17, GMA Next Gen 1.3.0  |
-| [**Android Legacy**](library/android-legacy) | SDK 23 (Android 6.0), Kotlin 2.0, JVM 11, GMA (Legacy) 24.9.0 |
+| [**Android Next Gen**](library/android)      | SDK 24 (Android 7.0), Kotlin 2.1, JVM 17, GMA Next Gen 1.5.0  |
+| [**Android Legacy**](library/android-legacy) | SDK 23 (Android 6.0), Kotlin 2.1, JVM 11, GMA (Legacy) 24.9.0 |
 | [**iOS**](library/ios)                       | iOS 15.0, Swift 5.10, GMA 12, Nimbus 3+                       |
 
 ## Integration
@@ -39,10 +39,10 @@ Add the DynamicPrice library to your `build.gradle.kts` file:
 ```kotlin
 dependencies {
     // For use with the Google Mobile Ads Next Gen SDK
-    implementation("com.adsbynimbus.dynamicprice:dynamicprice:1.0.1")
+    implementation("com.adsbynimbus.dynamicprice:dynamicprice:1.1.1")
 
     // For use with the Google Mobile Ads (Legacy) SDK
-    implementation("com.adsbynimbus.dynamicprice:dynamicprice-legacy:1.0.0")
+    implementation("com.adsbynimbus.dynamicprice:dynamicprice-legacy:1.1.0")
 }
 ```
 
@@ -103,7 +103,7 @@ release.
 
 #### `applyDynamicPrice` (iOS Only)
 
-The implementation on iOS has been updated to store the `NimbusResponse` in a LRU Cache
+The implementation on iOS has been updated to store the `NimbusResponse` in an LRU Cache
 automatically when calling `NimbusResponse.applyDynamicPrice(AdManagerRequest)` for rendering in
 `handleEventForNimbus`. It is no longer required to call `applyDynamicPrice` on the
 `AdManagerBannerView` or `AdManagerInterstitialAd` objects.
@@ -122,6 +122,9 @@ AdManagerBannerView` before calling `handleEventForNimbus`.
 3. Remove all references to `GoogleAuctionData`, `RequestManager.notifyNoFill` and
 `RequestManager.notifyImpression`. These classes and methods are no longer used and will be
 removed in an upcoming release.
+4. Replace `com.adsbynimbus.lineitem` and `com.adsbynimbus.google` imports with
+`com.adsbynimbus.dynamicprice`. All classes have been duplicated into the new namespace and the
+previous implementations will be removed in an upcoming release.
 
 ### iOS Migration (NimbusGAMKit)
 
