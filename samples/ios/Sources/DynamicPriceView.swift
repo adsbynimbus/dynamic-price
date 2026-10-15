@@ -23,7 +23,10 @@ public class DynamicPriceView: UIView, AppEventDelegate {
     private var refreshTask: Task<Void, Error>?
 
     /// Set this delegate to receive events from the GAMBannerView
-    public weak var delegate: BannerViewDelegate?
+    public var delegate: BannerViewDelegate? {
+        get { googleBanner.delegate }
+        set { googleBanner.delegate = newValue }
+    }
 
     /// Set to true for banner ads if they refresh when not on the screen
     public var useOnScreenCheck = false
@@ -36,11 +39,15 @@ public class DynamicPriceView: UIView, AppEventDelegate {
         self.googleBanner = AdManagerBannerView(adSize: adSize)
         self.nimbusRequest = nimbusRequest
         self.nimbusRequestManager = NimbusRequestManager()
-        super.init(frame: .zero)
+        super.init(frame: .init(origin: .zero, size: adSize.size))
         googleBanner.adUnitID = adUnitId
         googleBanner.appEventDelegate = self
         addSubview(googleBanner)
         googleBanner.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            googleBanner.centerXAnchor.constraint(equalTo: centerXAnchor),
+            googleBanner.centerYAnchor.constraint(equalTo: centerYAnchor),
+        ])
     }
 
     required init?(coder: NSCoder) {
@@ -72,35 +79,26 @@ public class DynamicPriceView: UIView, AppEventDelegate {
     public override func willMove(toWindow newWindow: UIWindow?) {
         removeVisibilityListeners()
 
-        guard let newWindow = newWindow else {
-            self.refreshTask?.cancel()
+        guard let newWindow else {
+            refreshTask?.cancel()
+            refreshTask = nil
             return
         }
 
-        onVisibilityChanged(newWindow) { isVisible in
-            Task { @MainActor [weak self = self] in
-                isVisible ? self?.startRefresh() : self?.refreshTask?.cancel()
-            }
-        }
+        registerVisibilityListeners(newWindow, #selector(onVisibilityChanged(_:)))
 
         startRefresh()
     }
 
-    public override func willMove(toSuperview newSuperview: UIView?) {
-        NSLayoutConstraint.deactivate(constraints)
-    }
-
-    public override func didMoveToSuperview() {
-        guard let parent = superview else { return }
-        translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            topAnchor.constraint(equalTo: parent.topAnchor),
-            bottomAnchor.constraint(equalTo: parent.bottomAnchor),
-            leftAnchor.constraint(equalTo: parent.leftAnchor),
-            rightAnchor.constraint(equalTo: parent.rightAnchor),
-            googleBanner.centerXAnchor.constraint(equalTo: centerXAnchor),
-            googleBanner.centerYAnchor.constraint(equalTo: centerYAnchor),
-        ])
+    @objc public func onVisibilityChanged(_ notification: Notification) {
+        switch notification.name {
+        case UIWindow.didBecomeVisibleNotification, UIApplication.didBecomeActiveNotification:
+            startRefresh()
+        case UIWindow.didBecomeHiddenNotification, UIApplication.didEnterBackgroundNotification:
+            refreshTask?.cancel()
+            refreshTask = nil
+        default: return
+        }
     }
 
     private func startRefresh() {
@@ -145,27 +143,31 @@ extension UIView {
     }
 
     @inlinable
-    func onVisibilityChanged(_ target: UIWindow, _ onChange: @escaping @Sendable (Bool) -> Void) {
+    func registerVisibilityListeners(_ target: UIWindow, _ onChange: Selector) {
         NotificationCenter.default.addObserver(
-            forName: UIWindow.didBecomeVisibleNotification,
+            self,
+            selector: onChange,
+            name: UIWindow.didBecomeVisibleNotification,
             object: target,
-            queue: nil
-        ) { _ in onChange(true) }
+        )
         NotificationCenter.default.addObserver(
-            forName: UIWindow.didBecomeHiddenNotification,
+            self,
+            selector: onChange,
+            name: UIWindow.didBecomeHiddenNotification,
             object: target,
-            queue: nil
-        ) { _ in onChange(false) }
+        )
         NotificationCenter.default.addObserver(
-            forName: UIApplication.didBecomeActiveNotification,
+            self,
+            selector: onChange,
+            name: UIApplication.didBecomeActiveNotification,
             object: UIApplication.shared,
-            queue: nil
-        ) { _ in onChange(true) }
+        )
         NotificationCenter.default.addObserver(
-            forName: UIApplication.didEnterBackgroundNotification,
+            self,
+            selector: onChange,
+            name: UIApplication.didEnterBackgroundNotification,
             object: UIApplication.shared,
-            queue: nil
-        ) { _ in onChange(false) }
+        )
     }
 
     public func parentViewController() -> UIViewController {
@@ -219,8 +221,11 @@ struct DynamicPriceInlineAd: UIViewRepresentable {
         func bannerViewDidReceiveAd(_ bannerView: BannerView) {
             // If using anchored adaptive banner, the following block will resize the ad to match
             // the parent's frame and will scale up the ad to fit/
-            if let banner = bannerView as? AdManagerBannerView, let parent = banner.superview {
-                banner.resize(adSizeFor(cgSize: parent.frame.size))
+            if let banner = bannerView as? AdManagerBannerView {
+                let size = inlineAd.adSize.size
+                banner.resize(size.height != 0 ? inlineAd.adSize :
+                    adSizeFor(cgSize: .init(width: size.width, height: size.width))
+                )
             }
             print("DynamicPrice: \(name) loaded")
         }
