@@ -23,7 +23,10 @@ public class DynamicPriceView: UIView, AppEventDelegate {
     private var refreshTask: Task<Void, Error>?
 
     /// Set this delegate to receive events from the GAMBannerView
-    public weak var delegate: BannerViewDelegate?
+    public var delegate: BannerViewDelegate? {
+        get { googleBanner.delegate }
+        set { googleBanner.delegate = newValue }
+    }
 
     /// Set to true for banner ads if they refresh when not on the screen
     public var useOnScreenCheck = false
