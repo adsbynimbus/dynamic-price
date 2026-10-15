@@ -64,11 +64,11 @@ internal class DynamicPriceEventHandler: NSObject {
 
     func errorHandler(_ error: NimbusError) -> Void {
         if !firedImpression {
-            if let adView = adView {
+            if let adView {
                 adView.delegate?.bannerView?(adView, didFailToReceiveAdWithError: error)
             }
 
-            if let interstitial = interstitial {
+            if let interstitial {
                 interstitial.fullScreenContentDelegate?
                     .ad?(interstitial, didFailToPresentFullScreenContentWithError: error)
             }
@@ -84,7 +84,7 @@ internal class DynamicPriceEventHandler: NSObject {
                 adView.delegate?.bannerViewDidRecordClick?(adView)
             }
 
-            if let interstitial = interstitial {
+            if let interstitial {
                 interstitial.fullScreenContentDelegate?.adDidRecordClick?(interstitial)
             }
         } else if event == .destroyed {
