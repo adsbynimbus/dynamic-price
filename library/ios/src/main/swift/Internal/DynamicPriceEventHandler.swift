@@ -15,9 +15,9 @@ internal class DynamicPriceEventHandler: NSObject {
     let googleClickTracker: URL
     let isInterstitial: Bool
     var cachedAd: DynamicPriceRenderer.CachedAd?
-    var ad: Ad?
     var onEvent: ((AdEvent) -> Void)?
     var onError: ((NimbusError) -> Void)?
+    weak var ad: Ad?
     weak var adView: BannerView?
     weak var interstitial: GoogleMobileAds.InterstitialAd?
     weak var presentingController: UIViewController?
