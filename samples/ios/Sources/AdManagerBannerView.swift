@@ -21,6 +21,9 @@ extension AdManagerBannerView: @retroactive AppEventDelegate {
 }
 
 struct BannerAdScreen: View {
+    @available(*, deprecated, message: "currentOrientationAdaptiveBanner is still used")
+    let adSize = currentOrientationAnchoredAdaptiveBanner(width: UIScreen.main.bounds.width)
+    @available(*, deprecated)
     var body: some View {
         VStack {
             // Refreshing is handled by the DynamicPriceView
@@ -28,27 +31,26 @@ struct BannerAdScreen: View {
                 adSize: AdSizeBanner,
                 nimbusRequest: .forBannerAd(position: AdTypes.Banner.id),
             )
-            .frame(width: AdSizeBanner.size.width, height: AdSizeBanner.size.height)
+            .frame(width: adSize.size.width, height: adSize.size.height, alignment: .bottom)
         }.navigationTitle(AdTypes.Banner.rawValue)
     }
 }
 
 struct BannerVideoScreen: View {
+    let adSize = currentOrientationInlineAdaptiveBanner(width: UIScreen.main.bounds.width)
     var body: some View {
-        VStack {
-            AdManagerInlineAd(AdSizeMediumRectangle) { adView in
-                let nimbusRequest = NimbusRequest.forBannerAd(
-                    position: AdTypes.BannerVideo.id,
-                    format: .letterbox,
-                )
-                nimbusRequest.addInlineVideo()
-                adView.loadDynamicPrice(
-                    adRequest: AdManagerRequest(),
-                    nimbusRequest: nimbusRequest,
-                )
-            }
-            .frame(width: AdSizeMediumRectangle.size.width, height: AdSizeMediumRectangle.size.height)
+        AdManagerInlineAd(adSize) { adView in
+            let nimbusRequest = NimbusRequest.forBannerAd(
+                position: AdTypes.BannerVideo.id,
+                format: .letterbox,
+            )
+            nimbusRequest.addInlineVideo()
+            adView.loadDynamicPrice(
+                adRequest: AdManagerRequest(),
+                nimbusRequest: nimbusRequest,
+            )
         }
+        .frame(width: adSize.size.width, height: adSize.size.height, alignment: .center)
         .navigationTitle(AdTypes.BannerVideo.id)
     }
 }
@@ -65,6 +67,7 @@ struct AdManagerInlineAd: UIViewRepresentable {
 
     func makeUIView(context: Context) -> AdManagerBannerView {
         let banner = AdManagerBannerView(adSize: adSize)
+        banner.validAdSizes = [nsValue(for: adSize), nsValue(for: AdSizeBanner)]
         banner.adUnitID = DynamicPriceApp.adUnitId
         banner.delegate = context.coordinator
         banner.appEventDelegate = banner
@@ -72,7 +75,7 @@ struct AdManagerInlineAd: UIViewRepresentable {
         return banner
     }
 
-    func updateUIView(_ uiView: AdManagerBannerView, context: Context) { }
+    func updateUIView(_ uiView: AdManagerBannerView, context: Context) {}
 
     func makeCoordinator() -> InlineAdCoordinator {
         InlineAdCoordinator(self)
@@ -90,6 +93,9 @@ struct AdManagerInlineAd: UIViewRepresentable {
         
         func bannerViewDidReceiveAd(_ bannerView: BannerView) {
             print("DynamicPrice: \(name) loaded")
+            if let banner = bannerView as? AdManagerBannerView {
+                banner.resize(parent.adSize)
+            }
         }
 
         func bannerViewDidFailToReceiveAdWithError(_ bannerView: BannerView, error: Error) {
