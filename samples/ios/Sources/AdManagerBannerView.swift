@@ -25,14 +25,16 @@ struct BannerAdScreen: View {
     let adSize = currentOrientationAnchoredAdaptiveBanner(width: UIScreen.main.bounds.width)
     @available(*, deprecated)
     var body: some View {
-        VStack {
+        VStack{
+            Spacer()
             // Refreshing is handled by the DynamicPriceView
             DynamicPriceInlineAd(
-                adSize: AdSizeBanner,
+                adSize: adSize,
                 nimbusRequest: .forBannerAd(position: AdTypes.Banner.id),
             )
-            .frame(width: adSize.size.width, height: adSize.size.height, alignment: .bottom)
-        }.navigationTitle(AdTypes.Banner.rawValue)
+            .frame(width: adSize.size.width, height: adSize.size.height)
+        }
+        .navigationTitle(AdTypes.Banner.rawValue)
     }
 }
 
