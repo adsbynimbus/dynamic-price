@@ -39,11 +39,15 @@ public class DynamicPriceView: UIView, AppEventDelegate {
         self.googleBanner = AdManagerBannerView(adSize: adSize)
         self.nimbusRequest = nimbusRequest
         self.nimbusRequestManager = NimbusRequestManager()
-        super.init(frame: .zero)
+        super.init(frame: .init(origin: .zero, size: adSize.size))
         googleBanner.adUnitID = adUnitId
         googleBanner.appEventDelegate = self
         addSubview(googleBanner)
         googleBanner.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            googleBanner.centerXAnchor.constraint(equalTo: centerXAnchor),
+            googleBanner.centerYAnchor.constraint(equalTo: centerYAnchor),
+        ])
     }
 
     required init?(coder: NSCoder) {
@@ -95,23 +99,6 @@ public class DynamicPriceView: UIView, AppEventDelegate {
             refreshTask = nil
         default: return
         }
-    }
-
-    public override func willMove(toSuperview newSuperview: UIView?) {
-        NSLayoutConstraint.deactivate(constraints)
-    }
-
-    public override func didMoveToSuperview() {
-        guard let parent = superview else { return }
-        translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            topAnchor.constraint(equalTo: parent.topAnchor),
-            bottomAnchor.constraint(equalTo: parent.bottomAnchor),
-            leftAnchor.constraint(equalTo: parent.leftAnchor),
-            rightAnchor.constraint(equalTo: parent.rightAnchor),
-            googleBanner.centerXAnchor.constraint(equalTo: centerXAnchor),
-            googleBanner.centerYAnchor.constraint(equalTo: centerYAnchor),
-        ])
     }
 
     private func startRefresh() {
@@ -235,7 +222,10 @@ struct DynamicPriceInlineAd: UIViewRepresentable {
             // If using anchored adaptive banner, the following block will resize the ad to match
             // the parent's frame and will scale up the ad to fit/
             if let banner = bannerView as? AdManagerBannerView {
-                banner.resize(inlineAd.adSize)
+                let size = inlineAd.adSize.size
+                banner.resize(size.height != 0 ? inlineAd.adSize :
+                    adSizeFor(cgSize: .init(width: size.width, height: size.width))
+                )
             }
             print("DynamicPrice: \(name) loaded")
         }
