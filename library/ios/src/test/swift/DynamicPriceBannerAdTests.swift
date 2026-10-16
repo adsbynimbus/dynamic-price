@@ -18,7 +18,7 @@ import Testing
 
     @MainActor
     init() async throws {
-        await NimbusTestEnvironment.shared.initIfNeeded()
+        await Nimbus.initIfNeeded()
         DynamicPriceRenderer["abc"] = .init(createNimbusAd())
         rootVC = UIViewController()
     }

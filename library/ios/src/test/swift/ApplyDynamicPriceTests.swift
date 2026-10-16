@@ -14,6 +14,11 @@ import DynamicPrice
 
 @Suite(.serialized) struct ApplyDynamicPriceTests {
 
+    @MainActor
+    init() async throws {
+        await Nimbus.initIfNeeded()
+    }
+
     @Test func `applyDynamicPrice sets customTargeting for static ads`() async {
         let ad = createNimbusAd(type: .static)
         let request = AdManagerRequest()
