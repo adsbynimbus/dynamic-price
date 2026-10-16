@@ -14,6 +14,11 @@ import DynamicPrice
 
 @Suite(.serialized) struct ApplyDynamicPriceTests {
 
+    @MainActor
+    init() async throws {
+        await Nimbus.initIfNeeded()
+    }
+
     @Test func `applyDynamicPrice sets customTargeting for static ads`() async {
         let ad = createNimbusAd(type: .static)
         let request = AdManagerRequest()
@@ -60,7 +65,7 @@ import DynamicPrice
     }
 
     @MainActor
-    @Test func `applyDynamicPrice uses na_bid=0 when Nimbus.shared.testMode = true`() async {
+    @Test func `applyDynamicPrice uses na_bid=0 when Nimbus.testMode = true`() async {
         Nimbus.configuration.testMode = true
         let ad = createNimbusAd(type: .static)
         let request = AdManagerRequest()
@@ -75,7 +80,7 @@ import DynamicPrice
     }
 
     @MainActor
-    @Test func `applyDynamicPrice uses na_bid_video=0 when Nimbus.shared.testMode = true`() async {
+    @Test func `applyDynamicPrice uses na_bid_video=0 when Nimbus.testMode = true`() async {
         Nimbus.configuration.testMode = true
         let ad = createNimbusAd(type: .video)
         let request = AdManagerRequest()

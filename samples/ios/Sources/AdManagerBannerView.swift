@@ -19,95 +19,43 @@ extension AdManagerBannerView: @retroactive AppEventDelegate {
     }
 }
 
+/// When using the AdManagerBannerView in SwiftUI with adaptive banners, to avoid any issues
+/// with resize operations triggering duplicate request, always place the AdManagerBannerView
+/// as a subview of another UIView which prevents this behavior from occurring.
+///
+/// See `DynamicPriceView` and `DynamicPriceInlineAd` in DynamicPriceView.swift
 struct BannerAdScreen: View {
+    @available(*, deprecated, message: "currentOrientationAdaptiveBanner is still used")
+    let adSize = currentOrientationAnchoredAdaptiveBanner(width: UIScreen.main.bounds.width)
+    @available(*, deprecated)
     var body: some View {
-        VStack {
-            AdManagerInlineAd(AdSizeBanner) { adView in
-                adView.loadDynamicPrice(
-                    adRequest: AdManagerRequest(),
-                    nimbusRequest: Nimbus.bannerAd(
-                        position: AdTypes.Banner.id,
-                        size: .banner,
-                    )
-                )
-            }
-            .frame(width: AdSizeBanner.size.width, height: AdSizeBanner.size.height)
-        }.navigationTitle(AdTypes.Banner.rawValue)
+        VStack{
+            Spacer()
+            // Refreshing is handled by the DynamicPriceView
+            DynamicPriceInlineAd(
+                adSize: adSize,
+                nimbusRequest: Nimbus.bannerAd(
+                    position: AdTypes.Banner.id,
+                    size: .banner,
+                ),
+            )
+            .frame(width: adSize.size.width, height: adSize.size.height)
+        }
+        .navigationTitle(AdTypes.Banner.rawValue)
     }
 }
 
 struct BannerVideoScreen: View {
+    let adSize = currentOrientationInlineAdaptiveBanner(width: UIScreen.main.bounds.width)
     var body: some View {
-        VStack {
-            AdManagerInlineAd(AdSizeMediumRectangle) { adView in
-                let nimbusRequest = Nimbus.bannerAd(
-                    position: AdTypes.BannerVideo.id,
-                    size: .mrec,
-                ) {
-                    video()
-                }
-
-                adView.loadDynamicPrice(
-                    adRequest: AdManagerRequest(),
-                    nimbusRequest: nimbusRequest,
-                )
-            }
-            .frame(width: AdSizeMediumRectangle.size.width, height: AdSizeMediumRectangle.size.height)
-        }
+        DynamicPriceInlineAd(
+            adSize: adSize,
+            nimbusRequest: Nimbus.bannerAd(position: AdTypes.BannerVideo.id, size: .mrec) {
+                video()
+            },
+        )
+        .frame(width: adSize.size.width, height: adSize.size.height)
         .navigationTitle(AdTypes.BannerVideo.id)
-    }
-}
-
-struct AdManagerInlineAd: UIViewRepresentable {
-    typealias UIViewType = AdManagerBannerView
-    let adSize: GoogleMobileAds.AdSize
-    let loadAd: (UIViewType) -> Void
-
-    init(_ adSize: GoogleMobileAds.AdSize, _ loadAd: @escaping (UIViewType) -> Void) {
-        self.adSize = adSize
-        self.loadAd = loadAd
-    }
-
-    func makeUIView(context: Context) -> AdManagerBannerView {
-        let banner = AdManagerBannerView(adSize: adSize)
-        banner.adUnitID = DynamicPriceApp.adUnitId
-        banner.delegate = context.coordinator
-        banner.appEventDelegate = banner
-        loadAd(banner)
-        return banner
-    }
-
-    func updateUIView(_ uiView: AdManagerBannerView, context: Context) { }
-
-    func makeCoordinator() -> InlineAdCoordinator {
-        InlineAdCoordinator(self)
-    }
-
-    class InlineAdCoordinator: NSObject, BannerViewDelegate {
-        let parent: AdManagerInlineAd
-        var name: String
-
-        init(_ parent: AdManagerInlineAd) {
-            self.parent = parent
-            let sizeDesc = String(describing: parent.adSize)
-            self.name = sizeDesc.replacingOccurrences(of: "AdSize", with: "")
-        }
-        
-        func bannerViewDidReceiveAd(_ bannerView: BannerView) {
-            print("DynamicPrice: \(name) loaded")
-        }
-
-        func bannerViewDidFailToReceiveAdWithError(_ bannerView: BannerView, error: Error) {
-            print("DynamicPrice: \(name) load failed \(error.localizedDescription)")
-        }
-
-        func bannerViewDidRecordImpression(_ bannerView: BannerView) {
-            print("DynamicPrice: \(name) impression")
-        }
-
-        func bannerViewDidRecordClick(_ bannerView: BannerView) {
-            print("DynamicPrice: \(name) clicked")
-        }
     }
 }
 

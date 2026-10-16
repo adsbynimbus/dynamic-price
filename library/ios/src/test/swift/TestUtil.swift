@@ -10,17 +10,14 @@ import DynamicPrice
 import GoogleMobileAds
 import NimbusKit
 
-actor NimbusTestEnvironment {
-    static let shared = NimbusTestEnvironment()
+extension Nimbus {
+    static var isInitialized = false
 
-    private var isInitialized = false
-
-    func initIfNeeded() async {
-        guard !isInitialized else { return }
-        await MainActor.run {
-            Nimbus.initialize(publisherKey: "wee", apiKey: "woo")
-        }
-        isInitialized = true
+    @MainActor
+    static func initIfNeeded() async {
+        guard !Self.isInitialized else { return }
+        Self.isInitialized = true
+        Nimbus.initialize(publisherKey: "wee", apiKey: "woo")
     }
 }
 

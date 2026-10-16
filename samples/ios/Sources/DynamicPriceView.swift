@@ -1,0 +1,243 @@
+//
+//  DynamicPriceView.swift
+//  ios-samples
+//
+//  Created by Jason Sznol on 9/22/26.
+//  Copyright © 2026 AdsByNimbus. All rights reserved.
+//
+
+import DynamicPrice
+import GoogleMobileAds
+import NimbusKit
+import SwiftUI
+
+private let refreshInterval: TimeInterval = 30
+
+@MainActor
+public class DynamicPriceView: UIView, AppEventDelegate {
+
+    private let googleBanner: AdManagerBannerView
+    private let nimbusRequest: () -> InlineAd
+    private var lastRequestTime: Date = Date.distantPast
+    private var refreshTask: Task<Void, Error>?
+
+    /// Set this delegate to receive events from the GAMBannerView
+    public var delegate: BannerViewDelegate? {
+        get { googleBanner.delegate }
+        set { googleBanner.delegate = newValue }
+    }
+
+    /// Set to true for banner ads if they refresh when not on the screen
+    public var useOnScreenCheck = false
+
+    public init(
+        adSize: GoogleMobileAds.AdSize,
+        adUnitId: String,
+        nimbusRequest: @autoclosure @escaping () -> InlineAd,
+    ) {
+        self.googleBanner = AdManagerBannerView(adSize: adSize)
+        self.nimbusRequest = nimbusRequest
+        super.init(frame: .init(origin: .zero, size: adSize.size))
+        googleBanner.adUnitID = adUnitId
+        googleBanner.appEventDelegate = self
+        addSubview(googleBanner)
+        googleBanner.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            googleBanner.centerXAnchor.constraint(equalTo: centerXAnchor),
+            googleBanner.centerYAnchor.constraint(equalTo: centerYAnchor),
+        ])
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    public func loadAd() async {
+        lastRequestTime = Date()
+
+        // See DynamicPrice+Helper for NimbusRequestManager async extension
+        let nimbusBid = try? await nimbusRequest().fetch().response
+
+        let request = AdManagerRequest()
+        request.customTargeting = [:]
+
+        nimbusBid?.applyDynamicPrice(request, mapping: DynamicPriceApp.mapping)
+
+        googleBanner.load(request)
+    }
+
+    public nonisolated func adView(
+        _ banner: BannerView,
+        didReceiveAppEvent name: String,
+        with info: String?
+    ) {
+        Task { @MainActor in banner.handleEventForNimbus(name: name, info: info) }
+    }
+
+    public override func willMove(toWindow newWindow: UIWindow?) {
+        removeVisibilityListeners()
+
+        guard let newWindow else {
+            refreshTask?.cancel()
+            refreshTask = nil
+            return
+        }
+
+        registerVisibilityListeners(newWindow, #selector(onVisibilityChanged(_:)))
+
+        startRefresh()
+    }
+
+    @objc public func onVisibilityChanged(_ notification: Notification) {
+        switch notification.name {
+        case UIWindow.didBecomeVisibleNotification, UIApplication.didBecomeActiveNotification:
+            startRefresh()
+        case UIWindow.didBecomeHiddenNotification, UIApplication.didEnterBackgroundNotification:
+            refreshTask?.cancel()
+            refreshTask = nil
+        default: return
+        }
+    }
+
+    private func startRefresh() {
+        guard refreshTask == nil || refreshTask?.isCancelled == true else { return }
+
+        refreshTask = Task {
+            while !Task.isCancelled {
+                // If not on screen, sleep for 200 milliseconds and then check again
+                guard !useOnScreenCheck || isOnScreen else {
+                    await Task.sleep(seconds: 0.2)
+                    continue
+                }
+
+                // Task.sleep(seconds:) extension is located in DynamicPrice+Helper.swift
+                await Task.sleep(seconds: refreshInterval - Date().timeIntervalSince(lastRequestTime))
+                guard !Task.isCancelled else { break }
+
+                await loadAd()
+            }
+        }
+    }
+}
+
+extension UIView {
+
+    var isOnScreen: Bool {
+        guard let window else { return false }
+
+        return !window.bounds.intersection(convert(bounds, to: nil)).isEmpty
+    }
+
+    @inlinable
+    func removeVisibilityListeners() {
+        NotificationCenter.default.removeObserver(
+            self, name: UIWindow.didBecomeVisibleNotification, object: window)
+        NotificationCenter.default.removeObserver(
+            self, name: UIWindow.didBecomeHiddenNotification, object: window)
+        NotificationCenter.default.removeObserver(
+            self, name: UIApplication.didBecomeActiveNotification, object: UIApplication.shared)
+        NotificationCenter.default.removeObserver(
+            self, name: UIApplication.didEnterBackgroundNotification, object: UIApplication.shared)
+    }
+
+    @inlinable
+    func registerVisibilityListeners(_ target: UIWindow, _ onChange: Selector) {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: onChange,
+            name: UIWindow.didBecomeVisibleNotification,
+            object: target,
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: onChange,
+            name: UIWindow.didBecomeHiddenNotification,
+            object: target,
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: onChange,
+            name: UIApplication.didBecomeActiveNotification,
+            object: UIApplication.shared,
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: onChange,
+            name: UIApplication.didEnterBackgroundNotification,
+            object: UIApplication.shared,
+        )
+    }
+
+    public func parentViewController() -> UIViewController {
+        var responder: UIResponder? = self
+        while !(responder is UIViewController) {
+            responder = responder?.next
+            if nil == responder {
+                break
+            }
+        }
+        return (responder as? UIViewController)!
+    }
+}
+
+struct DynamicPriceInlineAd: UIViewRepresentable {
+    typealias UIViewType = DynamicPriceView
+    let adSize: GoogleMobileAds.AdSize
+    let nimbusRequest: InlineAd
+
+    init(adSize: GoogleMobileAds.AdSize, nimbusRequest: InlineAd) {
+        self.adSize = adSize
+        self.nimbusRequest = nimbusRequest
+    }
+
+    func makeUIView(context: Context) -> DynamicPriceView {
+        let banner = DynamicPriceView(
+            adSize: adSize,
+            adUnitId: DynamicPriceApp.adUnitId,
+            nimbusRequest: nimbusRequest,
+        )
+        banner.delegate = context.coordinator
+        return banner
+    }
+
+    func updateUIView(_ uiView: DynamicPriceView, context: Context) { }
+
+    func makeCoordinator() -> DynamicPriceInlineAdCoordinator {
+        DynamicPriceInlineAdCoordinator(self)
+    }
+
+    class DynamicPriceInlineAdCoordinator: NSObject, BannerViewDelegate {
+        let inlineAd: DynamicPriceInlineAd
+        var name: String
+
+        init(_ inlineAd: DynamicPriceInlineAd) {
+            self.inlineAd = inlineAd
+            let sizeDesc = String(describing: inlineAd.adSize)
+            self.name = sizeDesc.replacingOccurrences(of: "AdSize", with: "")
+        }
+
+        func bannerViewDidReceiveAd(_ bannerView: BannerView) {
+            // If using anchored adaptive banner, the following block will resize the ad to match
+            // the parent's frame and will scale up the ad to fit/
+            if let banner = bannerView as? AdManagerBannerView {
+                let size = inlineAd.adSize.size
+                banner.resize(size.height != 0 ? inlineAd.adSize :
+                    adSizeFor(cgSize: .init(width: size.width, height: size.width))
+                )
+            }
+            print("DynamicPrice: \(name) loaded")
+        }
+
+        func bannerViewDidFailToReceiveAdWithError(_ bannerView: BannerView, error: Error) {
+            print("DynamicPrice: \(name) load failed \(error.localizedDescription)")
+        }
+
+        func bannerViewDidRecordImpression(_ bannerView: BannerView) {
+            print("DynamicPrice: \(name) impression")
+        }
+
+        func bannerViewDidRecordClick(_ bannerView: BannerView) {
+            print("DynamicPrice: \(name) clicked")
+        }
+    }
+}
