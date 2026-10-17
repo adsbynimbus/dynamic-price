@@ -19,7 +19,7 @@ leakcanary = "3.0-alpha-9"
 mockk = "1.14.11"
 okio = "3.18.2"
 #noinspection NewerVersionAvailable
-protobuf = "3.25.9"
+protobuf = "4.36.2"
 
 [plugins]
 android-app = { id = "com.android.application", version.ref = "android" }
