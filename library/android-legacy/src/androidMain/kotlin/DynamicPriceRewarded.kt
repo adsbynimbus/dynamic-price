@@ -3,12 +3,11 @@ package com.adsbynimbus.dynamicprice
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import com.adsbynimbus.AdEvent
 import com.adsbynimbus.Nimbus
 import com.adsbynimbus.NimbusError
+import com.adsbynimbus.NimbusResponse
 import com.adsbynimbus.dynamicprice.internal.*
-import com.adsbynimbus.render.*
-import com.adsbynimbus.render.Renderer.Companion.loadBlockingAd
-import com.adsbynimbus.request.NimbusResponse
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.OnPaidEventListener
@@ -20,6 +19,9 @@ import com.google.android.gms.ads.rewarded.RewardItem
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.google.android.gms.ads.rewarded.ServerSideVerificationOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /** Returns true if Nimbus will render the Rewarded ad */
 inline val RewardedAd.isNimbusWin: Boolean
@@ -31,26 +33,23 @@ fun loadDynamicPriceRewardedAd(
     adUnitId: String,
     adRequest: AdManagerAdRequest,
     loadCallback: RewardedAdLoadCallback,
-    nimbusListener: AdController.Listener? = null,
+    onError: NimbusError.Listener = NimbusError.Listener { },
+    onEvent: AdEvent.Listener = AdEvent.Listener { },
 ) {
     RewardedAd.load(context, adUnitId, adRequest, DynamicPriceRewardedCallback(
         callback = loadCallback,
         adRequest = adRequest,
-        nimbusListener = nimbusListener,
+        onError = onError,
+        onEvent = onEvent,
     ))
 }
 
-/**
- * Wrapper callback for loading Dynamic Price Rewarded ads
- *
- * @param callback The AdLoadCallback to wrap
- * @param nimbusAd The Nimbus bid if one was present
- * @param nimbusListener Optional Nimbus AdController listener
- */
+/** Wrapper callback for loading Dynamic Price Rewarded ads */
 class DynamicPriceRewardedCallback(
     internal val callback: RewardedAdLoadCallback,
     internal val nimbusAd: NimbusResponse?,
-    internal val nimbusListener: AdController.Listener? = null,
+    internal val onError: NimbusError.Listener,
+    internal val onEvent: AdEvent.Listener,
 ) : RewardedAdLoadCallback() {
 
     /**
@@ -58,22 +57,25 @@ class DynamicPriceRewardedCallback(
      *
      * @param callback The AdLoadCallback to wrap
      * @param adRequest The AdRequest passed to `RewardedAd.load`
-     * @param nimbusListener Optional Nimbus AdController listener
+     * @param onError Optional NimbusError.Listener for Nimbus errors
+     * @param onEvent Optional AdEvent.Listener for Nimbus Ad events
      */
     constructor(
         callback: RewardedAdLoadCallback,
         adRequest: AdManagerAdRequest,
-        nimbusListener: AdController.Listener? = null,
+        onError: NimbusError.Listener = NimbusError.Listener { },
+        onEvent: AdEvent.Listener = AdEvent.Listener { },
     ) : this(
         callback = callback,
         nimbusAd = adRequest.customTargeting.getString("na_id")?.let {
             DynamicPriceRenderer.adCache.remove(it)
         },
-        nimbusListener = nimbusListener,
+        onError = onError,
+        onEvent = onEvent,
     )
 
     init {
-        if (nimbusAd != null) DynamicPriceRenderer.adCache.remove(nimbusAd.auctionId)
+        if (nimbusAd != null) DynamicPriceRenderer.adCache.remove(nimbusAd.id)
     }
 
     override fun onAdLoaded(ad: RewardedAd) {
@@ -82,7 +84,8 @@ class DynamicPriceRewardedCallback(
                 DynamicPriceRewardedAd(
                     googleAd = ad,
                     nimbusAd = nimbusAd,
-                    listener = nimbusListener,
+                    onError = onError,
+                    onEvent = onEvent,
                 ),
             )
             ad.isNimbusWin -> callback.onAdFailedToLoad(
@@ -113,17 +116,23 @@ inline var RewardedAd.dynamicPriceAd: DynamicPriceAd?
 internal class DynamicPriceRewardedAd(
     val googleAd: RewardedAd,
     val nimbusAd: NimbusResponse,
-    val listener: AdController.Listener?,
-) : RewardedAd(), AdController.Listener {
+    val onError: NimbusError.Listener,
+    val onEvent: AdEvent.Listener,
+    val coroutineScope: CoroutineScope = DynamicPriceRenderer.renderScope
+) : RewardedAd(), AdEvent.Listener, NimbusError.Listener {
 
     var rewardListener: OnUserEarnedRewardListener? = null
     var shown: Boolean = false
 
-    fun Context.createController(): AdController? = loadBlockingAd(nimbusAd)?.apply {
-        googleAd.dynamicPriceAd = DynamicPriceAd(adController = this)
-        listeners.add(this@DynamicPriceRewardedAd)
-        if (listener != null) listeners.add(listener)
-    }
+    fun Context.createController() = Nimbus.rewardedAd(from = nimbusAd)
+        .onEvent(this@DynamicPriceRewardedAd)
+        .onError(this@DynamicPriceRewardedAd)
+        .also {
+            googleAd.dynamicPriceAd = DynamicPriceAd(adController = it)
+            coroutineScope.launch(Dispatchers.Main) {
+                it.load(this@createController)
+            }
+        }
 
     init {
         if (googleAd.isNimbusWin) application.createController()
@@ -131,10 +140,12 @@ internal class DynamicPriceRewardedAd(
 
     override fun show(activity: Activity, onUserEarnedRewardListener: OnUserEarnedRewardListener) {
         if (!googleAd.isNimbusWin) googleAd.show(activity, onUserEarnedRewardListener) else {
-            (dynamicPriceAd?.adController ?: activity.createController())?.run {
-                rewardListener = onUserEarnedRewardListener
-                start()
-            } ?: googleAd.fullScreenContentCallback?.onAdFailedToShowFullScreenContent(failToShowError)
+            val rewardedAd = googleAd.dynamicPriceAd?.adController as? com.adsbynimbus.RewardedAd
+                ?: activity.createController()
+            rewardListener = onUserEarnedRewardListener
+            coroutineScope.launch(Dispatchers.Main) {
+                rewardedAd.show(activity)
+            }
         }
     }
 
@@ -146,22 +157,25 @@ internal class DynamicPriceRewardedAd(
 
     override fun onAdEvent(adEvent: AdEvent) {
         when (adEvent) {
-            AdEvent.IMPRESSION -> {
+            AdEvent.Impression -> {
                 shown = true
                 googleAd.fullScreenContentCallback?.onAdShowedFullScreenContent()
                 googleAd.fullScreenContentCallback?.onAdImpression()
             }
-            AdEvent.CLICKED -> googleAd.fullScreenContentCallback?.onAdClicked()
-            AdEvent.COMPLETED -> rewardListener?.onUserEarnedReward(googleAd.rewardItem)
-            AdEvent.DESTROYED -> {
+            AdEvent.Clicked -> googleAd.fullScreenContentCallback?.onAdClicked()
+            AdEvent.Completed -> rewardListener?.onUserEarnedReward(googleAd.rewardItem)
+            AdEvent.Destroyed -> {
                 if (shown) fullScreenContentCallback?.onAdDismissedFullScreenContent()
                 destroy()
             }
             else -> return
         }
+        onEvent.onAdEvent(adEvent)
     }
 
     override fun onError(error: NimbusError) {
+        if (!shown) fullScreenContentCallback?.onAdFailedToShowFullScreenContent(failToShowError)
+        onError.onError(error)
         destroy()
     }
 

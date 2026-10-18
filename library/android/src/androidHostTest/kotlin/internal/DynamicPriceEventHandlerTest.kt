@@ -6,11 +6,11 @@ import android.app.Application
 import android.os.SystemClock
 import android.util.Log
 import android.view.View
+import com.adsbynimbus.Ad
+import com.adsbynimbus.AdEvent
 import com.adsbynimbus.NimbusError
 import com.adsbynimbus.internal.Platform
 import com.adsbynimbus.internal.application
-import com.adsbynimbus.render.AdController
-import com.adsbynimbus.render.AdEvent
 import com.google.android.libraries.ads.mobile.sdk.banner.BannerAd
 import com.google.android.libraries.ads.mobile.sdk.interstitial.InterstitialAd
 import io.mockk.*
@@ -36,7 +36,9 @@ import kotlin.test.Test
  */
 class DynamicPriceEventHandlerTest {
 
-    var controller: AdController = mockk(relaxed = true)
+    val controller: Ad = mockk(relaxed = true)
+    val onError: NimbusError.Listener = mockk(relaxed = true)
+    val onEvent: AdEvent.Listener = mockk(relaxed = true)
     val bannerAd: BannerAd = mockk(relaxed = true)
     val interstitialAd: InterstitialAd = mockk(relaxed = true)
     var adView: View = mockk(relaxed = true)
@@ -65,8 +67,9 @@ class DynamicPriceEventHandlerTest {
 
     @BeforeTest
     fun setUp() {
-        clearMocks(controller, adView, bannerAd, interstitialAd)
+        clearMocks(controller, adView, bannerAd, interstitialAd, onEvent, onError)
 
+        every { controller.adView } returns adView
         every { adView.post(any()) } answers {
             (it.invocation.args[0] as Runnable).run()
             true
@@ -79,21 +82,23 @@ class DynamicPriceEventHandlerTest {
     }
 
     @Test
-    fun `onAdEvent CLICKED should trigger click tracker and callbacks`() = testScope.runTest {
+    fun `onAdEvent Clicked should trigger click tracker and callbacks`() = testScope.runTest {
         arrayOf(DynamicPriceEventHandler(
-            bannerView = adView,
             googleAd = bannerAd,
             googleClickTracker = "https://test.com/click",
             nimbusAd = controller,
+            onError = onError,
+            onEvent = onEvent,
             coroutineScope = this,
         ), DynamicPriceEventHandler(
-            bannerView = null,
             googleAd = interstitialAd,
             googleClickTracker = "https://test.com/click",
             nimbusAd = controller,
+            onError = onError,
+            onEvent = onEvent,
             coroutineScope = this,
         )).forEach {
-            it.onAdEvent(AdEvent.CLICKED)
+            it.onAdEvent(AdEvent.Clicked)
         }
 
         advanceUntilIdle()
@@ -105,15 +110,16 @@ class DynamicPriceEventHandlerTest {
     @Test
     fun `onAdEvent DESTROYED for interstitial should NOT destroy controller`() = testScope.runTest {
         val handler = DynamicPriceEventHandler(
-            bannerView = null,
             googleAd = interstitialAd,
             googleClickTracker = "",
             nimbusAd = controller,
+            onError = onError,
+            onEvent = onEvent,
             coroutineScope = this,
         )
 
         mockkStatic(::maybeClearInterstitial) {
-            handler.onAdEvent(AdEvent.DESTROYED)
+            handler.onAdEvent(AdEvent.Destroyed)
             advanceUntilIdle()
             verify { maybeClearInterstitial(any()) }
         }
@@ -124,14 +130,15 @@ class DynamicPriceEventHandlerTest {
     @Test
     fun `onError should destroy controller and call fail callback on interstitial`() = testScope.runTest {
         val handler = DynamicPriceEventHandler(
-            bannerView = null,
             googleAd = interstitialAd,
             googleClickTracker = "",
             nimbusAd = controller,
+            onError = onError,
+            onEvent = onEvent,
             coroutineScope = this,
         )
 
-        handler.onError(NimbusError(NimbusError.ErrorType.RENDERER_ERROR, "Test Error", null))
+        handler.onError(NimbusError("Test Error"))
 
         verify {
             controller.destroy()
