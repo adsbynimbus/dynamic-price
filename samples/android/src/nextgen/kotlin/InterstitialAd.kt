@@ -1,5 +1,6 @@
 package com.adsbynimbus.dynamicprice.sample
 
+import android.util.Log
 import androidx.activity.compose.LocalActivity
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -38,7 +39,9 @@ fun InterstitialScreen(modifier: Modifier = Modifier) {
                 adEventCallback = object : InterstitialAdEventCallback,
                     AdEventCallback by LoggingAdEventCallback(Interstitial.title) {
                         override fun onAppEvent(name: String, data: String?) {
-                            handleEventForNimbus(name, data)
+                            handleEventForNimbus(name, data) {
+                                Log.i("DynamicPrice", "Nimbus Ad Event: $it")
+                            }
                         }
                     }
                 show(activity)

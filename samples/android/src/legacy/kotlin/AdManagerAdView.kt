@@ -33,7 +33,7 @@ typealias GoogleAdSize = com.google.android.gms.ads.AdSize
 fun AdManagerAdView.setupDynamicPrice() {
     appEventListener = { name, info ->
         handleEventForNimbus(name, info) {
-            println("Nimbus Ad Event: ${it.name}")
+            Log.i("DynamicPrice", "Nimbus Ad Event: $it")
         }
     }
 }
@@ -151,7 +151,7 @@ fun AdManagerInlineAd(
 
     DisposableEffect(Unit) {
         onDispose {
-            Log.i("DynamicPrice", "AdManagerInlineAd Called Destroy")
+            Log.i("DynamicPrice", "AdManagerInlineAd: Destroy")
             adView.destroy()
         }
     }

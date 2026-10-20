@@ -1,6 +1,7 @@
 package com.adsbynimbus.dynamicprice.sample
 
 import android.content.Context
+import android.util.Log
 import androidx.activity.compose.LocalActivity
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -36,7 +37,9 @@ suspend fun loadDynamicPriceInterstitial(
                 override fun onAdLoaded(ad: AdManagerInterstitialAd) {
                     // Set the appEventListener before returning the AdManagerInterstitialAd
                     ad.appEventListener = AppEventListener { name, info ->
-                        ad.handleEventForNimbus(name, info)
+                        ad.handleEventForNimbus(name, info) {
+                            Log.i("DynamicPrice", "Nimbus Ad Event: $it")
+                        }
                     }
 
                     if (continuation.isActive) continuation.resume(ad)

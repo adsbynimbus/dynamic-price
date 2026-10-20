@@ -1,6 +1,7 @@
 package com.adsbynimbus.dynamicprice.sample
 
 import android.graphics.Rect
+import android.util.Log
 import android.view.*
 import android.view.View.OnLayoutChangeListener
 import androidx.compose.foundation.layout.*
@@ -33,7 +34,9 @@ typealias GoogleAdSize = com.google.android.libraries.ads.mobile.sdk.banner.AdSi
 fun BannerAd.setupDynamicPrice(listener: AdEventCallback) {
     adEventCallback = object : BannerAdEventCallback, AdEventCallback by listener {
         override fun onAppEvent(name: String, data: String?) {
-            handleEventForNimbus(name, data)
+            handleEventForNimbus(name, data) {
+                Log.i("DynamicPrice", "Nimbus Ad Event: $it")
+            }
         }
     }
 }
@@ -170,7 +173,10 @@ fun AdManagerInlineAd(
     onLoadAd(adView)
 
     DisposableEffect(Unit) {
-        onDispose { adView.destroy() }
+        onDispose {
+            Log.i("DynamicPrice", "AdManagerInlineAd: Destroy")
+            adView.destroy()
+        }
     }
 }
 
