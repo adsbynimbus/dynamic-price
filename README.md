@@ -14,7 +14,7 @@ Nimbus bid to the Ad Manager request and rendering the ad when Nimbus wins the a
     - [Android (Gradle)](#android-gradle)
     - [iOS (Swift Package Manager)](#ios-swift-package-manager)
 - [Migration Guide](#migration-guide)
-    - [Nimbus SDK 3.0 Migration Guide](#nimbus-sdk-30-migration-guide)
+    - [Nimbus SDK 3.0 Migration Guide](#nimbus-sdk-30-update)
     - [Summary of Changes](#summary-of-changes)
     - [Android Migration (extension-google)](#android-migration-extension-google)
     - [iOS Migration (NimbusGAMKit)](#ios-migration-nimbusgamkit)
@@ -85,9 +85,15 @@ compatible with all existing inventory running Dynamic Price with Nimbus Renderi
 ### Nimbus SDK 3.0 Update
 
 In addition to the changes listed below, please review the 3.0 Migration guide for information on
-changes to Nimbus initialization, SDK Bidders, and replacing `NimbusRequest` /
+changes to Nimbus initialization, SDK Bidders, and replacing `NimbusRequest` / `NimbusAdManager` /
 `NimbusRequestManager` with the new `Nimbus.bannerAd`, `Nimbus.interstitialAd`, and
 `Nimbus.rewardedAd` methods for retrieving an ad.
+
+**Android**
+- Migration Guide - [https://docs.adsbynimbus.com/docs/nimbus-3.0-sdk-documentation/migrating-from-2.x/3.0-migration-guide-android](https://docs.adsbynimbus.com/docs/nimbus-3.0-sdk-documentation/migrating-from-2.x/3.0-migration-guide-android)
+- 3.0 Library Update - https://github.com/adsbynimbus/dynamic-price/pull/81
+- 3.0 Legacy Sample App Update - [Commit 21fa8a9](https://github.com/adsbynimbus/dynamic-price/pull/81/commits/21fa8a933c50684caf78346c5c9344ee12a36b36)
+- 3.0 Next Gen Sample App Update - [Commit 3d3233a](https://github.com/adsbynimbus/dynamic-price/pull/81/commits/3d3233a4ee0a8bc757a4e581d137a8754a0d8512)
 
 **iOS**
 - Migration Guide - [https://docs.adsbynimbus.com/docs/nimbus-3.0-sdk-documentation/migrating-from-2.x/3.0-migration-guide-ios](https://docs.adsbynimbus.com/docs/nimbus-3.0-sdk-documentation/migrating-from-2.x/3.0-migration-guide-ios)
@@ -165,30 +171,48 @@ present the Nimbus rendered interstitial after the Google interstitial has been 
 
 **[Android](samples/android/src/nextgen/kotlin/BannerAd.kt)**
 ```kotlin
-suspend fun AdManagerAdView.loadDynamicPrice(
+suspend fun AdView.loadDynamicPrice(
+    adUnitId: String,
     priceMapping: LinearPriceMapping,
-    nimbusRequest: NimbusRequest = forBannerAd(adUnitId, BANNER_320_50),
-    nimbusAdManager: NimbusAdManager = NimbusAdManager(),
 ) {
-    // Create a new AdManagerAdRequest.Builder for each request
-    val adManagerRequest = AdManagerAdRequest.Builder()
+    // Create a new BannerAdRequest.Builder for each request
+    val adManagerRequest = BannerAdRequest.Builder(
+        adUnitId = adUnitId,
+        adSize = AdSize.BANNER,
+    )
+
+    val nimbusRequest = Nimbus.bannerAd(
+        position = adUnitId,
+        size = com.adsbynimbus.AdSize.Banner,
+    )
 
     // Request an ad from Nimbus
     runCatching {
-        nimbusAdManager.makeRequest(context, nimbusRequest)
-    }.onSuccess { nimbusAd ->
+        val nimbusResponse = nimbusRequest.fetch().response
         // Call applyDynamicPrice on the adManagerRequest
-        adManagerRequest.applyDynamicPrice(nimbusAd, mapping = priceMapping)
+        nimbusResponse?.applyDynamicPrice(adManagerRequest, mapping = priceMapping)
     }
 
-    // Set the appEventListener and call handleEventForNimbus
-    appEventListener = AppEventListener { name, info ->
-        // handleEventForNimbus is called when Nimbus wins the auction
-        handleEventForNimbus(name, info)
-    }
+    return suspendCancellableCoroutine {
+        val callback = object : AdLoadCallback<BannerAd> {
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                if (it.isActive) it.resumeWithException(RuntimeException(adError.message))
+            }
 
-    // Send the adManagerRequest to Google
-    loadAd(adManagerRequest.build())
+            override fun onAdLoaded(ad: BannerAd) {
+                // Set the AdEventCallback and call handleEventForNimbus in onAppEvent
+                ad.adEventCallback = object : BannerAdEventCallback {
+                    override fun onAppEvent(name: String, data: String?) {
+                        // handleEventForNimbus is called when Nimbus wins the auction
+                        ad.handleEventForNimbus(name, data)
+                    }
+                }
+                if (it.isActive) it.resume(ad)
+            }
+        }
+        // Send the adManagerRequest to Google
+        loadAd(adRequest = adManagerRequest.build(), adLoadCallback = callback)
+    }
 }
 ```
 
@@ -227,44 +251,33 @@ extension AdManagerBannerView: @retroactive AppEventDelegate {
 **[Android](samples/android/src/nextgen/kotlin/InterstitialAd.kt)**
 ```kotlin
 suspend fun loadDynamicPriceInterstitial(
-    priceMapping: LinearPriceMapping,
     adUnitId: String,
-    nimbusRequest: NimbusRequest = NimbusRequest.forInterstitialAd(adUnitId),
-    nimbusAdManager: NimbusAdManager = NimbusAdManager(),
-): AdManagerInterstitialAd? {
-    // Create a new AdManagerAdRequest.Builder for each request
-    val adManagerRequest = AdManagerAdRequest.Builder()
+    priceMapping: LinearPriceMapping,
+): InterstitialAd? {
+    // Create a new AdRequest.Builder for each request
+    val adManagerRequest = AdRequest.Builder(adUnitId)
+
+    val nimbusRequest = Nimbus.interstitialAd(position = adUnitId)
 
     // Request an ad from Nimbus
     runCatching {
-        nimbusAdManager.makeRequest(context, nimbusRequest)
-    }.onSuccess { nimbusAd ->
+        val nimbusResponse = nimbusRequest.fetch().response
         // Call applyDynamicPrice on the adManagerRequest
-        adManagerRequest.applyDynamicPrice(nimbusAd, mapping = priceMapping)
+        nimbusResponse?.applyDynamicPrice(adManagerRequest, mapping = priceMapping)
     }
 
-    return runCatching {
-        suspendCancellableCoroutine { continuation ->
-            AdManagerInterstitialAd.load(context, adUnitId, adManagerRequest.build(),
-                object : AdManagerInterstitialAdLoadCallback() {
-                    override fun onAdLoaded(ad: AdManagerInterstitialAd) {
-                        // Set the appEventListener before returning the AdManagerInterstitialAd
-                        ad.appEventListener = AppEventListener { name, info ->
-                            ad.handleEventForNimbus(name, info)
-                        }
-
-                        if (continuation.isActive) continuation.resume(ad)
-                    }
-
-                    override fun onAdFailedToLoad(p0: LoadAdError) {
-                        if (continuation.isActive) {
-                            continuation.resumeWithException(RuntimeException(p0.message))
-                        }
-                    }
-                },
-            )
+    return when (val adResponse = InterstitialAd.load(adRequest.build())) {
+        is AdLoadResult.Success<InterstitialAd> -> adResponse.ad.apply {
+            // Set the AdEventCallback and call handleEventForNimbus in onAppEvent
+            adEventCallback = object : InterstitialAdEventCallback {
+                override fun onAppEvent(name: String, data: String?) {
+                    // handleEventForNimbus is called when Nimbus wins the auction
+                    handleEventForNimbus(name, data)
+                }
+            }
         }
-    }.getOrNull()
+        else -> null
+    }
 }
 ```
 
