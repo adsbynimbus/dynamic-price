@@ -24,11 +24,11 @@ Nimbus bid to the Ad Manager request and rendering the ad when Nimbus wins the a
 
 ## Minimum Requirements
 
-| Platform                                     | Minimum Requirements                                          |
-|:---------------------------------------------|:--------------------------------------------------------------|
-| [**Android Next Gen**](library/android)      | SDK 24 (Android 7.0), Kotlin 2.1, JVM 17, GMA Next Gen 1.5.0  |
-| [**Android Legacy**](library/android-legacy) | SDK 23 (Android 6.0), Kotlin 2.1, JVM 11, GMA (Legacy) 24.9.0 |
-| [**iOS**](library/ios)                       | iOS 15.0, Swift 5.10, GMA 12, Nimbus 3+                       |
+| Platform                                     | Minimum Requirements                                                     |
+|:---------------------------------------------|:-------------------------------------------------------------------------|
+| [**Android Next Gen**](library/android)      | SDK 24 (Android 7.0), Kotlin 2.1, JVM 17, GMA Next Gen 1.5.0,  Nimbus 3+ |
+| [**Android Legacy**](library/android-legacy) | SDK 23 (Android 6.0), Kotlin 2.1, JVM 11, GMA (Legacy) 25.0.0, Nimbus 3+ |
+| [**iOS**](library/ios)                       | iOS 15.0, Swift 5.10, GMA 12, Nimbus 3+                                  |
 
 ## Integration
 
@@ -39,10 +39,10 @@ Add the DynamicPrice library to your `build.gradle.kts` file:
 ```kotlin
 dependencies {
     // For use with the Google Mobile Ads Next Gen SDK
-    implementation("com.adsbynimbus.dynamicprice:dynamicprice:1.1.1")
+    implementation("com.adsbynimbus.dynamicprice:dynamicprice:3.0.0-rc.1")
 
     // For use with the Google Mobile Ads (Legacy) SDK
-    implementation("com.adsbynimbus.dynamicprice:dynamicprice-legacy:1.1.0")
+    implementation("com.adsbynimbus.dynamicprice:dynamicprice-legacy:3.0.0-rc.1")
 }
 ```
 
