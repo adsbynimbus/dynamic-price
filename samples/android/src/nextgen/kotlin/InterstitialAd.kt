@@ -1,25 +1,23 @@
 package com.adsbynimbus.dynamicprice.sample
 
-import android.content.Context
+import android.util.Log
 import androidx.activity.compose.LocalActivity
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import com.adsbynimbus.Nimbus
 import com.adsbynimbus.dynamicprice.*
 import com.adsbynimbus.dynamicprice.sample.AdTypes.Interstitial
-import com.adsbynimbus.request.NimbusRequest
-import com.adsbynimbus.request.NimbusRequest.Companion.forInterstitialAd
 import com.google.android.libraries.ads.mobile.sdk.common.*
 import com.google.android.libraries.ads.mobile.sdk.interstitial.*
 
 suspend fun loadDynamicPriceInterstitial(
-    context: Context,
     adRequest: AdRequest.Builder,
-    nimbusRequest: NimbusRequest,
+    nimbusRequest: com.adsbynimbus.InterstitialAd,
 ): AdLoadResult<InterstitialAd> {
     DynamicPriceHelper.runCatching {
-        val nimbusResponse = requestManager.makeRequest(context, nimbusRequest)
-        nimbusResponse.applyDynamicPrice(adRequest, mapping = mapping)
+        val nimbusResponse = nimbusRequest.fetch().response
+        nimbusResponse?.applyDynamicPrice(adRequest, mapping = mapping)
     }
     return InterstitialAd.load(adRequest.build())
 }
@@ -33,16 +31,17 @@ fun InterstitialScreen(modifier: Modifier = Modifier) {
     }
     LaunchedEffect(true) {
         val adResponse = loadDynamicPriceInterstitial(
-            context = activity,
             adRequest = AdRequest.Builder(BuildConfig.ADMANAGER_ADUNIT_ID),
-            nimbusRequest = forInterstitialAd(Interstitial.title),
+            nimbusRequest = Nimbus.interstitialAd(Interstitial.title),
         )
         if (adResponse is AdLoadResult.Success<InterstitialAd>) {
             adResponse.ad.apply {
                 adEventCallback = object : InterstitialAdEventCallback,
                     AdEventCallback by LoggingAdEventCallback(Interstitial.title) {
                         override fun onAppEvent(name: String, data: String?) {
-                            handleEventForNimbus(name, data)
+                            handleEventForNimbus(name, data) {
+                                Log.i("DynamicPrice", "Nimbus Ad Event: $it")
+                            }
                         }
                     }
                 show(activity)

@@ -1,6 +1,7 @@
 package com.adsbynimbus.dynamicprice.sample
 
 import android.graphics.Rect
+import android.util.Log
 import android.view.*
 import android.view.View.OnLayoutChangeListener
 import androidx.compose.foundation.layout.*
@@ -11,36 +12,42 @@ import androidx.compose.ui.platform.*
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.*
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.adsbynimbus.AdSize
+import com.adsbynimbus.InlineAd
+import com.adsbynimbus.Nimbus
 import com.adsbynimbus.dynamicprice.applyDynamicPrice
 import com.adsbynimbus.dynamicprice.handleEventForNimbus
 import com.adsbynimbus.dynamicprice.sample.AdTypes.*
-import com.adsbynimbus.openrtb.request.Format.Companion.BANNER_320_50
-import com.adsbynimbus.openrtb.request.Format.Companion.MREC
-import com.adsbynimbus.openrtb.request.Video
-import com.adsbynimbus.request.NimbusRequest
-import com.adsbynimbus.request.NimbusRequest.Companion.forBannerAd
-import com.google.android.libraries.ads.mobile.sdk.banner.*
+import com.adsbynimbus.video
+import com.google.android.libraries.ads.mobile.sdk.banner.AdView
+import com.google.android.libraries.ads.mobile.sdk.banner.BannerAd
+import com.google.android.libraries.ads.mobile.sdk.banner.BannerAdEventCallback
+import com.google.android.libraries.ads.mobile.sdk.banner.BannerAdRequest
 import com.google.android.libraries.ads.mobile.sdk.common.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.*
 import kotlin.time.*
 import kotlin.time.Duration.Companion.seconds
 
+typealias GoogleAdSize = com.google.android.libraries.ads.mobile.sdk.banner.AdSize
+
 fun BannerAd.setupDynamicPrice(listener: AdEventCallback) {
     adEventCallback = object : BannerAdEventCallback, AdEventCallback by listener {
         override fun onAppEvent(name: String, data: String?) {
-            handleEventForNimbus(name, data)
+            handleEventForNimbus(name, data) {
+                Log.i("DynamicPrice", "Nimbus Ad Event: $it")
+            }
         }
     }
 }
 
 suspend fun AdView.loadDynamicPrice(
     adRequest: BannerAdRequest.Builder,
-    nimbusRequest: NimbusRequest,
+    nimbusRequest: InlineAd,
 ): BannerAd {
     DynamicPriceHelper.runCatching {
-        val nimbusResponse = requestManager.makeRequest(context, nimbusRequest)
-        nimbusResponse.applyDynamicPrice(adRequest, mapping = mapping)
+        val nimbusResponse = nimbusRequest.fetch().response
+        nimbusResponse?.applyDynamicPrice(adRequest, mapping = mapping)
     }
     return suspendCancellableCoroutine {
         val request = adRequest.build()
@@ -61,7 +68,7 @@ suspend fun AdView.loadDynamicPrice(
 fun AdView.refreshingDynamicPrice(
     adEventCallback: AdEventCallback,
     adRequestProvider: () -> BannerAdRequest.Builder,
-    nimbusRequest: NimbusRequest,
+    nimbusRequest: InlineAd,
     lifecycleOwner: LifecycleOwner? = findViewTreeLifecycleOwner(),
 ) {
     if (lifecycleOwner == null) throw Exception("No valid lifecycle detected")
@@ -106,13 +113,13 @@ fun BannerAdScreen(modifier: Modifier = Modifier) {
                         @Suppress("Deprecation") //anchoredAdaptiveBanner is deprecated
                         BannerAdRequest.Builder(
                             adUnitId = BuildConfig.ADMANAGER_ADUNIT_ID,
-                            adSize = AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
+                            adSize = GoogleAdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
                                 context = it.context,
                                 width = window.containerDpSize.width.value.toInt(),
                             ),
                         )
                     },
-                    nimbusRequest = forBannerAd(AdViewBanner.title, BANNER_320_50),
+                    nimbusRequest = Nimbus.bannerAd(AdViewBanner.title, AdSize.Banner),
                     lifecycleOwner = lifecycleOwner,
                 )
             },
@@ -132,14 +139,14 @@ fun BannerVideoScreen(modifier: Modifier = Modifier) {
                     adRequestProvider = {
                         BannerAdRequest.Builder(
                             adUnitId = BuildConfig.ADMANAGER_ADUNIT_ID,
-                            adSize = AdSize.getCurrentOrientationInlineAdaptiveBannerAdSize(
+                            adSize = GoogleAdSize.getCurrentOrientationInlineAdaptiveBannerAdSize(
                                 context = it.context,
                                 width = window.containerDpSize.width.value.toInt(),
                             ),
                         )
                     },
-                    nimbusRequest = forBannerAd(AdViewBannerWithVideo.title, MREC).apply {
-                        request.imp[0].video = Video()
+                    nimbusRequest = Nimbus.bannerAd(AdViewBannerWithVideo.title, AdSize.Mrec) {
+                        video()
                     },
                     lifecycleOwner = lifecycleOwner,
                 )
@@ -166,7 +173,10 @@ fun AdManagerInlineAd(
     onLoadAd(adView)
 
     DisposableEffect(Unit) {
-        onDispose { adView.destroy() }
+        onDispose {
+            Log.i("DynamicPrice", "AdManagerInlineAd: Destroy")
+            adView.destroy()
+        }
     }
 }
 

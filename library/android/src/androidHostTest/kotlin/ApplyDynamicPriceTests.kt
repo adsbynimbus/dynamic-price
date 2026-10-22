@@ -2,6 +2,7 @@ package com.adsbynimbus.dynamicprice
 
 import android.os.SystemClock
 import com.adsbynimbus.Nimbus
+import com.adsbynimbus.NimbusResponse.Bid.MarkupType
 import com.google.android.libraries.ads.mobile.sdk.common.AdRequest
 import io.mockk.*
 import kotlin.test.*
@@ -19,29 +20,29 @@ class ApplyDynamicPriceTests {
     }
 
     @Test fun `applyDynamicPrice sets customTargeting for static ads`() {
-        val ad = createNimbusAd(type = "static")
+        val ad = createNimbusAd(type = MarkupType.Banner)
         val request = AdRequest.Builder("id").apply {
             ad.applyDynamicPrice(this, mapping = mapping)
         }.build()
 
-        assertEquals(ad.bid.auction_id, actual = request.customTargeting["na_id"])
+        assertEquals(ad.id, actual = request.customTargeting["na_id"])
         assertEquals(mapping.getTarget(ad), actual = request.customTargeting["na_bid"])
-        assertEquals(ad.bid.network, actual = request.customTargeting["na_network"])
-        assertEquals("${ad.bid.width}x${ad.bid.height}", actual = request.customTargeting["na_size"])
+        assertEquals(ad.bid.ext.omp?.buyer, actual = request.customTargeting["na_network"])
+        assertEquals("${ad.bid.w}x${ad.bid.h}", actual = request.customTargeting["na_size"])
         assertEquals("static", actual = request.customTargeting["na_type"])
         assertEquals("static", actual = request.customTargeting["na_render"])
         assertNull(request.customTargeting["na_bid_video"])
     }
 
     @Test fun `applyDynamicPrice sets customTargeting for video ads`() {
-        val ad = createNimbusAd(type = "video")
+        val ad = createNimbusAd(type = MarkupType.Video)
         val request = AdRequest.Builder("id").apply {
             ad.applyDynamicPrice(this, mapping = mapping)
         }.build()
 
-        assertEquals(ad.bid.auction_id, actual = request.customTargeting["na_id"])
+        assertEquals(ad.id, actual = request.customTargeting["na_id"])
         assertEquals(mapping.getTarget(ad), actual = request.customTargeting["na_bid_video"])
-        assertEquals(ad.bid.network, actual = request.customTargeting["na_network"])
+        assertEquals(ad.bid.ext.omp?.buyer, actual = request.customTargeting["na_network"])
         assertEquals("0x0", actual = request.customTargeting["na_size"])
         assertEquals("video", actual = request.customTargeting["na_type"])
         assertEquals("video", actual = request.customTargeting["na_render"])
@@ -67,8 +68,8 @@ class ApplyDynamicPriceTests {
     }
 
     @Test fun `applyDynamicPrice sets na_bid=0 when Nimbus testMode is true`() {
-        Nimbus.testMode = true
-        val ad = createNimbusAd(type = "static")
+        Nimbus.configuration.testMode = true
+        val ad = createNimbusAd(type = MarkupType.Banner)
         val request = AdRequest.Builder("id").apply {
             ad.applyDynamicPrice(this, mapping = mapping)
         }.build()
@@ -76,12 +77,12 @@ class ApplyDynamicPriceTests {
         assertEquals("0", actual = request.customTargeting["na_bid"])
         assertNull(request.customTargeting["na_bid_video"])
 
-        Nimbus.testMode = false
+        Nimbus.configuration.testMode = false
     }
 
     @Test fun `applyDynamicPrice uses na_bid_video=0 when Nimbus testMode is true`() {
-        Nimbus.testMode = true
-        val ad = createNimbusAd(type = "video")
+        Nimbus.configuration.testMode = true
+        val ad = createNimbusAd(type = MarkupType.Video)
         val request = AdRequest.Builder("id").apply {
             ad.applyDynamicPrice(this, mapping = mapping)
         }.build()
@@ -89,6 +90,6 @@ class ApplyDynamicPriceTests {
         assertEquals("0", actual = request.customTargeting["na_bid_video"])
         assertNull(request.customTargeting["na_bid"])
 
-        Nimbus.testMode = false
+        Nimbus.configuration.testMode = false
     }
 }
