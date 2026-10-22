@@ -34,8 +34,8 @@ kotlin {
         }
 
         aarMetadata {
-            minCompileSdk = 35
-            minAgpVersion = "8.5.0" // Min Required for Kotlin 2.0
+            minCompileSdk = 36
+            minAgpVersion = "8.10.0" // Min Required API 36
         }
 
         mavenPublication {

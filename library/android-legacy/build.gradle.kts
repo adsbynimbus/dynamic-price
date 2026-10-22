@@ -24,6 +24,7 @@ val dokkaHtmlJar = tasks.register<Jar>("dokkaHtmlJar") {
 kotlin {
     android {
         namespace = "$group.legacy"
+        //noinspection GradleDependency
         compileSdk = 36
         minSdk = 23
 
@@ -35,7 +36,7 @@ kotlin {
 
         aarMetadata {
             minCompileSdk = 36
-            minAgpVersion = "8.5.0" // Min Required for Kotlin 2.0
+            minAgpVersion = "8.10.0" // Min Required for API 36
         }
 
         mavenPublication {
@@ -60,7 +61,7 @@ kotlin {
                 providers.provider {
                     library.copy().apply {
                         version {
-                            require("[24.9.0,)")
+                            require("[25.0.0,)")
                             library.version?.let { prefer(it) }
                         }
                     }
