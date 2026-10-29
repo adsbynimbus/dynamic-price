@@ -80,6 +80,7 @@ dependencies {
     implementation(libs.androidx.startup)
 
     debugImplementation(libs.leakcanary)
+    debugImplementation(libs.androidx.compose.ui.tooling)
 
     constraints {
         implementation(libs.okio)

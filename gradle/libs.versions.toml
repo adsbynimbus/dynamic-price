@@ -61,7 +61,6 @@ androidx-compose = [
     "androidx-compose-material3",
     "androidx-compose-navigation",
     "androidx-compose-ui",
-    "androidx-compose-ui-tooling",
     "androidx-compose-ui-tooling-preview",
 ]
 androidx-media3 = [
