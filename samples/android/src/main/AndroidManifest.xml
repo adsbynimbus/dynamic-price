@@ -33,6 +33,10 @@
             <meta-data
                 android:name="com.adsbynimbus.dynamicprice.sample.NimbusInitializer"
                 android:value="androidx.startup"/>
+
+            <meta-data
+                android:name="com.adsbynimbus.dynamicprice.sample.GoogleMobileAdInitializer"
+                android:value="androidx.startup"/>
         </provider>
     </application>
 </manifest>
