@@ -45,6 +45,8 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
+    testOptions.unitTests.isIncludeAndroidResources = true
 }
 
 kotlin {
@@ -67,6 +69,7 @@ dependencies {
     implementation(libs.androidx.startup)
 
     debugImplementation(libs.leakcanary)
+    debugImplementation(libs.androidx.compose.ui.tooling)
 
     constraints {
         implementation(libs.okio)

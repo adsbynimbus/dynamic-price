@@ -1,5 +1,5 @@
 [versions]
-android = "9.4.1"
+android = "9.5.0"
 dokka = "2.3.0-Beta"
 kotlin = "2.4.21"
 
@@ -61,7 +61,6 @@ androidx-compose = [
     "androidx-compose-material3",
     "androidx-compose-navigation",
     "androidx-compose-ui",
-    "androidx-compose-ui-tooling",
     "androidx-compose-ui-tooling-preview",
 ]
 androidx-media3 = [
