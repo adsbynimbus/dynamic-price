@@ -17,7 +17,7 @@ android {
     defaultConfig {
         applicationId = namespace
         minSdk = 26
-        targetSdk = 36
+        targetSdk = compileSdk
         versionCode = 1
         versionName = "1.0"
         manifestPlaceholders["appName"] = "Dynamic Price Legacy Samples"
