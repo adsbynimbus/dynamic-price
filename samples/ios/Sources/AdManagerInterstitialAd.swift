@@ -12,7 +12,7 @@ func loadDynamicPriceInterstitialAd(
 ) async throws -> GoogleMobileAds.InterstitialAd {
     let nimbusResponse = try? await nimbusRequest.fetch().response
     // Apply Key-Values to AdManagerRequest
-    nimbusResponse?.applyDynamicPrice(adRequest, mapping: SampleApp.mapping)
+    nimbusResponse?.applyDynamicPrice(adRequest, mapping: priceMapping)
 
     let interstitialAd = try await AdManagerInterstitialAd.load(with: adUnitId, request: adRequest)
     interstitialAd.appEventDelegate = interstitialAd

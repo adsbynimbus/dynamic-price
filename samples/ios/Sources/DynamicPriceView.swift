@@ -55,13 +55,12 @@ public class DynamicPriceView: UIView, AppEventDelegate {
     public func loadAd() async {
         lastRequestTime = Date()
 
-        // See DynamicPrice+Helper for NimbusRequestManager async extension
         let nimbusBid = try? await nimbusRequest().fetch().response
 
         let request = AdManagerRequest()
         request.customTargeting = [:]
 
-        nimbusBid?.applyDynamicPrice(request, mapping: SampleApp.mapping)
+        nimbusBid?.applyDynamicPrice(request, mapping: priceMapping)
 
         googleBanner.load(request)
     }

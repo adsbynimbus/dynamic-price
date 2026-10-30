@@ -45,10 +45,10 @@ suspend fun AdView.loadDynamicPrice(
     adRequest: BannerAdRequest.Builder,
     nimbusRequest: InlineAd,
 ): BannerAd {
-    DynamicPriceHelper.runCatching {
-        val nimbusResponse = nimbusRequest.fetch().response
-        nimbusResponse?.applyDynamicPrice(adRequest, mapping = mapping)
-    }
+    val nimbusResponse = runCatching { nimbusRequest.fetch().response }.getOrNull()
+    // Apply Key-Values to BannerAdRequest.Builder
+    nimbusResponse?.applyDynamicPrice(adRequest, mapping = priceMapping)
+
     return suspendCancellableCoroutine {
         val request = adRequest.build()
         val callback = object : AdLoadCallback<BannerAd> {

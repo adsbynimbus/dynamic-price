@@ -21,7 +21,25 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import androidx.startup.Initializer
 import com.adsbynimbus.Nimbus
+import com.adsbynimbus.dynamicprice.LinearPriceGranularity
+import com.adsbynimbus.dynamicprice.LinearPriceMapping
+import com.adsbynimbus.dynamicprice.Mapping
 import kotlin.time.measureTime
+
+/**
+ * Example Mapping - Should be defined once and used globally
+ *
+ * $0.01 increments: $0.01 - $3.00   (ex. na_bid = {1, 2, 3, 4 ... 300})
+ * $0.05 increments: $3.00 - $8.00   (ex. na_bid = {300, 305, 310, 315 ... 800})
+ * $0.50 increments: $8.00 - $20.00  (ex. na_bid = {800, 850, 900, 950 ... 2000})
+ * $1.00 increments: $20.00 - $35.00 (ex. na_bid = {2000, 2100, 2200, 2300 ... 3500})
+ */
+val priceMapping: Mapping = LinearPriceMapping(
+    LinearPriceGranularity(0, 300, 1),
+    LinearPriceGranularity(300, 800, 5),
+    LinearPriceGranularity(800, 2000, 50),
+    LinearPriceGranularity(2000, 3500, 100)
+)
 
 class NimbusInitializer : Initializer<Unit> {
     override fun create(context: Context) {
