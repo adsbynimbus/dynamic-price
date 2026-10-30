@@ -24,6 +24,13 @@ import com.adsbynimbus.Nimbus
 import com.adsbynimbus.dynamicprice.LinearPriceGranularity
 import com.adsbynimbus.dynamicprice.LinearPriceMapping
 import com.adsbynimbus.dynamicprice.Mapping
+import com.adsbynimbus.dynamicprice.sample.BuildConfig.ADMANAGER_APP_ID
+import com.google.android.libraries.ads.mobile.sdk.MobileAds
+import com.google.android.libraries.ads.mobile.sdk.initialization.InitializationConfig
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlin.time.TimeSource.Monotonic
 import kotlin.time.measureTime
 
 /**
@@ -41,14 +48,20 @@ val priceMapping: Mapping = LinearPriceMapping(
     LinearPriceGranularity(2000, 3500, 100)
 )
 
-class NimbusInitializer : Initializer<Unit> {
+class AppInitializer : Initializer<Unit> {
     override fun create(context: Context) {
         val nimbusStartup = measureTime {
             Nimbus.initialize(context, BuildConfig.PUBLISHER_KEY, BuildConfig.API_KEY)
             Nimbus.configuration.testMode = true
         }
 
-        Log.i("DynamicPrice", "Nimbus init time: $nimbusStartup")
+        val googleStart = Monotonic.markNow()
+        CoroutineScope(Dispatchers.IO).launch {
+            MobileAds.initialize(context, InitializationConfig.Builder(ADMANAGER_APP_ID).build()) {
+                val googleInit = Monotonic.markNow() - googleStart
+                Log.i("DynamicPrice", "Init Time - Google: $googleInit, Nimbus: $nimbusStartup")
+            }
+        }
     }
 
     override fun dependencies(): MutableList<Class<out Initializer<*>>> = mutableListOf()

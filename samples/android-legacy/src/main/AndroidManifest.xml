@@ -37,9 +37,9 @@
             android:authorities="${applicationId}.androidx-startup"
             android:exported="false"
             tools:node="merge">
-            <!-- This entry makes NimbusInitializer discoverable. -->
+            <!-- This entry makes AppInitializer discoverable. -->
             <meta-data
-                android:name="com.adsbynimbus.dynamicprice.sample.NimbusInitializer"
+                android:name="com.adsbynimbus.dynamicprice.sample.AppInitializer"
                 android:value="androidx.startup"/>
         </provider>
     </application>

@@ -41,14 +41,14 @@ val priceMapping: Mapping = LinearPriceMapping(
     LinearPriceGranularity(2000, 3500, 100)
 )
 
-class NimbusInitializer : Initializer<Unit> {
+class AppInitializer : Initializer<Unit> {
     override fun create(context: Context) {
         val nimbusStartup = measureTime {
             Nimbus.initialize(context, BuildConfig.PUBLISHER_KEY, BuildConfig.API_KEY)
             Nimbus.configuration.testMode = true
         }
 
-        Log.i("DynamicPrice", "Nimbus init time: $nimbusStartup")
+        Log.i("DynamicPrice", "Init Time - Nimbus: $nimbusStartup")
     }
 
     override fun dependencies(): MutableList<Class<out Initializer<*>>> = mutableListOf()
