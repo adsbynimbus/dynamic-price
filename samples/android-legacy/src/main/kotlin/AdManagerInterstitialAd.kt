@@ -27,10 +27,10 @@ suspend fun loadDynamicPriceInterstitial(
     adRequest: AdManagerAdRequest.Builder,
     nimbusRequest: InterstitialAd,
 ): AdManagerInterstitialAd {
-    DynamicPriceHelper.runCatching {
-        val nimbusResponse = nimbusRequest.fetch().response
-        nimbusResponse?.applyDynamicPrice(adRequest, mapping = mapping)
-    }
+    val nimbusResponse = runCatching { nimbusRequest.fetch().response }.getOrNull()
+    // Apply Key-Values to AdManagerAdRequest.Builder
+    nimbusResponse?.applyDynamicPrice(adRequest, mapping = priceMapping)
+
     return suspendCancellableCoroutine { continuation ->
         AdManagerInterstitialAd.load(context, adUnitId, adRequest.build(),
             object : AdManagerInterstitialAdLoadCallback() {

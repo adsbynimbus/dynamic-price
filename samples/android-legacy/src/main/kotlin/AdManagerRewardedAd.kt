@@ -24,10 +24,10 @@ suspend fun loadDynamicPriceRewardedVideo(
     adRequest: AdManagerAdRequest.Builder,
     nimbusRequest: com.adsbynimbus.RewardedAd,
 ): RewardedAd {
-    DynamicPriceHelper.runCatching {
-        val nimbusResponse = nimbusRequest.fetch().response
-        nimbusResponse?.applyDynamicPrice(adRequest, mapping = mapping)
-    }
+    val nimbusResponse = runCatching { nimbusRequest.fetch().response }.getOrNull()
+    // Apply Key-Values to AdManagerAdRequest.Builder
+    nimbusResponse?.applyDynamicPrice(adRequest, mapping = priceMapping)
+
     return suspendCancellableCoroutine { continuation ->
         loadDynamicPriceRewardedAd(context, adUnitId, adRequest.build(),
             object : RewardedAdLoadCallback() {

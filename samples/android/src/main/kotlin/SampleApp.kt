@@ -21,16 +21,47 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import androidx.startup.Initializer
 import com.adsbynimbus.Nimbus
+import com.adsbynimbus.dynamicprice.LinearPriceGranularity
+import com.adsbynimbus.dynamicprice.LinearPriceMapping
+import com.adsbynimbus.dynamicprice.Mapping
+import com.adsbynimbus.dynamicprice.sample.BuildConfig.ADMANAGER_APP_ID
+import com.google.android.libraries.ads.mobile.sdk.MobileAds
+import com.google.android.libraries.ads.mobile.sdk.initialization.InitializationConfig
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlin.time.TimeSource.Monotonic
 import kotlin.time.measureTime
 
-class NimbusInitializer : Initializer<Unit> {
+/**
+ * Example Mapping - Should be defined once and used globally
+ *
+ * $0.01 increments: $0.01 - $3.00   (ex. na_bid = {1, 2, 3, 4 ... 300})
+ * $0.05 increments: $3.00 - $8.00   (ex. na_bid = {300, 305, 310, 315 ... 800})
+ * $0.50 increments: $8.00 - $20.00  (ex. na_bid = {800, 850, 900, 950 ... 2000})
+ * $1.00 increments: $20.00 - $35.00 (ex. na_bid = {2000, 2100, 2200, 2300 ... 3500})
+ */
+val priceMapping: Mapping = LinearPriceMapping(
+    LinearPriceGranularity(0, 300, 1),
+    LinearPriceGranularity(300, 800, 5),
+    LinearPriceGranularity(800, 2000, 50),
+    LinearPriceGranularity(2000, 3500, 100)
+)
+
+class AppInitializer : Initializer<Unit> {
     override fun create(context: Context) {
         val nimbusStartup = measureTime {
             Nimbus.initialize(context, BuildConfig.PUBLISHER_KEY, BuildConfig.API_KEY)
             Nimbus.configuration.testMode = true
         }
 
-        Log.i("DynamicPrice", "Nimbus init time: $nimbusStartup")
+        val googleStart = Monotonic.markNow()
+        CoroutineScope(Dispatchers.IO).launch {
+            MobileAds.initialize(context, InitializationConfig.Builder(ADMANAGER_APP_ID).build()) {
+                val googleInit = Monotonic.markNow() - googleStart
+                Log.i("DynamicPrice", "Init Time - Google: $googleInit, Nimbus: $nimbusStartup")
+            }
+        }
     }
 
     override fun dependencies(): MutableList<Class<out Initializer<*>>> = mutableListOf()

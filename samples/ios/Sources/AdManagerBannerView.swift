@@ -12,7 +12,7 @@ extension AdManagerBannerView: @retroactive AppEventDelegate {
         Task {
             let nimbusResponse = try? await nimbusRequest.fetch().response
             // Apply Key-Values to AdManagerRequest
-            nimbusResponse?.applyDynamicPrice(adRequest, mapping: DynamicPriceApp.mapping)
+            nimbusResponse?.applyDynamicPrice(adRequest, mapping: priceMapping)
 
             load(adRequest)
         }
