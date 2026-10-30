@@ -57,13 +57,11 @@ kotlin {
             implementation(libs.bundles.test.unit)
         }
         androidMain.dependencies {
-            implementation(libs.ads.google.legacy.flatMap{ library ->
-                providers.provider {
-                    library.copy().apply {
-                        version {
-                            require("[25.0.0,)")
-                            library.version?.let { prefer(it) }
-                        }
+            implementation(libs.ads.google.legacy.zip(libs.versions.ads.google.legacy.min) {
+                library, minVersion -> library.copy().apply {
+                    version {
+                        prefer(requiredVersion)
+                        require("[$minVersion,)")
                     }
                 }
             })
@@ -77,6 +75,12 @@ tasks.withType<Test>().configureEach {
 }
 
 dependencies.constraints {
+    // Ensure library is compiled with the min required version
+    androidCompileClasspath(libs.ads.google.legacy) {
+        version {
+            require(libs.versions.ads.google.legacy.min.get())
+        }
+    }
     androidMainImplementation(libs.protobuf) {
         version {
             prefer(requiredVersion)
