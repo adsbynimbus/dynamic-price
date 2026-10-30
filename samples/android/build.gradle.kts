@@ -67,14 +67,9 @@ dependencies {
     implementation(libs.ads.nimbus)
     implementation(libs.androidx.lifecycle)
     implementation(libs.androidx.startup)
+    implementation(libs.okio)
+    implementation(libs.protobuf)
 
     debugImplementation(libs.leakcanary)
     debugImplementation(libs.androidx.compose.ui.tooling)
-
-    constraints {
-        implementation(libs.okio)
-        implementation(libs.protobuf) {
-            because("Fixes CVE-2024-7254")
-        }
-    }
 }

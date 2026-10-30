@@ -61,8 +61,12 @@ gradle.lifecycle.beforeProject {
                         because("Fixes CWE-79")
                     }
                     "com.fasterxml.jackson", "com.fasterxml.jackson.core" -> {
-                        useVersion(if (requested.module.name == "jackson-annotations") "2.22" else "2.22.3")
+                        useVersion(if (requested.module.name == "jackson-annotations") "2.22" else "2.22.4")
                         because("Fixes CWE-918 (SSRF)")
+                    }
+                    "com.google.guava" if requested.module.name == "guava" -> {
+                        useVersion("33.7.2-${requested.version?.substringAfter("-")}")
+                        because("33.7.2 fixes CVE-2026-102554")
                     }
                 }
             }

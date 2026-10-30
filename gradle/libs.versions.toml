@@ -4,6 +4,7 @@ dokka = "2.3.0-Beta"
 kotlin = "2.4.21"
 
 ads-google-legacy = "25.5.0"
+ads-google-legacy-min = "25.0.0"
 ads-google-nextgen = "1.5.0"
 ads-nimbus = "3.0.0-rc.5"
 
