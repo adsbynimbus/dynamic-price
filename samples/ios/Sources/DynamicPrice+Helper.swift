@@ -1,7 +1,7 @@
 import DynamicPrice
 import SwiftUI
 
-extension DynamicPriceApp {
+extension SampleApp {
     nonisolated static let adUnitId = Bundle.main.infoDictionary?["AdManager AdUnit Id"] as! String
 
     /**

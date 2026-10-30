@@ -12,7 +12,7 @@ func loadDynamicPriceInterstitialAd(
 ) async throws -> GoogleMobileAds.InterstitialAd {
     let nimbusResponse = try? await nimbusRequest.fetch().response
     // Apply Key-Values to AdManagerRequest
-    nimbusResponse?.applyDynamicPrice(adRequest, mapping: DynamicPriceApp.mapping)
+    nimbusResponse?.applyDynamicPrice(adRequest, mapping: SampleApp.mapping)
 
     let interstitialAd = try await AdManagerInterstitialAd.load(with: adUnitId, request: adRequest)
     interstitialAd.appEventDelegate = interstitialAd
@@ -43,7 +43,7 @@ final class InterstitialAdViewModel: NSObject, FullScreenContentDelegate {
         guard !isLoading, interstitialAd == nil else { return }
         isLoading = true
         self.interstitialAd = try? await loadDynamicPriceInterstitialAd(
-            adUnitId: DynamicPriceApp.adUnitId,
+            adUnitId: SampleApp.adUnitId,
             adRequest: AdManagerRequest(),
             delegate: self,
             nimbusRequest: Nimbus.interstitialAd(position: adType.id),

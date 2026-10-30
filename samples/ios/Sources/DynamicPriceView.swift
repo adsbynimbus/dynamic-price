@@ -61,7 +61,7 @@ public class DynamicPriceView: UIView, AppEventDelegate {
         let request = AdManagerRequest()
         request.customTargeting = [:]
 
-        nimbusBid?.applyDynamicPrice(request, mapping: DynamicPriceApp.mapping)
+        nimbusBid?.applyDynamicPrice(request, mapping: SampleApp.mapping)
 
         googleBanner.load(request)
     }
@@ -193,7 +193,7 @@ struct DynamicPriceInlineAd: UIViewRepresentable {
     func makeUIView(context: Context) -> DynamicPriceView {
         let banner = DynamicPriceView(
             adSize: adSize,
-            adUnitId: DynamicPriceApp.adUnitId,
+            adUnitId: SampleApp.adUnitId,
             nimbusRequest: nimbusRequest,
         )
         banner.delegate = context.coordinator

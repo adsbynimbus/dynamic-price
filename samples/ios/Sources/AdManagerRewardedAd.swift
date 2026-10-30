@@ -10,7 +10,7 @@ func loadDynamicPriceRewardedVideo(
 ) async throws -> GoogleMobileAds.RewardedAd{
     let nimbusResponse = try? await nimbusRequest.fetch().response
     // Apply Key-Values to AdManagerRequest
-    nimbusResponse?.applyDynamicPrice(adRequest, mapping: DynamicPriceApp.mapping)
+    nimbusResponse?.applyDynamicPrice(adRequest, mapping: SampleApp.mapping)
 
     return try await RewardedAd.loadDynamicPrice(adUnitID: adUnitId, request: adRequest)
 }
@@ -38,7 +38,7 @@ final class RewardedAdViewModel: NSObject, FullScreenContentDelegate, AdMetadata
         let nimbusRequest = Nimbus.rewardedAd(position: adType.id)
         do {
             rewardedAd = try await loadDynamicPriceRewardedVideo(
-                adUnitId: DynamicPriceApp.adUnitId,
+                adUnitId: SampleApp.adUnitId,
                 adRequest: AdManagerRequest(),
                 nimbusRequest: nimbusRequest,
             )

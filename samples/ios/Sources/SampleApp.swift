@@ -3,7 +3,7 @@ import NimbusKit
 import SwiftUI
 
 @main
-struct DynamicPriceApp: App {
+struct SampleApp: App {
     init() {
         let apiKey = Bundle.main.infoDictionary?["Nimbus API Key"] as! String
         let publisherKey = Bundle.main.infoDictionary?["Nimbus Publisher Key"] as! String
