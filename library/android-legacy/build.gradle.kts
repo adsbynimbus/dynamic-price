@@ -77,6 +77,13 @@ tasks.withType<Test>().configureEach {
 }
 
 dependencies.constraints {
+    androidMainImplementation(libs.protobuf) {
+        version {
+            prefer(requiredVersion)
+            require("")
+            because("Fixes CVE-2024-7254")
+        }
+    }
     androidMainImplementation(libs.androidx.core) {
         version {
             require("[1.13.0,)")
