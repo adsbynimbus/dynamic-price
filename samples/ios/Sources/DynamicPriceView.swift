@@ -17,8 +17,7 @@ private let refreshInterval: TimeInterval = 30
 public class DynamicPriceView: UIView, AppEventDelegate {
 
     private let googleBanner: AdManagerBannerView
-    private let nimbusRequestManager: NimbusRequestManager
-    private let nimbusRequest: () -> NimbusRequest
+    private let nimbusRequest: () -> InlineAd
     private var lastRequestTime: Date = Date.distantPast
     private var refreshTask: Task<Void, Error>?
 
@@ -32,13 +31,12 @@ public class DynamicPriceView: UIView, AppEventDelegate {
     public var useOnScreenCheck = false
 
     public init(
-        adSize: AdSize,
+        adSize: GoogleMobileAds.AdSize,
         adUnitId: String,
-        nimbusRequest: @autoclosure @escaping () -> NimbusRequest,
+        nimbusRequest: @autoclosure @escaping () -> InlineAd,
     ) {
         self.googleBanner = AdManagerBannerView(adSize: adSize)
         self.nimbusRequest = nimbusRequest
-        self.nimbusRequestManager = NimbusRequestManager()
         super.init(frame: .init(origin: .zero, size: adSize.size))
         googleBanner.adUnitID = adUnitId
         googleBanner.appEventDelegate = self
@@ -57,13 +55,12 @@ public class DynamicPriceView: UIView, AppEventDelegate {
     public func loadAd() async {
         lastRequestTime = Date()
 
-        // See DynamicPrice+Helper for NimbusRequestManager async extension
-        let nimbusBid = try? await nimbusRequestManager.makeRequest(nimbusRequest())
+        let nimbusBid = try? await nimbusRequest().fetch().response
 
         let request = AdManagerRequest()
         request.customTargeting = [:]
 
-        nimbusBid?.applyDynamicPrice(request, mapping: DynamicPriceApp.mapping)
+        nimbusBid?.applyDynamicPrice(request, mapping: priceMapping)
 
         googleBanner.load(request)
     }
@@ -184,10 +181,10 @@ extension UIView {
 
 struct DynamicPriceInlineAd: UIViewRepresentable {
     typealias UIViewType = DynamicPriceView
-    let adSize: AdSize
-    let nimbusRequest: NimbusRequest
+    let adSize: GoogleMobileAds.AdSize
+    let nimbusRequest: InlineAd
 
-    init(adSize: AdSize, nimbusRequest: NimbusRequest) {
+    init(adSize: GoogleMobileAds.AdSize, nimbusRequest: InlineAd) {
         self.adSize = adSize
         self.nimbusRequest = nimbusRequest
     }
@@ -195,7 +192,7 @@ struct DynamicPriceInlineAd: UIViewRepresentable {
     func makeUIView(context: Context) -> DynamicPriceView {
         let banner = DynamicPriceView(
             adSize: adSize,
-            adUnitId: DynamicPriceApp.adUnitId,
+            adUnitId: SampleApp.adUnitId,
             nimbusRequest: nimbusRequest,
         )
         banner.delegate = context.coordinator

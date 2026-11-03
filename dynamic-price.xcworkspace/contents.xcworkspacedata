@@ -11,11 +11,21 @@
          location = "group:src/androidHostTest">
       </FileRef>
    </Group>
+      <Group
+        location = "group:samples/android-legacy/src"
+        name = "android-legacy-samples">
+        <FileRef
+           location = "group:main">
+        </FileRef>
+     </Group>
    <Group
       location = "group:library/android"
       name = "android-library">
       <FileRef
          location = "group:src/androidMain">
+      </FileRef>
+      <FileRef
+         location = "group:src/androidHostTest">
       </FileRef>
    </Group>
    <Group
@@ -23,12 +33,6 @@
       name = "android-samples">
       <FileRef
          location = "group:main">
-      </FileRef>
-      <FileRef
-         location = "group:nextgen">
-      </FileRef>
-      <FileRef
-         location = "group:legacy">
       </FileRef>
    </Group>
    <Group

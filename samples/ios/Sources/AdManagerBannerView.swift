@@ -1,6 +1,6 @@
-import GoogleMobileAds
 import DynamicPrice
-@preconcurrency import NimbusKit
+import GoogleMobileAds
+import NimbusKit
 import SwiftUI
 
 extension AdManagerBannerView: @retroactive AppEventDelegate {
@@ -8,12 +8,11 @@ extension AdManagerBannerView: @retroactive AppEventDelegate {
         handleEventForNimbus(name: name, info: info)
     }
 
-    func loadDynamicPrice(adRequest: AdManagerRequest, nimbusRequest: NimbusRequest) {
+    func loadDynamicPrice(adRequest: AdManagerRequest, nimbusRequest: InlineAd) {
         Task {
-            let nimbusRequestManager = NimbusRequestManager()
-            let nimbusResponse = try? await nimbusRequestManager.makeRequest(nimbusRequest)
+            let nimbusResponse = try? await nimbusRequest.fetch().response
             // Apply Key-Values to AdManagerRequest
-            nimbusResponse?.applyDynamicPrice(adRequest, mapping: DynamicPriceApp.mapping)
+            nimbusResponse?.applyDynamicPrice(adRequest, mapping: priceMapping)
 
             load(adRequest)
         }
@@ -35,7 +34,10 @@ struct BannerAdScreen: View {
             // Refreshing is handled by the DynamicPriceView
             DynamicPriceInlineAd(
                 adSize: adSize,
-                nimbusRequest: .forBannerAd(position: AdTypes.Banner.id),
+                nimbusRequest: Nimbus.bannerAd(
+                    position: AdTypes.Banner.id,
+                    size: .banner,
+                ),
             )
             .frame(width: adSize.size.width, height: adSize.size.height)
         }
@@ -48,14 +50,9 @@ struct BannerVideoScreen: View {
     var body: some View {
         DynamicPriceInlineAd(
             adSize: adSize,
-            nimbusRequest: {
-                let nimbusRequest = NimbusRequest.forBannerAd(
-                    position: AdTypes.BannerVideo.id,
-                    format: .letterbox,
-                )
-                nimbusRequest.addInlineVideo()
-                return nimbusRequest
-            }(),
+            nimbusRequest: Nimbus.bannerAd(position: AdTypes.BannerVideo.id, size: .mrec) {
+                video()
+            },
         )
         .frame(width: adSize.size.width, height: adSize.size.height)
         .navigationTitle(AdTypes.BannerVideo.id)

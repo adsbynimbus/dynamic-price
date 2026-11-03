@@ -24,6 +24,7 @@ val dokkaHtmlJar = tasks.register<Jar>("dokkaHtmlJar") {
 kotlin {
     android {
         namespace = "$group.legacy"
+        //noinspection GradleDependency
         compileSdk = 36
         minSdk = 23
 
@@ -35,7 +36,7 @@ kotlin {
 
         aarMetadata {
             minCompileSdk = 36
-            minAgpVersion = "8.5.0" // Min Required for Kotlin 2.0
+            minAgpVersion = "8.10.0" // Min Required for API 36
         }
 
         mavenPublication {
@@ -56,13 +57,11 @@ kotlin {
             implementation(libs.bundles.test.unit)
         }
         androidMain.dependencies {
-            implementation(libs.ads.google.legacy.flatMap{ library ->
-                providers.provider {
-                    library.copy().apply {
-                        version {
-                            require("[24.9.0,)")
-                            library.version?.let { prefer(it) }
-                        }
+            implementation(libs.ads.google.legacy.zip(libs.versions.ads.google.legacy.min) {
+                library, minVersion -> library.copy().apply {
+                    version {
+                        prefer(requiredVersion)
+                        require("[$minVersion,)")
                     }
                 }
             })
@@ -76,16 +75,17 @@ tasks.withType<Test>().configureEach {
 }
 
 dependencies.constraints {
-    androidMainImplementation(libs.androidx.core) {
+    // Ensure library is compiled with the min required version
+    androidCompileClasspath(libs.ads.google.legacy) {
         version {
-            require("[1.13.0,)")
-            because("BundleCompat.getSerializable added in 1.13.0")
+            require(libs.versions.ads.google.legacy.min.get())
         }
     }
-    androidMainImplementation(libs.bundles.androidx.media3) {
+    androidMainImplementation(libs.protobuf) {
         version {
             prefer(requiredVersion)
-            require("[1.6.0, )")
+            require("")
+            because("Fixes CVE-2024-7254")
         }
     }
 }

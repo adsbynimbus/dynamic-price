@@ -9,7 +9,7 @@ import NimbusKit
 
 /// Provides a mapping from a Nimbus response to Dynamic Price target
 public protocol Mapping {
-    func getTarget(_ ad: NimbusAd) -> String
+    func getTarget(_ ad: NimbusResponse) -> String
 }
 
 /// A mapping using a linear step function to generate the target dynamic price value
@@ -73,8 +73,9 @@ public struct LinearPriceMapping: Mapping, Sendable {
 
      - Returns: The keywords to set
      */
-    public func getTarget(_ ad: NimbusAd) -> String {
-        let range = granularities.first { ad.bidInCents < $0.max } ?? granularities.last!
-        return String(min(max(ad.bidInCents - (ad.bidInCents % range.step), range.min), range.max))
+    public func getTarget(_ ad: NimbusResponse) -> String {
+        let price = Int(ad.bid.price * 100)
+        let range = granularities.first { price < $0.max } ?? granularities.last!
+        return String(min(max(price - (price % range.step), range.min), range.max))
     }
 }

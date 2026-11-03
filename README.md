@@ -14,6 +14,7 @@ Nimbus bid to the Ad Manager request and rendering the ad when Nimbus wins the a
     - [Android (Gradle)](#android-gradle)
     - [iOS (Swift Package Manager)](#ios-swift-package-manager)
 - [Migration Guide](#migration-guide)
+    - [Nimbus SDK 3.0 Migration Guide](#nimbus-sdk-30-update)
     - [Summary of Changes](#summary-of-changes)
     - [Android Migration (extension-google)](#android-migration-extension-google)
     - [iOS Migration (NimbusGAMKit)](#ios-migration-nimbusgamkit)
@@ -23,11 +24,11 @@ Nimbus bid to the Ad Manager request and rendering the ad when Nimbus wins the a
 
 ## Minimum Requirements
 
-| Platform                                     | Minimum Requirements                                          |
-|:---------------------------------------------|:--------------------------------------------------------------|
-| [**Android Next Gen**](library/android)      | SDK 24 (Android 7.0), Kotlin 2.1, JVM 17, GMA Next Gen 1.5.0  |
-| [**Android Legacy**](library/android-legacy) | SDK 23 (Android 6.0), Kotlin 2.1, JVM 11, GMA (Legacy) 24.9.0 |
-| [**iOS**](library/ios)                       | iOS 15.0, Swift 5.10, GMA 12                                  |
+| Platform                                     | Minimum Requirements                                                     |
+|:---------------------------------------------|:-------------------------------------------------------------------------|
+| [**Android Next Gen**](library/android)      | SDK 24 (Android 7.0), Kotlin 2.1, JVM 17, GMA Next Gen 1.6.0,  Nimbus 3+ |
+| [**Android Legacy**](library/android-legacy) | SDK 23 (Android 6.0), Kotlin 2.1, JVM 11, GMA (Legacy) 25.0.0, Nimbus 3+ |
+| [**iOS**](library/ios)                       | iOS 15.0, Swift 5.10, GMA 12, Nimbus 3+                                  |
 
 ## Integration
 
@@ -38,10 +39,10 @@ Add the DynamicPrice library to your `build.gradle.kts` file:
 ```kotlin
 dependencies {
     // For use with the Google Mobile Ads Next Gen SDK
-    implementation("com.adsbynimbus.dynamicprice:dynamicprice:1.1.1")
+    implementation("com.adsbynimbus.dynamicprice:dynamicprice:3.0.0")
 
     // For use with the Google Mobile Ads (Legacy) SDK
-    implementation("com.adsbynimbus.dynamicprice:dynamicprice-legacy:1.1.0")
+    implementation("com.adsbynimbus.dynamicprice:dynamicprice-legacy:3.0.0")
 }
 ```
 
@@ -52,7 +53,7 @@ Add the following dependency to your `Package.swift`:
 ```swift
 let package = Package(
     dependencies: [
-        .package(url: "https://github.com/adsbynimbus/dynamic-price", from: "1.1.0")
+        .package(url: "https://github.com/adsbynimbus/dynamic-price", from: "3.0.0")
     ],
     targets: [
         .target(
@@ -81,19 +82,42 @@ compatible with all existing inventory running Dynamic Price with Nimbus Renderi
 </script>
 ```
 
+### Nimbus SDK 3.0 Update
+
+In addition to the changes listed below, please review the 3.0 Migration guide for information on
+changes to Nimbus initialization, SDK Bidders, and replacing `NimbusRequest` / `NimbusAdManager` /
+`NimbusRequestManager` with the new `Nimbus.bannerAd`, `Nimbus.interstitialAd`, and
+`Nimbus.rewardedAd`, and `Nimbus.dynamicUnit` methods for retrieving an ad.
+
+**Android**
+- Migration Guide - [https://docs.adsbynimbus.com/docs/migrating-from-2.x/3.0-migration-guide-android](https://docs.adsbynimbus.com/docs/migrating-from-2.x/3.0-migration-guide-android)
+- 3.0 Library Update - https://github.com/adsbynimbus/dynamic-price/pull/81
+- 3.0 Legacy Sample App Update - [Commit 21fa8a9](https://github.com/adsbynimbus/dynamic-price/pull/81/commits/21fa8a933c50684caf78346c5c9344ee12a36b36)
+- 3.0 Next Gen Sample App Update - [Commit 3d3233a](https://github.com/adsbynimbus/dynamic-price/pull/81/commits/3d3233a4ee0a8bc757a4e581d137a8754a0d8512)
+
+**iOS**
+- Migration Guide - [https://docs.adsbynimbus.com/docs/migrating-from-2.x/3.0-migration-guide-ios](https://docs.adsbynimbus.com/docs/migrating-from-2.x/3.0-migration-guide-ios)
+- 3.0 Library Update - https://github.com/adsbynimbus/dynamic-price/pull/57
+- 3.0 Sample App Update - [Commit baa6c30](https://github.com/adsbynimbus/dynamic-price/pull/57/commits/baa6c30951d5a326473a3019b8e6835c07a3c39f)
+
 ### Summary of Changes
 
 #### Win / Loss (Android + iOS)
 
-Win/Loss functionality has been deprecated on both platforms and will be removed in an upcoming
-release.
+Win/Loss functionality has been removed on both platforms.
 
-#### `applyDynamicPrice` (iOS Only)
+#### `AdRequest.applyDynamicPrice(nimbusResponse)` (Android + iOS)
 
-The implementation on iOS has been updated to store the `NimbusAd` in an LRU Cache automatically
-when calling `NimbusAd.applyDynamicPrice(AdManagerRequest)` for rendering in `handleEventForNimbus`.
-It is no longer required to call `applyDynamicPrice` on the `AdManagerBannerView` or
-`AdManagerInterstitialAd` objects.
+`AdManagerAdRequest.Builder.applyDynamicPrice(nimbusResponse)` and
+`AdManagerRequest.applyDynamicPrice(nimbusResponse)` extension methods have been removed.
+Use `NimbusResponse.applyDynamicPrice(adRequest)` instead.
+
+#### `applyDynamicPrice` iOS Only
+
+The implementation on iOS has been updated to store the `NimbusResponse` in an LRU Cache
+automatically when calling `NimbusResponse.applyDynamicPrice(AdManagerRequest)` for rendering in
+`handleEventForNimbus`. It is no longer required to call `applyDynamicPrice` on the
+`AdManagerBannerView` or `AdManagerInterstitialAd` objects.
 
 #### `BannerView.handleEventForNimbus` (iOS Only)
 
@@ -105,35 +129,55 @@ AdManagerBannerView` before calling `handleEventForNimbus`.
 ### Android Migration (extension-google)
 
 1. Remove `com.adsbynimbus.android:extension-google` from your `build.gradle(.kts)` file.
-2. Add `com.adsbynimbus.dynamicprice:dynamicprice-legacy:1.+` to your `build.gradle(.kts)` file.
+2. Add `com.adsbynimbus.dynamicprice:dynamicprice-legacy:3.+` to your `build.gradle(.kts)` file.
 3. Remove all references to `GoogleAuctionData`, `RequestManager.notifyNoFill` and
 `RequestManager.notifyImpression`. These classes and methods are no longer used and will be
 removed in an upcoming release.
 4. Replace `com.adsbynimbus.lineitem` and `com.adsbynimbus.google` imports with
 `com.adsbynimbus.dynamicprice`. All classes have been duplicated into the new namespace and the
 previous implementations will be removed in an upcoming release.
+5. Replace `NimbusRequest.forBannerAd(position, format)` with `Nimbus.bannerAd(position, size)`
+6. Replace `NimbusRequest.forInterstitialAd(position)` with `Nimbus.interstitialAd(position)`
+7. Replace `NimbusRequest.forRewardedVideo(position)` with `Nimbus.rewardedAd(position)`
+8. Replace `NimbusRequest.forDynamicUnit(position)` with `Nimbus.dynamicUnit(position)`
+9. Replace `listener: AdController.Listener` with `onError: NimbusError.Listener` and
+   `onEvent: AdEvent.Listener` parameters in `handleEventForNimbus`. Errors that occur before an
+   impressions has fired will be sent to the Google Ad listener as well.
+10. Replace all references of `NimbusAdManager/RequestManager.makeRequest()` with the suspend call to
+`val nimbusResponse = Ad.fetch().response`
+11. Ensure you are calling `nimbusResponse.applyDynamicPrice(request, mapping)`, other overrides
+have been removed
 
 ### iOS Migration (NimbusGAMKit)
 
 1. Remove the `NimbusGAMKit` library from your Swift Package or Xcode project.
 2. Add the `https://github.com/adsbynimbus/dynamic-price` Swift Package and `DynamicPrice` library
-to your application target.
-3. *Perform a clean build!* The change in step 4 can cause a build failure if using a stale build.
-4. The `handleEventForNimbus` extension has been moved to the `BannerView` class so it is no longer
+to your application target using `from: "3.0.0`.
+3. Update the nimbus-ios-sdk Swift Package to `from: 3.0.0` or remove the reference to
+transitively import it from the `dynamic-price` package.
+4. *Perform a clean build!* The change in step 4 can cause a build failure if using a stale build.
+5. `NimbusGAMLinearPriceMapping` and `NimbusGAMLinearPriceGranularity` have been removed. Use
+`LinearPriceMapping` and `LinearPriceGranularity` instead.
+6. The `handleEventForNimbus` extension has been moved to the `BannerView` class so it is no longer
 required to cast to `AdManagerBannerView` in the `AppEventDelegate` callback.
-5. Remove all references to `AdManagerBannerView.updatePrice`, `InterstitialAd.updatePrice`, and
-`NimbusRequestManager.notifyError`. These methods are no longer used and will be removed in an
-upcoming release.
-6. `AdLoader.loadDynamicPrice` and `AdManagerBannerView.loadDynamicPrice` have been deprecated.
+7. Replaced `listener: AdControllerDelegate?` with `onError: ((NimbusError) -> Void)?` and
+`onEvent: ((AdEvent) -> Void)?` parameters in `handleEventForNimbus`. Errors that occur before an
+impressions has fired will be sent to the Google Ad delegate as well.
+8. Remove all references to `AdManagerBannerView.updatePrice`, `InterstitialAd.updatePrice`, and
+`NimbusRequestManager.notifyError`. These methods have been deleted.
+9. Remove all references to `NimbusRequestManager` and replace instances of `NimbusRequest` with the
+3.x equivalent of `Nimbus.bannerAd`, `Nimbus.insterstitialAd`, and `Nimbus.rewardedAd` ad creation
+methods and retrieve the `NimbusResponse` by calling `try? await nimbusAd.fetch().response`.
+10. `AdLoader.loadDynamicPrice` and `AdManagerBannerView.loadDynamicPrice` have been deleted.
 Replace any occurrences with the original load methods and ensure you are calling
-`NimbusAd.applyDynamicPrice(AdManagerRequest)` prior to calling `(AdLoader/AdManagerAdView).load(AdManagerRequest)`.
-7. Remove all occurrences of `AdManagerAdView.applyDynamicPrice` and `InterstitialAd.applyDynamicPrice`.
-These methods are no longer required for Nimbus rendering and will be removed in an upcoming release.
-8. `InterstitialAd.presentDynamicPrice(from: )` has been deprecated and should be replaced with the
+`NimbusResponse.applyDynamicPrice(AdManagerRequest)` prior to calling
+`(AdLoader/AdManagerAdView).load(AdManagerRequest)`.
+11. Remove all occurrences of `AdManagerAdView.applyDynamicPrice` and
+`InterstitialAd.applyDynamicPrice`. These methods are no longer required for Nimbus rendering and
+have been deleted.
+12. `InterstitialAd.presentDynamicPrice(from: )` has been deleted and should be replaced with the
 original `InterstitialAd.present(from: nil)` method. The `DynamicPrice` SDK will automatically
 present the Nimbus rendered interstitial after the Google interstitial has been presented.
-9. `NimbusGAMLinearPriceMapping` and `NimbusGAMLinearPriceGranularity` have been renamed to
-`LinearPriceMapping` and `LinearPriceGranularity`
 
 ---
 
@@ -141,32 +185,50 @@ present the Nimbus rendered interstitial after the Google interstitial has been 
 
 ### Banner Ad
 
-**[Android](samples/android/src/nextgen/kotlin/BannerAd.kt)**
+**[Android](samples/android/src/main/kotlin/BannerAd.kt)**
 ```kotlin
-suspend fun AdManagerAdView.loadDynamicPrice(
+suspend fun AdView.loadDynamicPrice(
+    adUnitId: String,
     priceMapping: LinearPriceMapping,
-    nimbusRequest: NimbusRequest = forBannerAd(adUnitId, BANNER_320_50),
-    nimbusAdManager: NimbusAdManager = NimbusAdManager(),
 ) {
-    // Create a new AdManagerAdRequest.Builder for each request
-    val adManagerRequest = AdManagerAdRequest.Builder()
+    // Create a new BannerAdRequest.Builder for each request
+    val adManagerRequest = BannerAdRequest.Builder(
+        adUnitId = adUnitId,
+        adSize = AdSize.BANNER,
+    )
+
+    val nimbusRequest = Nimbus.bannerAd(
+        position = adUnitId,
+        size = com.adsbynimbus.AdSize.Banner,
+    )
 
     // Request an ad from Nimbus
     runCatching {
-        nimbusAdManager.makeRequest(context, nimbusRequest)
-    }.onSuccess { nimbusAd ->
+        val nimbusResponse = nimbusRequest.fetch().response
         // Call applyDynamicPrice on the adManagerRequest
-        adManagerRequest.applyDynamicPrice(nimbusAd, mapping = priceMapping)
+        nimbusResponse?.applyDynamicPrice(adManagerRequest, mapping = priceMapping)
     }
 
-    // Set the appEventListener and call handleEventForNimbus
-    appEventListener = AppEventListener { name, info ->
-        // handleEventForNimbus is called when Nimbus wins the auction
-        handleEventForNimbus(name, info)
-    }
+    return suspendCancellableCoroutine {
+        val callback = object : AdLoadCallback<BannerAd> {
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                if (it.isActive) it.resumeWithException(RuntimeException(adError.message))
+            }
 
-    // Send the adManagerRequest to Google
-    loadAd(adManagerRequest.build())
+            override fun onAdLoaded(ad: BannerAd) {
+                // Set the AdEventCallback and call handleEventForNimbus in onAppEvent
+                ad.adEventCallback = object : BannerAdEventCallback {
+                    override fun onAppEvent(name: String, data: String?) {
+                        // handleEventForNimbus is called when Nimbus wins the auction
+                        ad.handleEventForNimbus(name, data)
+                    }
+                }
+                if (it.isActive) it.resume(ad)
+            }
+        }
+        // Send the adManagerRequest to Google
+        loadAd(adRequest = adManagerRequest.build(), adLoadCallback = callback)
+    }
 }
 ```
 
@@ -180,13 +242,15 @@ extension AdManagerBannerView: @retroactive AppEventDelegate {
         banner.handleEventForNimbus(name: name, info: info)
     }
 
-    func loadDynamicPrice(adRequest: AdManagerRequest, nimbusRequest: NimbusRequest) {
+    func loadDynamicPrice(adRequest: AdManagerRequest, adUnitID: String) async {
         Task {
             // Set the appEventDelegate that includes the call to `handleEventForNimbus`
             self.appEventDelegate = self
-            // See samples/ios/Sources/DynamicPrice+Helper.swift for makeRequest async method
-            let nimbusRequestManager = NimbusRequestManager()
-            let nimbusResponse = try? await nimbusRequestManager.makeRequest(nimbusRequest)
+            // Always create a new NimbusKit.InlineAd object for each request
+            let nimbusResponse = try? await Nimbus.bannerAd(
+                position: adUnitID,
+                size: .banner,
+            ).fetch().response
 
             // Apply Key-Values to AdManagerRequest
             nimbusResponse?.applyDynamicPrice(into: adRequest, mapping: DynamicPriceApp.mapping)
@@ -200,47 +264,36 @@ extension AdManagerBannerView: @retroactive AppEventDelegate {
 
 ### Interstitial Ad
 
-**[Android](samples/android/src/nextgen/kotlin/InterstitialAd.kt)**
+**[Android](samples/android/src/main/kotlin/InterstitialAd.kt)**
 ```kotlin
 suspend fun loadDynamicPriceInterstitial(
-    priceMapping: LinearPriceMapping,
     adUnitId: String,
-    nimbusRequest: NimbusRequest = NimbusRequest.forInterstitialAd(adUnitId),
-    nimbusAdManager: NimbusAdManager = NimbusAdManager(),
-): AdManagerInterstitialAd? {
-    // Create a new AdManagerAdRequest.Builder for each request
-    val adManagerRequest = AdManagerAdRequest.Builder()
+    priceMapping: LinearPriceMapping,
+): InterstitialAd? {
+    // Create a new AdRequest.Builder for each request
+    val adManagerRequest = AdRequest.Builder(adUnitId)
+
+    val nimbusRequest = Nimbus.interstitialAd(position = adUnitId)
 
     // Request an ad from Nimbus
     runCatching {
-        nimbusAdManager.makeRequest(context, nimbusRequest)
-    }.onSuccess { nimbusAd ->
+        val nimbusResponse = nimbusRequest.fetch().response
         // Call applyDynamicPrice on the adManagerRequest
-        adManagerRequest.applyDynamicPrice(nimbusAd, mapping = priceMapping)
+        nimbusResponse?.applyDynamicPrice(adManagerRequest, mapping = priceMapping)
     }
 
-    return runCatching {
-        suspendCancellableCoroutine { continuation ->
-            AdManagerInterstitialAd.load(context, adUnitId, adManagerRequest.build(),
-                object : AdManagerInterstitialAdLoadCallback() {
-                    override fun onAdLoaded(ad: AdManagerInterstitialAd) {
-                        // Set the appEventListener before returning the AdManagerInterstitialAd
-                        ad.appEventListener = AppEventListener { name, info ->
-                            ad.handleEventForNimbus(name, info)
-                        }
-
-                        if (continuation.isActive) continuation.resume(ad)
-                    }
-
-                    override fun onAdFailedToLoad(p0: LoadAdError) {
-                        if (continuation.isActive) {
-                            continuation.resumeWithException(RuntimeException(p0.message))
-                        }
-                    }
-                },
-            )
+    return when (val adResponse = InterstitialAd.load(adRequest.build())) {
+        is AdLoadResult.Success<InterstitialAd> -> adResponse.ad.apply {
+            // Set the AdEventCallback and call handleEventForNimbus in onAppEvent
+            adEventCallback = object : InterstitialAdEventCallback {
+                override fun onAppEvent(name: String, data: String?) {
+                    // handleEventForNimbus is called when Nimbus wins the auction
+                    handleEventForNimbus(name, data)
+                }
+            }
         }
-    }.getOrNull()
+        else -> null
+    }
 }
 ```
 
@@ -256,9 +309,10 @@ extension AdManagerInterstitialAd: @retroactive AppEventDelegate {
 }
 
 func loadDynamicPriceInterstitialAd(adUnitId: String) async throws -> InterstitialAd? {
-    let nimbusRequestManager = NimbusRequestManager()
-    let nimbusRequest = NimbusRequest.forInterstitialAd(position: adUnitId)
-    let nimbusResponse = try? await nimbusRequestManager.makeRequest(nimbusRequest)
+    // Always create a new AdManagerRequest for each ad call
+    let adRequest = AdManagerRequest()
+    // Always create a new NimbusKit.InterstitialAd object for each request
+    let nimbusResponse = try? await Nimbus.interstitialAd(position: adType.id).fetch().response
     // Apply Key-Values to AdManagerRequest
     nimbusResponse?.applyDynamicPrice(into: adRequest, mapping: DynamicPriceApp.mapping)
 

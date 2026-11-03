@@ -9,7 +9,7 @@
 import GoogleMobileAds
 import NimbusKit
 
-public extension RewardedAd {
+public extension GoogleMobileAds.RewardedAd {
     private static let adSystemKey = GADAdMetadataKey(rawValue: "AdSystem")
 
     var isNimbusWin: Bool {
@@ -19,8 +19,9 @@ public extension RewardedAd {
     static func loadDynamicPrice(
         adUnitID: String,
         request: AdManagerRequest,
-        listener: AdControllerDelegate? = nil,
-    ) async throws -> RewardedAd {
+        onError: ((NimbusError) -> Void)? = nil,
+        onEvent: ((AdEvent) -> Void)? = nil,
+    ) async throws -> GoogleMobileAds.RewardedAd {
         let rewardedAd = try await RewardedAd.load(with: adUnitID, request: request)
 
         guard let nimbusAuctionId = request.customTargeting?["na_id"] as? String,
@@ -28,39 +29,47 @@ public extension RewardedAd {
             return rewardedAd
         }
 
-        return DynamicPriceRewardedAd(googleAd: rewardedAd, nimbusAd: nimbusAd, listener: listener)
+        return DynamicPriceRewardedAd(
+            googleAd: rewardedAd,
+            nimbusAd: nimbusAd,
+            onError: onError,
+            onEvent: onEvent,
+        )
     }
 }
 
-internal class DynamicPriceRewardedAd: RewardedAd, AdControllerDelegate, AdMetadataDelegate {
+internal class DynamicPriceRewardedAd: GoogleMobileAds.RewardedAd, AdMetadataDelegate {
 
-    let googleAd: RewardedAd
+    let googleAd: GoogleMobileAds.RewardedAd
     let nimbusAd: DynamicPriceRenderer.CachedAd
-    var controller: AdController?
-    weak var listener: AdControllerDelegate?
+    var ad: NimbusKit.RewardedAd?
+    var onError: ((NimbusError) -> Void)?
+    var onEvent: ((AdEvent) -> Void)?
     weak var metadataDelegate: AdMetadataDelegate?
     var rewardHandler: GADUserDidEarnRewardHandler?
     var didReceiveMetadata = false
     var shown = false
 
     public init(
-        googleAd: RewardedAd,
+        googleAd: GoogleMobileAds.RewardedAd,
         nimbusAd: DynamicPriceRenderer.CachedAd,
-        listener: AdControllerDelegate? = nil,
+        onError: ((NimbusError) -> Void)?,
+        onEvent: ((AdEvent) -> Void)?,
     ) {
         self.googleAd = googleAd
         self.nimbusAd = nimbusAd
-        self.listener = listener
+        self.onError = onError
+        self.onEvent = onEvent
         super.init()
         googleAd.adMetadataDelegate = self
     }
 
     deinit {
-        guard let controller else { return }
+        guard let ad else { return }
         if Thread.isMainThread {
-            controller.destroy()
+            ad.destroy()
         } else {
-            Task { @MainActor in controller.destroy() }
+            Task { @MainActor in ad.destroy() }
         }
     }
 
@@ -93,18 +102,13 @@ internal class DynamicPriceRewardedAd: RewardedAd, AdControllerDelegate, AdMetad
                 return
             }
             do {
-                if controller == nil {
-                    controller = try Nimbus.loadBlocking(
-                        ad: nimbusAd.value,
-                        presentingViewController: viewController,
-                        delegate: self,
-                        isRewarded: true,
-                        companionAd: .init(width: 320, height: 480, renderMode: .endCard),
-                        animated: false,
-                    )
+                if ad == nil {
+                    ad = Nimbus.rewardedAd(from: nimbusAd.value)
+                        .onError(errorHandler)
+                        .onEvent(eventHandler)
                 }
                 rewardHandler = userDidEarnRewardHandler
-                controller?.start()
+                try await ad?.show(from: viewController)
             } catch {
                 googleAd.fullScreenContentDelegate?.ad?(
                     googleAd, didFailToPresentFullScreenContentWithError: error)
@@ -112,7 +116,16 @@ internal class DynamicPriceRewardedAd: RewardedAd, AdControllerDelegate, AdMetad
         }
     }
 
-    func didReceiveNimbusEvent(controller: any AdController, event: NimbusEvent) {
+    func errorHandler(_ error: NimbusError) -> Void {
+        if !shown {
+            googleAd.fullScreenContentDelegate?.ad?(googleAd,
+                didFailToPresentFullScreenContentWithError: error)
+        }
+        
+        ad?.destroy()
+    }
+
+    func eventHandler(_ event: AdEvent) -> Void {
         switch event {
         case .impression:
             googleAd.fullScreenContentDelegate?.adWillPresentFullScreenContent?(googleAd)
@@ -125,7 +138,7 @@ internal class DynamicPriceRewardedAd: RewardedAd, AdControllerDelegate, AdMetad
             rewardHandler = nil
         case .destroyed:
             rewardHandler = nil
-            self.controller = nil
+            ad = nil
             if shown {
                 googleAd.fullScreenContentDelegate?.adWillDismissFullScreenContent?(googleAd)
                 googleAd.fullScreenContentDelegate?.adDidDismissFullScreenContent?(googleAd)
@@ -133,12 +146,7 @@ internal class DynamicPriceRewardedAd: RewardedAd, AdControllerDelegate, AdMetad
         default:
             break
         }
-        listener?.didReceiveNimbusEvent(controller: controller, event: event)
-    }
-
-    func didReceiveNimbusError(controller: any AdController, error: any NimbusError) {
-        listener?.didReceiveNimbusError(controller: controller, error: error)
-        controller.destroy()
+        onEvent?(event)
     }
 
     override var adMetadata: [GADAdMetadataKey : Any]? { googleAd.adMetadata }

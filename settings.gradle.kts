@@ -61,8 +61,12 @@ gradle.lifecycle.beforeProject {
                         because("Fixes CWE-79")
                     }
                     "com.fasterxml.jackson", "com.fasterxml.jackson.core" -> {
-                        useVersion(if (requested.module.name == "jackson-annotations") "2.22" else "2.22.3")
+                        useVersion(if (requested.module.name == "jackson-annotations") "2.22" else "2.22.4")
                         because("Fixes CWE-918 (SSRF)")
+                    }
+                    "com.google.guava" if requested.module.name == "guava" -> {
+                        useVersion("33.7.2-${requested.version?.substringAfter("-")}")
+                        because("33.7.2 fixes CVE-2026-102554")
                     }
                 }
             }
@@ -87,9 +91,11 @@ gradle.lifecycle.afterProject {
 
 rootProject.name = "dynamic-price"
 
-include("android-samples")
-project(":android-samples").projectDir = layout.rootDirectory.file("samples/android").asFile
 include("android-library")
 project(":android-library").projectDir = layout.rootDirectory.file("library/android").asFile
 include("android-legacy")
 project(":android-legacy").projectDir = layout.rootDirectory.file("library/android-legacy").asFile
+include("android-samples")
+project(":android-samples").projectDir = layout.rootDirectory.file("samples/android").asFile
+include("android-legacy-samples")
+project(":android-legacy-samples").projectDir = layout.rootDirectory.file("samples/android-legacy").asFile

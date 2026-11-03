@@ -1,0 +1,49 @@
+package com.adsbynimbus.dynamicprice.sample
+
+import android.util.Log
+import androidx.activity.compose.LocalActivity
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.*
+import com.adsbynimbus.Nimbus
+import com.adsbynimbus.dynamicprice.*
+import com.adsbynimbus.dynamicprice.sample.AdTypes.*
+import com.google.android.libraries.ads.mobile.sdk.common.*
+import com.google.android.libraries.ads.mobile.sdk.rewarded.*
+
+suspend fun loadDynamicPriceRewardedVideo(
+    adRequest: AdRequest.Builder,
+    nimbusRequest: com.adsbynimbus.RewardedAd,
+): AdLoadResult<RewardedAd> {
+    val nimbusResponse = runCatching { nimbusRequest.fetch().response }.getOrNull()
+    // Apply Key-Values to AdRequest.Builder
+    nimbusResponse?.applyDynamicPrice(adRequest, mapping = priceMapping)
+
+    return RewardedAd.loadDynamicPrice(adRequest.build())
+}
+
+@Composable
+fun RewardedAdScreen(modifier: Modifier = Modifier) {
+    val activity = LocalActivity.current
+    if (activity == null) {
+        Text(modifier = modifier, text = "Unable to resolve Activity")
+        return
+    }
+    LaunchedEffect(true) {
+        val adResponse = loadDynamicPriceRewardedVideo(
+            adRequest = AdRequest.Builder(BuildConfig.ADMANAGER_ADUNIT_ID),
+            nimbusRequest = Nimbus.rewardedAd(RewardedVideo.title),
+        )
+        if (adResponse is AdLoadResult.Success<RewardedAd>) {
+            adResponse.ad.adEventCallback = object : RewardedAdEventCallback,
+                AdEventCallback by LoggingAdEventCallback(RewardedVideo.title) {
+                override fun onAdMetadataChanged() {
+                    Log.i("DynamicPrice", "${RewardedVideo.title} metadata changed; nimbusWin=${adResponse.ad.isNimbusWin}")
+                }
+            }
+            adResponse.ad.show(activity) {
+                Log.i("DynamicPrice", "${RewardedVideo.title} user earned reward ${it.type}")
+            }
+        }
+    }
+}
