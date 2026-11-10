@@ -57,15 +57,15 @@ gradle.lifecycle.beforeProject {
                         because("Fixes CVE-2026-84939")
                     }
                     "org.jsoup" -> {
-                        useVersion("1.23.2")
+                        useVersion("1.24.1")
                         because("Fixes CWE-79")
                     }
                     "com.fasterxml.jackson", "com.fasterxml.jackson.core" -> {
-                        useVersion(if (requested.module.name == "jackson-annotations") "2.22" else "2.22.4")
+                        useVersion(if (requested.module.name == "jackson-annotations") "2.23" else "2.23.0")
                         because("Fixes CWE-918 (SSRF)")
                     }
                     "com.google.guava" if requested.module.name == "guava" -> {
-                        useVersion("33.7.2-${requested.version?.substringAfter("-")}")
+                        useVersion("33.8.0-${requested.version?.substringAfter("-")}")
                         because("33.7.2 fixes CVE-2026-102554")
                     }
                 }
