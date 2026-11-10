@@ -1,6 +1,6 @@
 [versions]
-android = "9.5.0"
-dokka = "2.3.0-Beta"
+android = "9.5.1"
+dokka = "2.3.0"
 kotlin = "2.4.21"
 
 ads-google-legacy = "25.5.0"
@@ -17,7 +17,7 @@ androidx-navigation = "2.10.2"
 androidx-startup = "1.2.0"
 kotlinx-coroutines = "1.11.0"
 leakcanary = "3.0-alpha-9"
-mockk = "1.14.11"
+mockk = "1.14.12"
 okio = "3.18.2"
 #noinspection NewerVersionAvailable
 protobuf = "3.25.9"
