@@ -69,6 +69,8 @@ dependencies {
     implementation(libs.androidx.core)
     implementation(libs.androidx.lifecycle)
     implementation(libs.androidx.startup)
+    implementation(libs.kotlinx.coroutines)
+    implementation(libs.kotlin.serialization.json)
     implementation(libs.okio)
     implementation(libs.protobuf)
 

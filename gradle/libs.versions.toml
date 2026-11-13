@@ -16,6 +16,7 @@ androidx-media3 = "1.11.1"
 androidx-navigation = "2.10.2"
 androidx-startup = "1.2.0"
 kotlinx-coroutines = "1.11.0"
+kotlinx-serialization = "1.13.0"
 leakcanary = "3.0-alpha-9"
 mockk = "1.14.12"
 okio = "3.18.2"
@@ -49,7 +50,9 @@ androidx-media3-core = { module = "androidx.media3:media3-exoplayer", version.re
 androidx-media3-hls = { module = "androidx.media3:media3-exoplayer-hls", version.ref = "androidx-media3" }
 androidx-startup = { module = "androidx.startup:startup-runtime", version.ref = "androidx-startup" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
+kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 leakcanary = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakcanary" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
