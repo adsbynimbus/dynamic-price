@@ -7,6 +7,10 @@
 Dynamic Price integrates with the Google Mobile Ads SDK by appending key-value parameters from a
 Nimbus bid to the Ad Manager request and rendering the ad when Nimbus wins the auction.
 
+### Important
+Publishers still on the 2.x Nimbus SDKs should update to **Nimbus Android 2.37.4** and **Nimbus iOS
+2.34.1** for fixes and viewability improvements backported from 3.x.
+
 ## Table of Contents
 
 - [Minimum Requirements](#minimum-requirements)
