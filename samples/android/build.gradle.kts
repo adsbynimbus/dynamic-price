@@ -19,7 +19,7 @@ android {
         minSdk = 26
         targetSdk = compileSdk
         versionCode = 1
-        versionName = "1.0"
+        versionName = "3.0.0"
         manifestPlaceholders["appName"] = "Dynamic Price Samples"
         with(providers) {
             buildConfigField("String", "API_KEY", "\"${gradleProperty("sample.nimbus.apikey").get()}\"")

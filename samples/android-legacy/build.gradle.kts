@@ -19,7 +19,7 @@ android {
         minSdk = 26
         targetSdk = compileSdk
         versionCode = 1
-        versionName = "1.0"
+        versionName = "3.0.0"
         manifestPlaceholders["appName"] = "Dynamic Price Legacy Samples"
         with(providers) {
             manifestPlaceholders["gamAppId"] = gradleProperty("sample.admanager.appid").get()
