@@ -6,7 +6,7 @@ kotlin = "2.4.21"
 ads-google-legacy = "25.5.0"
 ads-google-legacy-min = "25.0.0"
 ads-google-nextgen = "1.6.0"
-ads-nimbus = "3.0.0"
+ads-nimbus = "3.1.0"
 
 androidx-activity = "1.13.0"
 androidx-compose = "2026.11.01"
