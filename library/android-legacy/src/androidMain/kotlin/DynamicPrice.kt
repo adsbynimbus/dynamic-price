@@ -72,6 +72,7 @@ fun AdManagerAdView.handleEventForNimbus(
                 onEvent = onEvent,
                 rootView = this@handleEventForNimbus,
             )
+            dynamicPriceAd = DynamicPriceAd(nimbusAd)
             DynamicPriceRenderer.renderScope.launch(Dispatchers.Main.immediate) {
                 nimbusAd.show(targetView)
             }
@@ -128,6 +129,7 @@ fun <T : InterstitialAd> T.handleEventForNimbus(
                 onEvent = onEvent,
                 interstitialAd = this
             )
+            dynamicPriceAd = DynamicPriceAd(nimbusAd)
             DynamicPriceRenderer.renderScope.launch {
                 nimbusAd.load()
             }

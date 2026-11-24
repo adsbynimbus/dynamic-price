@@ -21,6 +21,7 @@ import com.adsbynimbus.AdEvent
 import com.adsbynimbus.Nimbus
 import com.adsbynimbus.NimbusError
 import com.adsbynimbus.NimbusResponse
+import com.adsbynimbus.dynamicprice.dynamicPriceAd
 import com.google.android.gms.ads.AdActivity
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.BaseAdView
@@ -177,9 +178,13 @@ internal class DynamicPriceEventHandler(
                 adViewRef.get()?.adListener?.onAdClicked()
                 interstitialRef.get()?.fullScreenContentCallback?.onAdClicked()
             }
-            AdEvent.Destroyed -> if (isInterstitial) maybeClearInterstitial() else {
+            AdEvent.Destroyed -> if (isInterstitial) {
+                maybeClearInterstitial()
+                interstitialRef.get()?.dynamicPriceAd = null
+            } else {
                 lifecycleJob?.cancel(skipDestroy)
                 nimbusAd.adView?.removeOnAttachStateChangeListener(this)
+                adViewRef.get()?.dynamicPriceAd = null
             }
             else -> Unit
         }
