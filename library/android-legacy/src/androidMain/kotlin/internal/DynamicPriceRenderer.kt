@@ -178,10 +178,12 @@ internal class DynamicPriceEventHandler(
                 adViewRef.get()?.adListener?.onAdClicked()
                 interstitialRef.get()?.fullScreenContentCallback?.onAdClicked()
             }
-            AdEvent.Destroyed -> if (isInterstitial) maybeClearInterstitial() else {
+            AdEvent.Destroyed -> if (isInterstitial) {
+                maybeClearInterstitial()
+                interstitialRef.get()?.dynamicPriceAd = null
+            } else {
                 lifecycleJob?.cancel(skipDestroy)
                 nimbusAd.adView?.removeOnAttachStateChangeListener(this)
-                interstitialRef.get()?.dynamicPriceAd = null
                 adViewRef.get()?.dynamicPriceAd = null
             }
             else -> Unit
