@@ -49,7 +49,9 @@ kotlin {
             languageVersion = KotlinVersion.KOTLIN_2_1
         }
 
-        withHostTest { }
+        withHostTest {
+            isIncludeAndroidResources = true
+        }
     }
 
     sourceSets {
