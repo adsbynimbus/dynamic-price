@@ -109,9 +109,15 @@ class DynamicPriceRewardedCallback(
  * rewardedAd?.dynamicPriceAd?.destroy()
  * ```
  */
-inline var RewardedAd.dynamicPriceAd: DynamicPriceAd?
-    get() = responseInfo.responseExtras.dynamicPriceAd
-    internal set(value) { responseInfo.responseExtras.dynamicPriceAd = value }
+var RewardedAd.dynamicPriceAd: DynamicPriceAd?
+    get() = responseInfo.responseId?.let { DynamicPriceRenderer.fullscreenAdCache[it] }
+    internal set(value) {
+        responseInfo.responseId?.let {
+            if (value == null) DynamicPriceRenderer.fullscreenAdCache.remove(it) else {
+                DynamicPriceRenderer.fullscreenAdCache.put(it, value)
+            }
+        }
+    }
 
 internal class DynamicPriceRewardedAd(
     val googleAd: RewardedAd,

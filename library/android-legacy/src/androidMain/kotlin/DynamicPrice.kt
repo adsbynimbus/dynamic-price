@@ -1,7 +1,5 @@
 package com.adsbynimbus.dynamicprice
 
-import android.os.Bundle
-import androidx.core.os.BundleCompat.getSerializable
 import com.adsbynimbus.Ad
 import com.adsbynimbus.AdEvent
 import com.adsbynimbus.Nimbus
@@ -171,8 +169,10 @@ class DynamicPriceAd(@PublishedApi internal val adController: Ad) : java.io.Seri
  * ```
  */
 inline var BaseAdView.dynamicPriceAd: DynamicPriceAd?
-    get() = responseInfo?.responseExtras?.dynamicPriceAd
-    internal set(value) { responseInfo?.responseExtras?.dynamicPriceAd = value }
+    get() = getTag(com.adsbynimbus.android.R.id.controller) as? DynamicPriceAd
+    internal set(value) {
+        setTag(com.adsbynimbus.android.R.id.controller, value)
+    }
 
 /**
  * Retrieves the Nimbus rendered [DynamicPriceAd] if it won the auction.
@@ -185,15 +185,14 @@ inline var BaseAdView.dynamicPriceAd: DynamicPriceAd?
  * interstitialAd?.dynamicPriceAd?.destroy()
  * ```
  */
-inline var InterstitialAd.dynamicPriceAd: DynamicPriceAd?
-    get() = responseInfo.responseExtras.dynamicPriceAd
-    internal set(value) { responseInfo.responseExtras.dynamicPriceAd = value }
-
-@PublishedApi
-internal inline var Bundle.dynamicPriceAd: DynamicPriceAd?
-    get() = getSerializable(this, "na_render", DynamicPriceAd::class.java)
-    set(value) {
-        if (value == null) remove("na_render") else putSerializable("na_render", value)
+var InterstitialAd.dynamicPriceAd: DynamicPriceAd?
+    get() = responseInfo.responseId?.let { DynamicPriceRenderer.fullscreenAdCache[it] }
+    internal set(value) {
+        responseInfo.responseId?.let {
+            if (value == null) DynamicPriceRenderer.fullscreenAdCache.remove(it) else {
+                DynamicPriceRenderer.fullscreenAdCache.put(it, value)
+            }
+        }
     }
 
 internal fun AbstractAdRequestBuilder<*>.applyTargeting(nimbusAd: NimbusResponse, target: String) {
