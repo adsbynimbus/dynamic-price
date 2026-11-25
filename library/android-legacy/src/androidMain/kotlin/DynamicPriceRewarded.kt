@@ -101,9 +101,9 @@ class DynamicPriceRewardedCallback(
 /**
  * Retrieves the Nimbus rendered [DynamicPriceAd] if it won the auction.
  *
- * This accessor should be used to destroy the Nimbus rendered ad if the InterstitialAd is being
- * discarded; Nimbus rendered ads are automatically destroyed when the interstitial is dismissed
- * after being shown.
+ * This accessor should be used to destroy the Nimbus rendered ad if the RewardedAd is being
+ * discarded; Nimbus rendered ads are automatically destroyed when the ad is dismissed after being
+ * shown.
  *
  * ```
  * rewardedAd?.dynamicPriceAd?.destroy()
