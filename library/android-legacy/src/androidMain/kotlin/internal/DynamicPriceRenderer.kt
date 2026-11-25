@@ -21,6 +21,7 @@ import com.adsbynimbus.AdEvent
 import com.adsbynimbus.Nimbus
 import com.adsbynimbus.NimbusError
 import com.adsbynimbus.NimbusResponse
+import com.adsbynimbus.dynamicprice.DynamicPriceAd
 import com.adsbynimbus.dynamicprice.dynamicPriceAd
 import com.google.android.gms.ads.AdActivity
 import com.google.android.gms.ads.AdError
@@ -50,6 +51,7 @@ internal class DynamicPriceRenderer(
         }
 
         val adCache = LruCache<String, NimbusResponse>(10)
+        val fullscreenAdCache = LruCache<String, DynamicPriceAd>(10)
 
         val jsonSerializer = Json {
             coerceInputValues = true
